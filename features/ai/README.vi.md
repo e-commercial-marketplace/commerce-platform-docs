@@ -1,0 +1,132 @@
+# Tính năng AI
+
+## Mục đích
+
+Sở hữu trợ lý Spring AI, ánh xạ tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên, gọi tool chỉ đọc, bộ nhớ hội thoại, RAG và lưu trữ hội thoại AI chat trong cùng một Spring Boot monolith.
+
+## Phạm vi MVP
+
+Lát cắt AI đầu tiên chỉ ánh xạ yêu cầu ngôn ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thành tìm kiếm sản phẩm công khai có giới hạn. Yêu cầu của guest có thể phi trạng thái (stateless). Các phiên lưu trữ (persisted sessions), tool đơn hàng và vận chuyển, tool voucher, RAG và phân tích doanh thu cho seller được hoãn lại.
+
+## Trách nhiệm
+
+- Cung cấp `POST /api/ai/ask`.
+- Cấu hình `ChatClient` và provider được chọn.
+- Lưu trữ lịch sử `AiChatSession` và `AiMessage` cho khách hàng đã xác thực.
+- Trước hết công khai các tool tìm kiếm sản phẩm công khai; sau đó bổ sung các tool đơn hàng, vận chuyển, theo dõi và voucher thuộc sở hữu của khách hàng.
+- Phân giải khách hàng đã xác thực từ Spring Security context cho dữ liệu được bảo vệ.
+- Dùng RAG cho chính sách/FAQ và tool cho dữ liệu giao dịch trực tiếp.
+- Sau này bổ sung tìm kiếm sản phẩm theo ngữ nghĩa/tóm tắt đánh giá mà không cho phép các hành động không thể đảo ngược.
+- Giữ phân tích doanh thu cho seller ở mức lập kế hoạch.
+
+## API dự kiến
+
+```text
+POST /api/ai/ask                         # public for catalog search; customer scope when authenticated
+GET  /api/ai/sessions                    # CUSTOMER only
+GET  /api/ai/sessions/{id}/messages      # CUSTOMER and own session only
+```
+
+## Phân quyền
+
+| Tác nhân | Thao tác cho phép | Ràng buộc |
+|---|---|---|
+| Client chưa xác thực | Tìm kiếm sản phẩm công khai và hỏi thông tin sản phẩm công khai | Không có dữ liệu đơn hàng, vận chuyển, voucher hay tài khoản. Yêu cầu có thể phi trạng thái. |
+| CUSTOMER | Tìm kiếm sản phẩm; sau này hỏi về đơn hàng, vận chuyển và voucher của chính họ | Dữ liệu được bảo vệ được phân giải từ principal đã xác thực. |
+| SELLER/ADMIN | Không có quyền truy cập AI trong phạm vi hiện tại | Phân tích doanh thu cho seller chỉ ở mức lập kế hoạch. |
+| AI model/client | Gọi các tool chỉ đọc | Không được cung cấp quyền truy cập `userId` tùy ý hay bỏ qua repository trực tiếp. |
+
+## Sơ đồ lớp trọng tâm
+
+```mermaid
+classDiagram
+    class User {
+        UUID id
+        Role role
+    }
+
+    class AiChatSession {
+        UUID id
+        DateTime createdAt
+    }
+
+    class AiMessage {
+        UUID id
+        AiRole role
+        String content
+        Decimal confidence?
+        DateTime createdAt
+    }
+
+    class AiRole {
+        <<enumeration>>
+        USER
+        ASSISTANT
+        SYSTEM
+    }
+
+    User "1" --> "0..*" AiChatSession : owns
+    AiChatSession "1" *-- "0..*" AiMessage : turns
+    AiMessage --> AiRole : role
+```
+
+## Ranh giới Tool và RAG
+
+```mermaid
+flowchart LR
+    AiService --> ChatClient
+    ChatClient --> ProductTools[ProductTools]
+    ChatClient --> OrderTools[OrderTools]
+    ChatClient --> ShipmentTools[ShipmentTools]
+    ChatClient --> VoucherTools[VoucherTools]
+    ProductTools --> ExistingServices[Existing application services]
+    OrderTools --> ExistingServices
+    ShipmentTools --> ExistingServices
+    VoucherTools --> ExistingServices
+    ChatClient --> RAG[Policies, FAQ, and pgvector]
+```
+
+Dùng tool cho trạng thái đơn hàng hiện tại, trạng thái vận chuyển, tồn kho, tình trạng voucher và giá trực tiếp. Dùng RAG cho chính sách đổi trả, chính sách vận chuyển, hướng dẫn thanh toán, chính sách voucher, quy định cho seller và FAQ.
+
+Luồng tìm kiếm sản phẩm:
+
+```mermaid
+flowchart LR
+    UserText[User natural-language request] --> Extract[Extract ProductSearchQuery]
+    Extract --> Validate[Validate allowed filters and limits]
+    Validate --> Catalog[Catalog service]
+    Catalog --> Results[Public product results]
+    Results --> Answer[Grounded AI answer]
+```
+
+AI không được bịa đặt tình trạng còn hàng, giá hay tồn kho của sản phẩm ngoài kết quả từ catalog-service.
+
+## Các hành động bị cấm ban đầu
+
+Tính năng AI ban đầu không được công khai `cancelOrder`, `refundPayment`, `changePrice`, `updateStock`, `markDelivered` hay `deleteReview`.
+
+## Mô hình dữ liệu
+
+Mô hình AI lưu trữ chỉ lưu hội thoại của khách hàng. Yêu cầu tìm kiếm sản phẩm công khai của guest là công khai và phi trạng thái, vì vậy không nên tạo session thuộc sở hữu của khách hàng.
+
+### Quan hệ bảng
+
+- `users (1) -> ai_chat_sessions (many)`: khách hàng đã xác thực sở hữu các phiên AI đã lưu của mình.
+- `ai_chat_sessions (1) -> ai_messages (many)`: một session chứa các lượt hội thoại user, assistant hoặc system theo thứ tự.
+- `ai_chat_sessions.userId -> users.id` là ranh giới sở hữu; không bao giờ nhận ID chủ sở hữu từ request body.
+
+### Ý nghĩa trường
+
+| Bảng | Trường | Ý nghĩa |
+|---|---|---|
+| `ai_chat_sessions` | `id` | Định danh ổn định cho một hội thoại khách hàng được lưu trữ. |
+| `ai_chat_sessions` | `createdAt` | Thời điểm session được tạo. |
+| `ai_chat_sessions` | `userId` | Khách hàng đã xác thực sở hữu session. |
+| `ai_messages` | `id` | Định danh ổn định cho một lượt hội thoại. |
+| `ai_messages` | `role` | `USER`, `ASSISTANT` hoặc `SYSTEM`; quyết định cách diễn giải lượt hội thoại. |
+| `ai_messages` | `content` | Đầu vào của người dùng hoặc thông điệp assistant/system đã được grounded. |
+| `ai_messages` | `confidence` | Metadata confidence tùy chọn cho câu trả lời đã ánh xạ; không phải quyết định ủy quyền. |
+| `ai_messages` | `createdAt` | Thời điểm lượt hội thoại được lưu trữ. |
+| `ai_messages` | `sessionId` | Bản ghi `ai_chat_sessions` cha. |
+
+Đây là các trường logic từ `ERD.vi.md`; các migration `V10` và `V11` vẫn là placeholder.

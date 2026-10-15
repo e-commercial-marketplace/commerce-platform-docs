@@ -1,0 +1,499 @@
+# 03. Architecture & Design Specification
+
+## 1. Document Control
+
+| Field | Value |
+|---|---|
+| Document ID | DOC-03 |
+| Document title | Architecture & Design Specification |
+| Project | E-Commerce Marketplace |
+| Primary source | [`PLAN.md`](https://github.com/anhhoang19122005/E-Commercial-Market-Place/blob/main/PLAN.md) |
+| Class model reference | [`ECommerce_Marketplace_Class_Diagram.puml`](https://github.com/anhhoang19122005/E-Commercial-Market-Place/blob/main/ECommerce_Marketplace_Class_Diagram.puml) |
+| Status | Architecture and design baseline |
+| Architecture style | Modular monolith |
+
+## 2. Purpose
+
+This document describes the target architecture, module boundaries, package organization, domain
+model, key flows, security design, persistence design, external integrations, and test strategy.
+
+The PlantUML class diagram is the reference for class attributes, enumerations, relationships, and
+class-level constraints. This document summarizes that model and does not replace the source diagram.
+
+## 3. Architecture Drivers
+
+The design is driven by the following constraints from `PLAN.md`:
+
+- the system remains one Spring Boot application, one JVM process, one deployment unit, and one
+  primary PostgreSQL database;
+- features are separated by business capability, not by one global technical-layer tree;
+- cross-feature calls are normal Spring bean method calls inside the same JVM;
+- controllers are thin and business rules are placed in services/domain logic;
+- transactional consistency is required for checkout, stock, voucher consumption, and payment
+  callbacks;
+- prepayment orders expire 24 hours after creation and restore checkout stock exactly once; COD
+  remains pending until all required seller shipments are delivered in the MVP;
+- Spring AI remains inside the monolith and starts with read-only tools;
+- React Native never calls an LLM provider directly.
+
+## 4. System Context and Deployment View
+
+```text
+React Native (Expo)
+        |
+        | REST / WebSocket
+        v
++------------------------------------------------+
+|           Spring Boot Modular Monolith         |
+|                                                |
+| auth | user | catalog | cart | order           |
+| payment | shipment | voucher | review          |
+| chat | ai | common                             |
+|                                                |
+| AI module                                      |
+|   ChatClient                                   |
+|   + Tool Calling -> existing feature services  |
+|   + Chat Memory                                |
+|   + RAG -> pgvector                            |
++--------------------------+---------------------+
+                           |
+                           v
+                 PostgreSQL + pgvector
+                           |
+                           +--> external VNPAY
+                           +--> external LLM provider
+```
+
+### 4.1 Runtime components
+
+| Component | Responsibility |
+|---|---|
+| React Native (Expo) | Presentation, navigation, client state, REST/WebSocket consumption |
+| Spring Boot monolith | API, business rules, authorization, transactions, payment, shipment, chat, and AI orchestration |
+| PostgreSQL | Primary marketplace persistence |
+| pgvector | Embedding/vector storage for RAG |
+| VNPAY | External online payment provider |
+| LLM provider | External model provider accessed only by Spring AI backend |
+
+### 4.2 Technology stack
+
+| Layer | Technology | Status |
+|---|---|---|
+| Backend runtime | Spring Boot 3.3.5, Java 21, Maven 3.9+ | Current scaffold |
+| Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.5.0, Actuator | Current scaffold |
+| Backend persistence | Spring Data JPA/Hibernate, PostgreSQL 16, Flyway | Current scaffold |
+| Backend security | Spring Security and JJWT 0.12.6 | Current dependency; flow is phased |
+| Backend realtime | Spring WebSocket | Dependency present; human chat is phased |
+| Mobile runtime | React Native with Expo | Scaffold; version TBD |
+| Mobile HTTP | Axios | Planned frontend dependency |
+| Mobile server state | TanStack Query | Planned frontend dependency |
+| Mobile secure storage | Expo SecureStore | Planned frontend dependency |
+| AI | Spring AI, external LLM provider, pgvector RAG | Planned backend phase |
+| Testing | Spring Boot Test, JUnit 5, Testcontainers, H2 | Current backend scaffold |
+
+The frontend has no `package.json` or installed dependencies yet. Its listed libraries are design
+choices for the first Expo implementation, not evidence of a completed mobile build.
+
+## 5. Logical Module Architecture
+
+### 5.1 Feature modules
+
+| Feature | Main responsibility | Planned internal layers |
+|---|---|---|
+| `auth` | Register, login, refresh, JWT, security | `controller`, `service`, `dto`, `security`, `config` |
+| `user` | User data, roles, seller status | `entity`, `repository`, `service`, `dto`, `mapper` |
+| `catalog` | Categories, products, stock, customer catalog | `entity`, `repository`, `service`, `controller`, `dto`, `mapper` |
+| `cart` | Customer cart items and cart validation | `entity`, `repository`, `service`, `controller`, `dto` |
+| `order` | Orders, order items, checkout, seller order processing | `entity`, `repository`, `service`, `controller`, `dto`, `mapper` |
+| `payment` | Payment records, COD, VNPAY integration | `entity`, `repository`, `service`, `controller`, `dto`, `vnpay` |
+| `shipment` | Seller shipments, delivery method, tracking, status | `entity`, `repository`, `service`, `controller`, `dto` |
+| `voucher` | Voucher data, validation, usage | `entity`, `repository`, `service`, `controller`, `dto` |
+| `review` | Review eligibility and product reviews | `entity`, `repository`, `service`, `controller`, `dto` |
+| `chat` | Human conversations, messages, WebSocket | `entity`, `repository`, `service`, `websocket`, `dto` |
+| `ai` | ChatClient, tools, RAG, memory, AI persistence | `controller`, `service`, `config`, `tools`, `rag`, `memory`, `entity`, `dto` |
+| `common` | Shared errors, responses, config, utilities | `exception`, `response`, `config`, `util` |
+
+### 5.2 Package structure
+
+```text
+com.marketplace
+├── auth
+│   ├── controller
+│   ├── service
+│   ├── dto
+│   ├── security
+│   └── config
+├── user
+│   ├── entity
+│   ├── repository
+│   ├── service
+│   ├── dto
+│   └── mapper
+├── catalog
+├── cart
+├── order
+├── payment
+├── shipment
+├── voucher
+├── review
+├── chat
+├── ai
+└── common
+```
+
+Each feature expands into the layers shown in section 5.1 when that responsibility is needed. The
+architecture avoids a global `controller/`, `service/`, `repository/`, `entity/` layout.
+
+## 6. Domain Model Design
+
+### 6.1 Classes from the referenced diagram
+
+The class model contains the following entities:
+
+```text
+User, Category, Product, CartItem, Order, OrderItem,
+Payment, Voucher, Shipment, Review, Conversation, Message,
+AiChatSession, AiMessage
+```
+
+The class model contains the following enumerations:
+
+```text
+Role, SellerStatus, OrderStatus, OrderItemStatus,
+PaymentMethod, PaymentStatus, DeliveryMethod, ShipmentStatus,
+AiRole
+```
+
+`AiRole` represents the role of an AI message: `USER`, `ASSISTANT`, or `SYSTEM`.
+
+### 6.2 Core relationships
+
+| Relationship | Design meaning |
+|---|---|
+| `User -> CartItem -> Product` | A customer owns cart items, each referring to one product. |
+| `User -> Order -> OrderItem` | A customer places orders; an order owns one or more order items. |
+| `OrderItem -> Product` | Each order item refers to the purchased product and stores product name/price snapshots. |
+| `OrderItem -> User` | Each order item records its seller. |
+| `User -> Product` | A seller owns the products they sell. |
+| `Category -> Product` | A category contains products. |
+| `Order -> Payment` | One order may have multiple payment attempts. |
+| `Order -> Voucher` | An order may apply zero or one voucher. |
+| `Order -> Shipment` | An order may produce multiple seller-specific shipments. |
+| `Shipment -> OrderItem` | A shipment contains one or more order items from the same seller. |
+| `Shipment -> User` | A shipment is owned/managed by one seller. |
+| `User -> Review -> Product` | A customer writes reviews for products. |
+| `Conversation -> Message` | A human conversation owns its messages. |
+| `Conversation -> Product/Order` | A human conversation may refer to an optional product or order. |
+| `User -> AiChatSession -> AiMessage` | AI chat persistence is separate from human chat. |
+
+### 6.3 Domain constraints
+
+The following constraints are design invariants:
+
+- `sellerStatus` is required only when `role = SELLER`.
+- A product has `price > 0` and `stock >= 0`.
+- `active = false` means the product is soft-deleted or unlisted.
+- Cart uniqueness is `(user, product)` and cart quantity is at least 1.
+- Review uniqueness is `(user, product)` and rating is in `[1..5]`.
+- A seller can modify only owned products, order items, and shipments.
+- All order items in one shipment must belong to the same seller.
+- `Shipment.seller == OrderItem.seller` for every item in that shipment.
+- `Shipment.orderId == OrderItem.orderId` for every shipment mapping.
+- An MVP order item is mapped to at most one shipment, using the complete order-item line; partial,
+  split, and replacement shipments are deferred.
+- `transactionId` is required and unique for VNPAY.
+- A payment attempt can be retried by creating another payment row.
+- `trackingCode` and `shippedAt` are required for `SHIPPED`.
+- `deliveredAt` is required for `DELIVERED`.
+- `FAILED` is a seller-scoped shipment outcome and never restores stock by itself.
+- `RETURNED` means the package reached the seller warehouse; only then is that shipment's quantity
+  restored.
+- `OrderStatus` remains an order-level aggregate and does not collapse mixed seller outcomes.
+- Direct order-item cancellation is allowed before shipment assignment. An assigned `PENDING` or
+  `PREPARING` shipment uses an atomic cancellation path that marks mapped lines `CANCELLED` and
+  releases unshipped stock exactly once; `SHIPPED` or later cannot be cancelled.
+- Before payment completion, that transaction recalculates `Order.totalAmount` and pending
+  `Payment.amount` from the remaining line snapshots. All-cancelled orders become `CANCELLED`; if
+  delivered non-cancelled lines are all that remain, payment/order completion is reevaluated immediately.
+- Money is represented in `VND`, and the first MVP uses a fixed `0.00` shipping fee.
+- The MVP human chat rule is unique `(customer, seller)`.
+- AI chat is separate from human chat and is read-only for Order, Payment, and Shipment operations.
+
+## 7. State and Workflow Design
+
+### 7.1 Customer checkout
+
+```text
+Cart
+  -> validate active products
+  -> validate stock
+  -> validate voucher
+  -> recalculate prices server-side
+  -> create Order(PENDING)
+  -> create OrderItems with name/price snapshots
+  -> reserve or decrease stock
+  -> set prepayment deadline to createdAt + 24 hours when the order requires prepayment
+  -> save discount/shipping/total snapshots
+  -> clear purchased cart items
+```
+
+The entire checkout operation is consistency-sensitive and should be transactional.
+
+### 7.2 Seller fulfillment
+
+```text
+OrderItem PENDING
+      -> CONFIRMED
+      -> included in Shipment
+
+PENDING/CONFIRMED
+      -> CANCELLED
+```
+
+The service must compare the authenticated seller with `orderItem.seller.id` before changing state.
+
+### 7.3 Shipment state
+
+```text
+PENDING
+  -> PREPARING
+  -> SHIPPED
+      -> DELIVERED
+      -> FAILED
+          -> RETURNED
+
+PENDING/PREPARING
+  -> CANCELLED
+```
+
+`SHIPPED` requires `trackingCode` and `shippedAt`. `DELIVERED` requires `deliveredAt`. `FAILED` does
+not restore stock. After the package reaches the seller warehouse, the shipment moves to `RETURNED`
+and only that transition restores its shipped quantity. The order is set to `DELIVERED` only after
+all required non-cancelled shipments are delivered; mixed seller outcomes remain visible per shipment.
+Cancelling an assigned `PENDING`/`PREPARING` shipment releases unshipped stock and is not a
+`RETURNED` operation.
+It also recalculates the current payable amount without changing historical line snapshots.
+For mixed terminal outcomes, the order remains an aggregate container; the API exposes the result per
+shipment and does not introduce a new order-level failure enum.
+
+### 7.4 Payment state
+
+COD:
+
+```text
+Payment(method=COD, status=PENDING)
+  -> COMPLETED when all required non-cancelled shipments are DELIVERED
+```
+
+The final required `DELIVERED` transition is the COD collection trigger handled by the shipment/payment
+services in one transaction. The MVP records no partial COD settlement or refund for mixed
+`FAILED`/`RETURNED` seller outcomes.
+
+VNPAY:
+
+```text
+Create Payment(PENDING)
+ -> redirect/create VNPAY request
+ -> callback
+      COMPLETED
+      or FAILED
+```
+
+Callbacks must validate signatures/checksums and use a unique transaction/reference identifier for
+idempotent processing.
+
+## 8. API and Integration Design
+
+### 8.1 REST boundaries
+
+The planned REST groups are:
+
+```text
+/api/auth
+/api/products
+/api/categories
+/api/seller/products
+/api/cart
+/api/orders
+/api/seller/order-items
+/api/vouchers
+/api/payments/vnpay
+/api/seller/shipments
+/api/orders/{orderId}/shipments
+/api/products/{productId}/reviews
+/api/conversations
+/api/ai
+```
+
+Controllers expose transport concerns. Services enforce business rules, ownership, transaction
+boundaries, and calls to other feature services.
+
+### 8.2 Human chat boundary
+
+Human chat uses `WS /ws/chat` for real-time updates and REST endpoints for conversation/message
+history. Message persistence and retry/idempotency remain inside the `chat` feature.
+
+### 8.3 AI boundary
+
+```text
+AiController
+    -> AiService
+        -> ChatClient
+            -> read-only tools
+            -> RAG
+            -> chat memory
+```
+
+AI tools call existing application services. They resolve the authenticated customer from Spring
+Security context for protected data and do not accept arbitrary protected `userId` values from the
+model or client. Guest AI access is limited to public product search.
+
+## 9. AI Design
+
+### 9.1 Delivery sequence
+
+```text
+ChatClient
+ -> read-only tool calling
+ -> AiChatSession/AiMessage memory
+ -> RAG + pgvector
+ -> semantic product search/review summary
+```
+
+### 9.2 Read-only tools
+
+| Tool group | Planned capabilities |
+|---|---|
+| `ProductTools` | `searchProducts(ProductSearchQuery)`, `getProduct` for public catalog data |
+| `OrderTools` | Later customer-only `getMyOrders`, `getMyOrder(orderId)` |
+| `ShipmentTools` | Later customer-only `getShipmentStatus(orderId)`, `getTrackingInformation(orderId)` |
+| `VoucherTools` | Later customer-only `checkVoucher(code)` |
+
+The product-search boundary is:
+
+```text
+Natural-language request
+  -> constrained ProductSearchQuery
+  -> validation of fields, sort, and page limits
+  -> catalog service search
+  -> grounded natural-language answer
+```
+
+Seller revenue analysis is planning only.
+
+The initial AI layer must not expose `cancelOrder`, `refundPayment`, `changePrice`, `updateStock`,
+`markDelivered`, or `deleteReview`.
+
+### 9.3 RAG boundary
+
+RAG is for semi-static content such as return policy, shipping policy, payment guide, voucher policy,
+seller rules, and FAQs.
+
+Live order status, shipment status, stock, voucher availability, and product price use tool calling
+instead of RAG.
+
+## 10. Security Design
+
+- Use Spring Security with JWT access and refresh flow.
+- Hash passwords with `PasswordEncoder`; never store plaintext.
+- Enforce role checks through endpoint/service authorization.
+- Enforce ownership checks in addition to roles.
+- Prevent a seller from managing another seller's product, order item, or shipment.
+- Limit customer order/shipment queries to the authenticated customer.
+- Validate all VNPAY callback signatures/checksums.
+- Make payment callbacks idempotent.
+- Resolve protected AI tool identity from Spring Security context; permit guests only on public
+  product-search operations.
+- Never trust role or user IDs supplied by React Native.
+- Keep provider API keys on the backend.
+- In production, disable framework error-message and binding-error inclusion; return safe
+  `INTERNAL_ERROR` responses for unexpected failures.
+
+## 11. Persistence and Migration Design
+
+Use Flyway for ordered schema changes. The planned migration order is:
+
+```text
+V1  users
+V2  categories + products
+V3  cart_items
+V4  orders + order_items
+V5  vouchers
+V6  payments
+V7  shipments + shipment_order_items mapping
+V8  reviews
+V9  conversations + messages
+V10 ai_chat_sessions + ai_messages
+V11 pgvector + AI document/vector tables
+```
+
+Important constraints and indexes include:
+
+- unique `user.email`;
+- unique `category.name`;
+- unique `(cart_item.user_id, cart_item.product_id)`;
+- unique VNPAY transaction/reference where applicable;
+- unique `(review.user_id, review.product_id)`;
+- indexes on `product.seller_id`, `order.status`, `order_item.seller_id`, `shipment.seller_id`, and
+  `shipment.status`.
+- index on `order.created_at` for the 24-hour prepayment-order expiration scan.
+
+Money values use `BigDecimal`.
+
+## 12. Frontend Design Boundary
+
+The React Native structure is feature-oriented:
+
+```text
+src
+├── features
+│   ├── auth
+│   ├── catalog
+│   ├── cart
+│   ├── checkout
+│   ├── orders
+│   ├── shipment
+│   ├── review
+│   ├── chat
+│   └── ai
+├── components
+├── navigation
+├── lib/api
+├── hooks
+├── store
+└── types
+```
+
+React Native owns presentation and client state. Spring Boot remains the authority for authorization,
+even when the mobile UI hides an action.
+
+## 13. Test Design
+
+The architecture must be verified with:
+
+- unit tests;
+- integration tests;
+- security ownership tests;
+- payment idempotency tests;
+- multi-seller order/shipment tests;
+- AI tool authorization tests;
+- product search and pagination performance checks.
+
+The most important cross-module tests cover seller isolation, order price snapshots, payment retry,
+duplicate callback handling, voucher concurrency, review eligibility, and AI data isolation.
+
+## 14. Architecture Decisions and Exclusions
+
+The design intentionally excludes the following until a later requirement justifies them:
+
+- microservices;
+- API Gateway;
+- service discovery;
+- Feign or inter-service REST;
+- Kafka;
+- Saga;
+- distributed transactions;
+- initial AI write actions.
+
+These exclusions preserve a single deployable monolith and keep business operations inside normal
+Spring transaction and authorization boundaries.
