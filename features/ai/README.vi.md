@@ -6,15 +6,27 @@ Sở hữu trợ lý Spring AI, ánh xạ tìm kiếm sản phẩm bằng ngôn 
 
 ## Phạm vi MVP
 
-Lát cắt AI đầu tiên chỉ ánh xạ yêu cầu ngôn ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thành tìm kiếm sản phẩm công khai có giới hạn. Yêu cầu của guest có thể phi trạng thái (stateless). Các phiên lưu trữ (persisted sessions), tool đơn hàng và vận chuyển, tool voucher, RAG và phân tích doanh thu cho seller được hoãn lại.
+Lát cắt AI đầu tiên trả lời câu hỏi về marketplace mà không yêu cầu đăng nhập: ánh xạ yêu cầu ngôn
+ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thành tìm kiếm sản phẩm công khai có giới
+hạn (qua Tool Calling tới catalog service) hoặc kiến thức chính sách/FAQ qua RAG. Yêu cầu của guest
+có thể phi trạng thái (stateless). Các phiên lưu trữ (persisted sessions), tool đơn hàng và vận
+chuyển, tool voucher và phân tích doanh thu cho seller được hoãn lại.
+
+LLM provider được chọn là **DeepSeek**, cấu hình trên backend qua biến môi trường (API tương thích
+OpenAI qua Spring AI). Secret của provider không bao giờ rời backend. Tính năng AI không bao giờ
+được làm crash app: khi provider chưa được cấu hình hoặc gọi provider thất bại, backend trả về
+`AI_UNAVAILABLE` (HTTP 503) và client hiển thị trạng thái "không khả dụng". Endpoint AI public bị
+giới hạn mức sử dụng (rate-limited).
 
 ## Trách nhiệm
 
-- Cung cấp `POST /api/ai/ask`.
-- Cấu hình `ChatClient` và provider được chọn.
+- Cung cấp `POST /api/ai/ask` dưới dạng endpoint public (không yêu cầu đăng nhập cho dữ liệu công khai).
+- Cấu hình `ChatClient` với provider DeepSeek từ cấu hình môi trường.
+- Trả về lỗi `AI_UNAVAILABLE` có kiểm soát khi provider thiếu hoặc lỗi.
 - Lưu trữ lịch sử `AiChatSession` và `AiMessage` cho khách hàng đã xác thực.
 - Trước hết công khai các tool tìm kiếm sản phẩm công khai; sau đó bổ sung các tool đơn hàng, vận chuyển, theo dõi và voucher thuộc sở hữu của khách hàng.
-- Phân giải khách hàng đã xác thực từ Spring Security context cho dữ liệu được bảo vệ.
+- Phân giải khách hàng đã xác thực từ Spring Security context cho dữ liệu được bảo vệ; guest chỉ
+  nhận dữ liệu công khai và không bao giờ được truyền user ID.
 - Dùng RAG cho chính sách/FAQ và tool cho dữ liệu giao dịch trực tiếp.
 - Sau này bổ sung tìm kiếm sản phẩm theo ngữ nghĩa/tóm tắt đánh giá mà không cho phép các hành động không thể đảo ngược.
 - Giữ phân tích doanh thu cho seller ở mức lập kế hoạch.
@@ -31,7 +43,7 @@ GET  /api/ai/sessions/{id}/messages      # CUSTOMER and own session only
 
 | Tác nhân | Thao tác cho phép | Ràng buộc |
 |---|---|---|
-| Client chưa xác thực | Tìm kiếm sản phẩm công khai và hỏi thông tin sản phẩm công khai | Không có dữ liệu đơn hàng, vận chuyển, voucher hay tài khoản. Yêu cầu có thể phi trạng thái. |
+| Client chưa xác thực | Hỏi về sản phẩm công khai, FAQ và chính sách | Không yêu cầu đăng nhập. Không có dữ liệu đơn hàng, vận chuyển, voucher hay tài khoản. Yêu cầu có thể phi trạng thái và bị giới hạn mức sử dụng. |
 | CUSTOMER | Tìm kiếm sản phẩm; sau này hỏi về đơn hàng, vận chuyển và voucher của chính họ | Dữ liệu được bảo vệ được phân giải từ principal đã xác thực. |
 | SELLER/ADMIN | Không có quyền truy cập AI trong phạm vi hiện tại | Phân tích doanh thu cho seller chỉ ở mức lập kế hoạch. |
 | AI model/client | Gọi các tool chỉ đọc | Không được cung cấp quyền truy cập `userId` tùy ý hay bỏ qua repository trực tiếp. |

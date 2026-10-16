@@ -10,14 +10,18 @@ Status: Confirmed (root §3, SRS §5.1).
 
 - Actor/auth: public, no token required.
 - Maps to: FR-AUTH-01, FR-AUTH-02, FR-AUTH-03, FR-AUTH-04.
-- Business rule: register creates a `CUSTOMER` role only. The client must not send `role` or `sellerStatus`; any such field is ignored. Seller/Admin accounts are created only via admin flows.
+- Business rule: public registration accepts only `CUSTOMER` (default) or `SELLER`. A seller
+  application creates `SELLER` with `PENDING` status and requires admin approval; approval/rejection
+  triggers a notification email (best-effort, never rolls back the decision). `ADMIN` accounts come
+  only from environment-based bootstrap when no admin exists; the client must never send `ADMIN`.
 - Request body (JSON):
 
 ```json
 {
   "email": "customer@example.com",
   "password": "strong-password",
-  "name": "Customer"
+  "name": "Customer",
+  "role": "CUSTOMER"
 }
 ```
 
@@ -26,6 +30,7 @@ Status: Confirmed (root §3, SRS §5.1).
 | `email` | Required, valid email, unique in `users.email` |
 | `password` | Required, min length per validation policy (never persisted raw; stored as `users.passwordHash`) |
 | `name` | Required, display name (persisted as `users.full_name`) |
+| `role` | Optional, `CUSTOMER` (default) or `SELLER`; `ADMIN` is rejected |
 
 - Success: `201 Created`, `ApiResponse<AuthResponse>`. `data` payload:
 
@@ -88,11 +93,36 @@ Status: Confirmed (root §3, SRS §5.1).
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<AuthResponse>`. Returns a new token pair; the client must use the new `accessToken` and `refreshToken`. Same `data` shape as above.
+- Success: `200 OK`, `ApiResponse<AuthResponse>`. Returns a new token pair and revokes the used
+  refresh token (rotation); the client must use the new `accessToken` and `refreshToken`. Same `data` shape as above.
 - Errors:
 
 | Code | HTTP | When |
 |---|---|---|
 | `VALIDATION_ERROR` | 400 | Missing `refreshToken` |
 | `AUTHENTICATION_REQUIRED` | 401 | Expired, revoked, or invalid refresh token |
+| `INTERNAL_ERROR` | 500 | Unexpected failure |
+
+### POST /api/auth/logout
+
+Status: Planned — implement in Phase 1 (contract frozen here; `refresh_tokens` storage already designed in migration V12).
+
+- Actor/auth: authenticated customer/seller/admin (access token) revoking their own refresh token.
+- Maps to: FR-AUTH-02, FR-AUTH-04.
+- Request body (JSON):
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+- Success: `200 OK`, `ApiResponse<null>` (envelope with `data: null`). The refresh token is revoked;
+  reuse returns `401` with `AUTHENTICATION_REQUIRED`.
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Missing `refreshToken` |
+| `AUTHENTICATION_REQUIRED` | 401 | Missing/expired access token, or revoked refresh token |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |

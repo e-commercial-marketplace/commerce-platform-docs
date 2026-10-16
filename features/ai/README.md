@@ -7,18 +7,28 @@ memory, RAG, and AI chat persistence inside the same Spring Boot monolith.
 
 ## MVP boundary
 
-The first AI slice only maps a guest or authenticated customer's natural-language request to a
-constrained public product search. Guest requests may be stateless. Persisted sessions, order and
-shipment tools, voucher tools, RAG, and seller revenue analysis are deferred.
+The first AI slice answers marketplace questions without requiring login: it maps a guest or
+authenticated customer's natural-language request to a constrained public product search (via Tool
+Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests may be
+stateless. Persisted sessions, order and shipment tools, voucher tools, and seller revenue analysis
+are deferred.
+
+The selected LLM provider is **DeepSeek**, configured on the backend via environment variables
+(OpenAI-compatible API through Spring AI). Provider secrets never leave the backend. The AI feature
+must never crash the app: when the provider is not configured or the provider call fails, the
+backend returns `AI_UNAVAILABLE` (HTTP 503) and the client shows a "not available" state. The public
+AI endpoint is rate-limited.
 
 ## Responsibilities
 
-- Provide `POST /api/ai/ask`.
-- Configure `ChatClient` and the selected provider.
+- Provide `POST /api/ai/ask` as a public endpoint (no login required for public data).
+- Configure `ChatClient` with the DeepSeek provider from environment configuration.
+- Return a controlled `AI_UNAVAILABLE` error when the provider is missing or failing.
 - Persist `AiChatSession` and `AiMessage` history for authenticated customers.
 - Expose public product-search tools first; add customer-owned order, shipment, tracking, and voucher
   tools later.
-- Resolve the authenticated customer from Spring Security context for protected data.
+- Resolve the authenticated customer from Spring Security context for protected data; guests only
+  receive public data and must never pass a user ID.
 - Use RAG for policies/FAQ and tools for live transactional data.
 - Add semantic product search/review summary later without enabling irreversible actions.
 - Keep seller revenue analysis as planning only.
@@ -35,7 +45,7 @@ GET  /api/ai/sessions/{id}/messages      # CUSTOMER and own session only
 
 | Actor | Allowed operation | Constraint |
 |---|---|---|
-| Unauthenticated client | Search public products and ask for public product information | No order, shipment, voucher, or account data. Requests may be stateless. |
+| Unauthenticated client | Ask about public products, FAQ, and policies | No login required. No order, shipment, voucher, or account data. Requests may be stateless and are rate-limited. |
 | CUSTOMER | Search products; later ask about their own orders, shipments, and vouchers | Protected data is resolved from the authenticated principal. |
 | SELLER/ADMIN | No AI access in the current scope | Seller revenue analysis is planning only. |
 | AI model/client | Call read-only tools | Must not provide arbitrary `userId` access or direct repository bypass. |

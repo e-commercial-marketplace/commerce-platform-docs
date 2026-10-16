@@ -8,14 +8,21 @@ Sở hữu các điểm vào xác thực và ranh giới bảo mật cho marketp
 
 MVP mobile đầu tiên dùng đăng ký/đăng nhập/refresh của customer trước khi checkout bằng giỏ hàng có backend. Phê duyệt seller và ủy quyền Admin vẫn là khả năng của backend, chưa có màn hình mobile trong mốc này.
 
+Đăng ký public mặc định tạo `CUSTOMER`; đơn đăng ký seller (được cung cấp trên màn hình tạo tài khoản) tạo `SELLER` với trạng thái `PENDING`. Đăng ký public không bao giờ được tạo tài khoản `ADMIN`. Khi chưa có admin, admin đầu tiên được bootstrap từ cấu hình môi trường (không bao giờ hard-code credentials).
+
 ## Trách nhiệm
 
 - Đăng ký người dùng.
 - Xác thực người dùng và cấp JWT access/refresh token.
-- Refresh access token.
+- Refresh access token kèm xoay vòng: refresh thành công trả về cặp mới và thu hồi refresh token đã dùng.
+- Thu hồi refresh token trước khi hết hạn (logout/thao tác admin); token bị thu hồi bị từ chối với 401.
+- Hết hạn access và refresh token theo cấu hình backend.
 - Băm mật khẩu bằng Spring Security `PasswordEncoder`.
 - Phân giải principal đã xác thực cho các kiểm tra sở hữu ở downstream.
 - Áp dụng quy tắc role và phê duyệt seller khi phê duyệt seller thuộc MVP.
+- Gửi email thông báo khi seller đăng ký và khi được duyệt theo kiểu best-effort: gửi email thất bại
+  không được rollback đăng ký/duyệt (MVP không dùng message broker; retry bằng outbox lưu DB hoặc
+  admin gửi lại khi cần).
 
 ## API dự kiến
 
@@ -23,13 +30,15 @@ MVP mobile đầu tiên dùng đăng ký/đăng nhập/refresh của customer tr
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
+POST /api/auth/logout
 ```
 
 ## Phân quyền
 
 | Tác nhân | Thao tác cho phép | Ràng buộc |
 |---|---|---|
-| Client chưa xác thực | Đăng ký, đăng nhập, refresh | Các endpoint auth là công khai; quyền truy cập guest được giới hạn riêng ở tìm kiếm catalog công khai và luồng AI tìm kiếm sản phẩm công khai. |
+| Client chưa xác thực | Đăng ký, đăng nhập, refresh | Các endpoint auth là công khai; quyền truy cập guest được giới hạn riêng ở tìm kiếm catalog công khai và luồng AI tìm kiếm sản phẩm công khai. Đăng ký chỉ chấp nhận `CUSTOMER` hoặc `SELLER`; `ADMIN` chỉ đến từ bootstrap. |
+| User đã xác thực | Logout (thu hồi refresh token của chính mình) | Yêu cầu access token; refresh token bị thu hồi dùng lại sẽ bị từ chối. |
 | CUSTOMER | Dùng các tính năng dành cho customer sau khi đăng nhập | Định danh lấy từ token đã xác thực. |
 | SELLER | Dùng các tính năng dành cho seller sau khi đăng nhập | Quyền sở hữu và phê duyệt seller được kiểm tra riêng. |
 | ADMIN | Dùng các tính năng dành cho admin sau khi đăng nhập | Role lấy từ principal đã xác thực, không lấy từ dữ liệu request. |
@@ -78,6 +87,8 @@ Auth sở hữu ranh giới định danh quanh bảng `users`. Auth không sở 
 
 - `users.id` được tham chiếu bởi `products.sellerId`, `orders.userId` và các trường participant của seller/customer trong các tính năng khác.
 - `users.sellerStatus` là giá trị enum, không phải quan hệ khóa ngoại tới bảng khác.
+- `refresh_tokens.userId -> users.id` lưu một hàng cho mỗi refresh token đã cấp (chỉ lưu SHA-256 hash,
+  migration `V12`); xoay vòng thu hồi hàng đã dùng, logout/thao tác admin đặt `revokedAt`.
 - Quyền sở hữu phải được phân giải từ principal đã xác thực trước khi service tính năng đọc hàng liên quan.
 
 ### Ý nghĩa trường

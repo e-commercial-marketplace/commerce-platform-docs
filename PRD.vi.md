@@ -15,16 +15,33 @@ bên trong backend.
 Mobile MVP đầu tiên là customer-facing shopping flow. Các screen references được cung cấp định nghĩa
 capabilities cần implement, không phải visual specification pixel-perfect.
 
+#### Các mốc bàn giao
+
+- **MVP tối thiểu (bắt buộc đạt):** luồng mua sắm của customer dưới đây. Các màn hình Seller/Admin
+  không bắt buộc trong mobile MVP đầu tiên, nhưng backend vẫn phải enforce các domain rule của chúng.
+- **Full roadmap:** app 3 role (`CUSTOMER`, `SELLER`, `ADMIN`) với quản lý catalog/stock/order/
+  shipment của seller, quản lý user/category/voucher của admin, human chat, tích hợp VNPAY và
+  lát cắt AI đầy đủ.
+
 #### Trong phạm vi
 
 - Public catalog browsing, search, category filtering, price/rating filtering, pagination và trình bày grid/list.
 - Product detail với product information, rating summary, quantity selection và các action add-to-cart/buy-now.
 - Customer registration/login bắt buộc trước server-backed cart checkout.
+- Đăng ký public mặc định tạo tài khoản `CUSTOMER`. Onboarding seller được cung cấp trên màn hình tạo
+  tài khoản: đơn đăng ký seller tạo tài khoản `SELLER` với trạng thái `PENDING`. Đăng ký public
+  không bao giờ được tạo tài khoản `ADMIN`.
+- Đơn đăng ký seller mới kích hoạt email thông báo; admin duyệt sẽ kích hoạt email xác nhận thành công
+  gửi cho seller. Gửi email là best-effort và không được rollback đăng ký/duyệt khi gửi thất bại.
+- Tài khoản admin đầu tiên được bootstrap từ cấu hình môi trường khi chưa có admin.
+  Credentials không bao giờ hard-code trong repo.
 - Thêm, cập nhật, xóa cart item và server-side total calculation.
 - Checkout với shipping-address snapshot và COD payment. VNPAY vẫn là payment slice tiếp theo.
 - Tạo order, payment result và tra cứu order cơ bản của customer.
 - Product reviews chỉ gồm rating và comment.
-- Public/customer AI product search qua search flow hiện có; guest searches có thể stateless.
+- Public/customer AI product search và hỏi đáp theo context marketplace qua search flow hiện có; guest
+  searches có thể stateless và không yêu cầu đăng nhập. AI cho guest chỉ giới hạn ở dữ liệu công khai
+  (sản phẩm, FAQ, chính sách); câu hỏi về đơn hàng/vận chuyển/tài khoản yêu cầu customer đã xác thực.
 
 #### Hoãn khỏi mobile MVP đầu tiên
 

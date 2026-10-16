@@ -61,8 +61,10 @@ flowchart LR
 - Một shipment thuộc về một order và một seller. Ánh xạ MVP dùng whole order-item lines, với mỗi
   order item được gán cho tối đa một shipment; `shipment.orderId` phải bằng `orderItem.orderId`.
 - Spring AI là internal feature, không phải service riêng biệt.
+- LLM provider được chọn là DeepSeek, gọi qua Spring AI trên backend.
 - AI bắt đầu với read-only tools và không được bypass authorization thông thường.
-- React Native không bao giờ gọi OpenAI hoặc Gemini trực tiếp.
+- React Native không bao giờ gọi trực tiếp LLM provider. AI phải degrade gracefully với
+  `AI_UNAVAILABLE` khi provider chưa được cấu hình hoặc lỗi.
 
 ## 3. Luồng client-backend
 
@@ -129,6 +131,6 @@ Guest requests bị giới hạn ở public product search; seller và admin AI 
 - PostgreSQL lưu primary marketplace data.
 - pgvector lưu embeddings cho RAG phase.
 - VNPAY xử lý online payment interaction.
-- OpenAI/Gemini-compatible provider được chọn cung cấp model responses qua Spring AI.
+- DeepSeek provider được chọn (API tương thích OpenAI) cung cấp model responses qua Spring AI.
 - Provider secrets giữ trên backend.
 - Production error responses dùng safe `INTERNAL_ERROR` messages không kèm framework binding details.

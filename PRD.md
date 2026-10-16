@@ -15,16 +15,33 @@ inside the backend.
 The first mobile MVP is a customer-facing shopping flow. The provided screen references define the
 capabilities to implement, not a pixel-perfect visual specification.
 
+#### Delivery milestones
+
+- **Minimum MVP (must achieve):** the customer shopping flow below. Seller/Admin screens are not
+  required in the first mobile MVP, but the backend must already enforce their domain rules.
+- **Full roadmap:** the 3-role app (`CUSTOMER`, `SELLER`, `ADMIN`) with seller catalog/stock/order/
+  shipment management, admin user/category/voucher management, human chat, VNPAY integration, and
+  the full AI slice.
+
 #### In scope
 
 - Public catalog browsing, search, category filtering, price/rating filtering, pagination, and grid/list presentation.
 - Product detail with product information, rating summary, quantity selection, and add-to-cart/buy-now actions.
 - Customer registration/login required before server-backed cart checkout.
+- Public registration creates a `CUSTOMER` account by default. Seller onboarding is offered on the
+  account-creation screen: a seller application creates a `SELLER` account with `PENDING` status.
+  Public registration must never create an `ADMIN` account.
+- A new seller request triggers a notification email; admin approval triggers a success email to
+  the seller. Email sending is best-effort and must not roll back registration/approval if it fails.
+- The first admin account is bootstrapped from environment configuration when no admin exists.
+  Credentials are never hard-coded in the repo.
 - Cart item add, update, remove, and server-side total calculation.
 - Checkout with a shipping-address snapshot and COD payment. VNPAY remains the next payment slice.
 - Order creation, payment result, and basic customer order retrieval.
 - Product reviews with rating and comment only.
-- Public/customer AI product search through the existing search flow; guest searches may be stateless.
+- Public/customer AI product search and marketplace Q&A through the existing search flow; guest
+  searches may be stateless and do not require login. Guest AI is limited to public data (products,
+  FAQ, policies); order/shipment/account questions require an authenticated customer.
 
 #### Deferred from the first mobile MVP
 

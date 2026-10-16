@@ -59,6 +59,17 @@ classDiagram
 
 `SellerStatus` chỉ bắt buộc khi `User.role = SELLER`. Kiểm tra role và kiểm tra sở hữu là hai trách nhiệm riêng biệt.
 
+## Onboarding seller
+
+- Đăng ký public mặc định là `CUSTOMER`. Đơn đăng ký seller tạo `User.role = SELLER`
+  với `SellerStatus = PENDING`.
+- Đơn đăng ký seller mới kích hoạt email thông báo cho seller (và hiển thị để admin xét duyệt).
+- Admin duyệt chuyển seller sang `APPROVED` và kích hoạt email xác nhận thành công cho seller.
+  Seller `REJECTED`/`SUSPENDED` không được bán.
+- Gửi email là best-effort và không được rollback transaction đăng ký/duyệt.
+- Tài khoản admin đầu tiên được bootstrap từ cấu hình môi trường khi chưa có admin;
+  đăng ký public không bao giờ được tạo `ADMIN`.
+
 ## Mô hình dữ liệu
 
 User là bảng định danh được gần như mọi tính năng nghiệp vụ tham chiếu. User là nguồn định danh tác nhân, không thay thế kiểm tra sở hữu riêng của từng tính năng.

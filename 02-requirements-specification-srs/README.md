@@ -351,7 +351,7 @@ validation, unique transaction/reference identifiers, and idempotent completion.
 
 ### 8.3 LLM provider
 
-The selected OpenAI/Gemini-compatible provider shall be configured on the backend. The mobile client
+The selected DeepSeek provider (OpenAI-compatible API) shall be configured on the backend. The mobile client
 shall never call the provider directly.
 
 ### 8.4 Database and vector store

@@ -60,6 +60,17 @@ classDiagram
 `SellerStatus` is required only when `User.role = SELLER`. Role checks and ownership checks are
 separate responsibilities.
 
+## Seller onboarding
+
+- Public registration defaults to `CUSTOMER`. A seller application creates `User.role = SELLER`
+  with `SellerStatus = PENDING`.
+- A new seller request triggers a notification email to the seller (and is visible for admin review).
+- Admin approval moves the seller to `APPROVED` and triggers a success email to the seller.
+  `REJECTED`/`SUSPENDED` sellers cannot sell.
+- Email sending is best-effort and must not roll back the registration/approval transaction.
+- The first admin account is bootstrapped from environment configuration when no admin exists;
+  public registration can never create an `ADMIN`.
+
 ## Data model
 
 User is the identity table referenced by nearly every business feature. It is the source of actor

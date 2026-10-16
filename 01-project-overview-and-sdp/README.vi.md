@@ -82,7 +82,7 @@ Các quyết định sau đây là bắt buộc đối với hệ thống đư�
 5. Sử dụng PostgreSQL transaction cho checkout, cập nhật stock, tiêu thụ voucher và callback thanh toán.
 6. Giữ Spring AI trong cùng monolith dưới feature `ai`.
 7. Khởi đầu AI với các tool chỉ đọc (read-only tool). AI không được trực tiếp thay đổi trạng thái nghiệp vụ quan trọng (business-critical state).
-8. React Native không được gọi trực tiếp OpenAI hoặc Gemini. Các yêu cầu AI đi qua Spring Boot.
+8. React Native không được gọi trực tiếp LLM provider (DeepSeek). Các yêu cầu AI đi qua Spring Boot.
 
 ## 6. Cơ sở Công nghệ
 

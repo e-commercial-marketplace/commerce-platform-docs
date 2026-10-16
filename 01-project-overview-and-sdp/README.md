@@ -82,7 +82,7 @@ The following decisions are mandatory for the planned system:
 5. Use PostgreSQL transactions for checkout, stock updates, voucher consumption, and payment callbacks.
 6. Keep Spring AI inside the same monolith under the `ai` feature.
 7. Start AI with read-only tools. AI must not directly mutate business-critical state.
-8. React Native must not call OpenAI or Gemini directly. AI requests go through Spring Boot.
+8. React Native must not call the LLM provider (DeepSeek) directly. AI requests go through Spring Boot.
 
 ## 6. Technology Baseline
 

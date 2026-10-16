@@ -102,6 +102,7 @@ VOUCHER_EXPIRED
 VOUCHER_EXHAUSTED
 VOUCHER_ALREADY_APPLIED
 PAYMENT_FAILED
+AI_UNAVAILABLE
 INTERNAL_ERROR
 ```
 
@@ -132,9 +133,14 @@ Content-Type: application/json
 {
   "email": "customer@example.com",
   "password": "strong-password",
-  "name": "Customer"
+  "name": "Customer",
+  "role": "CUSTOMER"
 }
 ```
+
+`role` is optional and defaults to `CUSTOMER`. Public registration accepts only `CUSTOMER` or
+`SELLER` (a seller application starts with `PENDING` status and requires admin approval); it must
+never create an `ADMIN` account.
 
 ### Login
 
@@ -205,6 +211,27 @@ Content-Type: application/json
   "refreshToken": "jwt-refresh-token"
 }
 ```
+
+Refresh rotates the token pair: a successful refresh returns a new access/refresh pair and revokes
+the used refresh token. Refresh tokens expire per backend configuration and can be revoked
+(server-side) before expiry. The client must use the token pair returned by refresh. Rotation and
+revocation storage (`refresh_tokens`, migration `V12`) is implemented in Phase 1.
+
+```http
+POST /api/auth/logout
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+Logout revokes the given refresh token. After logout the revoked token returns `401` with
+`AUTHENTICATION_REQUIRED` when reused. The logout endpoint and revocation enforcement are
+implemented in Phase 1.
 
 ## 4. Catalog
 
@@ -552,10 +579,14 @@ Review listing returns `ApiResponse<PageResponse<ReviewDto>>`; its `data` contai
 `totalElements`, and `totalPages`. An ineligible customer receives
 `REVIEW_NOT_ELIGIBLE`; a second review for the same customer/product receives `REVIEW_ALREADY_EXISTS`.
 
-## 8. AI product search
+## 8. AI product search and marketplace Q&A
 
 The mobile client sends natural language to the backend. The backend maps the request to a constrained
-catalog query and generates an answer grounded in the catalog result.
+catalog query (for product questions) or to RAG-grounded policy/FAQ knowledge (for marketplace
+questions) and generates an answer grounded in those results. No login is required: guests may ask
+about public data (products, FAQ, policies). Questions about orders, shipments, vouchers, or accounts
+require an authenticated customer; the backend resolves identity from the security context and never
+trusts a client-supplied user ID.
 
 ```http
 POST /api/ai/ask
@@ -606,6 +637,11 @@ count and product data.
 Guest requests may be stateless. The AI must not receive provider API keys, arbitrary user IDs, or
 write-capability tools. Because the MVP currency is `VND`, foreign-currency input must be clarified or
 rejected; the backend must not silently convert it without an explicit exchange-rate policy.
+
+The AI feature must never crash the app. When the provider is not configured or the provider call
+fails, the backend returns `503` with `AI_UNAVAILABLE` and the client shows a "not available" state.
+The public AI endpoint is rate-limited to prevent abuse. Provider wiring lands in Phase 10; until
+then the backend answers `AI_UNAVAILABLE` for every AI request.
 
 ## 9. State rules required by the backend
 

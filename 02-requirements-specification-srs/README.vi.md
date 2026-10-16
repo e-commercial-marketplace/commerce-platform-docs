@@ -351,7 +351,7 @@ Tích hợp VNPAY phải hỗ trợ tạo request, chuyển hướng (redirect),
 
 ### 8.3 LLM provider
 
-LLM provider tương thích OpenAI/Gemini đã chọn phải được cấu hình trên backend. Client mobile
+DeepSeek provider đã chọn (API tương thích OpenAI) phải được cấu hình trên backend. Client mobile
 không bao giờ được gọi trực tiếp provider.
 
 ### 8.4 Cơ sở dữ liệu và vector store

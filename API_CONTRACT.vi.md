@@ -102,6 +102,7 @@ VOUCHER_EXPIRED
 VOUCHER_EXHAUSTED
 VOUCHER_ALREADY_APPLIED
 PAYMENT_FAILED
+AI_UNAVAILABLE
 INTERNAL_ERROR
 ```
 
@@ -132,9 +133,14 @@ Content-Type: application/json
 {
   "email": "customer@example.com",
   "password": "strong-password",
-  "name": "Customer"
+  "name": "Customer",
+  "role": "CUSTOMER"
 }
 ```
+
+`role` là optional và mặc định là `CUSTOMER`. Đăng ký public chỉ chấp nhận `CUSTOMER` hoặc
+`SELLER` (đơn đăng ký seller bắt đầu với trạng thái `PENDING` và cần admin duyệt); không bao giờ
+được tạo tài khoản `ADMIN`.
 
 ### Đăng nhập
 
@@ -203,6 +209,26 @@ Content-Type: application/json
   "refreshToken": "jwt-refresh-token"
 }
 ```
+
+Refresh xoay vòng cặp token: refresh thành công trả về cặp access/refresh mới và thu hồi refresh
+token đã dùng. Refresh token hết hạn theo cấu hình backend và có thể bị thu hồi (server-side) trước
+khi hết hạn. Client phải dùng cặp token do refresh trả về. Lưu trữ xoay vòng và thu hồi
+(`refresh_tokens`, migration `V12`) được implement trong Phase 1.
+
+```http
+POST /api/auth/logout
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+Logout thu hồi refresh token đã cho. Sau logout, token bị thu hồi dùng lại sẽ trả về `401` với
+`AUTHENTICATION_REQUIRED`. Endpoint logout và enforcement thu hồi được implement trong Phase 1.
 
 ## 4. Catalog
 
@@ -551,10 +577,14 @@ Review listing trả về `ApiResponse<PageResponse<ReviewDto>>`; `data` chứa 
 `totalPages`. Một ineligible customer nhận
 `REVIEW_NOT_ELIGIBLE`; một second review cho cùng customer/product nhận `REVIEW_ALREADY_EXISTS`.
 
-## 8. AI product search
+## 8. AI product search và hỏi đáp marketplace
 
 Mobile client gửi natural language tới backend. Backend ánh xạ request thành constrained
-catalog query và sinh answer grounded trong catalog result.
+catalog query (cho câu hỏi sản phẩm) hoặc kiến thức chính sách/FAQ qua RAG (cho câu hỏi về
+marketplace) và sinh answer grounded trong các kết quả đó. Không yêu cầu đăng nhập: guest có thể hỏi
+về dữ liệu công khai (sản phẩm, FAQ, chính sách). Câu hỏi về đơn hàng, vận chuyển, voucher hay tài
+khoản yêu cầu customer đã xác thực; backend phân giải định danh từ security context và không bao giờ
+tin user ID do client gửi.
 
 ```http
 POST /api/ai/ask
@@ -605,6 +635,11 @@ count và product data.
 Guest requests có thể stateless. AI không được nhận provider API keys, arbitrary user IDs hoặc
 write-capability tools. Vì MVP currency là `VND`, foreign-currency input phải được clarified hoặc
 rejected; backend không được silently convert nó khi chưa có explicit exchange-rate policy.
+
+Tính năng AI không bao giờ được làm crash app. Khi provider chưa được cấu hình hoặc gọi provider
+thất bại, backend trả về `503` với `AI_UNAVAILABLE` và client hiển thị trạng thái "không khả dụng".
+Endpoint AI public bị giới hạn mức sử dụng (rate-limited) để chống lạm dụng. Đấu nối provider thực
+hiện trong Phase 10; cho đến lúc đó backend trả `AI_UNAVAILABLE` cho mọi AI request.
 
 ## 9. State rules backend bắt buộc
 
