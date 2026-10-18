@@ -224,14 +224,9 @@ erDiagram
 
 ```text
 V1  users
-V2  categories + products
-V3  cart_items
-V4  orders + order_items
-V5  vouchers
-V6  payments
-V7  shipments + shipment_order_items mapping
-V8  reviews
-V9  conversations + messages
-V10 ai_chat_sessions + ai_messages
-V11 pgvector + AI document/vector tables
+V2-V11 historical placeholders (do not edit after Flyway records them)
+V12 refresh_tokens
+V13 domain tables: categories, products, cart_items, orders/items, vouchers, payments,
+    shipments/mapping, reviews, conversations/messages, ai_chat_sessions/messages
+V14+ pgvector extension and AI document/vector tables (deferred until the RAG schema is finalized)
 ```
