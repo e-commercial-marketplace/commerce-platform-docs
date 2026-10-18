@@ -124,5 +124,5 @@ cart, order, review, and chat rows reference products but do not own catalog dat
 The first mobile MVP uses one image per product and does not model color/size variants. A later
 variant model must not silently change the meaning of the product-level `stock` field.
 
-The V2 catalog migration is currently a placeholder, so these fields describe the planned logical
-schema rather than an already-applied database table.
+The historical V2 migration is a placeholder. The catalog tables are created by V13 because earlier
+placeholder migrations may already be recorded by Flyway.
