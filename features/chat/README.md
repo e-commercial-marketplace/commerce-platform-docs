@@ -108,5 +108,5 @@ session/message model.
 | `messages` | `conversationId` | Parent conversation. |
 | `messages` | `senderId` | User who sent the message. |
 
-The V9 migration is currently a placeholder; the table and idempotency details must be finalized
-before WebSocket persistence is implemented.
+The historical V9 migration is a placeholder. V13 creates the conversation/message tables; message
+idempotency behavior remains to be finalized with the WebSocket persistence implementation.
