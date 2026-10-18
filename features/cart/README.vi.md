@@ -84,4 +84,4 @@ classDiagram
 
 Cart item không sở hữu snapshot giá. Luồng order phải đọc giá sản phẩm hợp lệ hiện tại và tạo snapshot `OrderItem` bất biến trong lúc checkout.
 
-Migration V3 hiện là placeholder; bảng `cart_items`, các khóa ngoại và ràng buộc duy nhất `(userId, productId)` vẫn cần được triển khai trong migration thực tế.
+Migration V3 lịch sử là placeholder. Bảng `cart_items`, các khóa ngoại và ràng buộc duy nhất `(userId, productId)` được tạo trong V13 để giữ nguyên checksum Flyway đã ghi nhận.
