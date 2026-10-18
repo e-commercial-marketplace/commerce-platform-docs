@@ -86,8 +86,9 @@ The following decisions are mandatory for the planned system:
 
 ## 6. Technology Baseline
 
-The backend versions below reflect the current `backend/pom.xml` and Docker Compose scaffold. The
-frontend remains a scaffold, so its library versions are intentionally not pinned yet.
+The backend versions below reflect the current `backend/pom.xml`, `backend/Dockerfile`, and Docker
+Compose stack. The frontend remains a scaffold, so its library versions are intentionally not pinned
+yet.
 
 | Area | Technology or approach | Status |
 |---|---|---|
@@ -100,6 +101,8 @@ frontend remains a scaffold, so its library versions are intentionally not pinne
 | Database | PostgreSQL 16 with pgvector image | Current local container scaffold |
 | Persistence | Spring Data JPA/Hibernate | Current backend dependency |
 | Database migrations | Flyway | Current backend dependency |
+| Backend container image | Multi-stage `backend/Dockerfile` (Maven build stage + Temurin 21 JRE runtime, non-root user) | Current scaffold |
+| Local orchestration | Docker Compose: PostgreSQL/pgvector + backend API, DB health-gated | Current scaffold |
 | Authentication | Spring Security with JJWT 0.12.6 | Current backend dependency; flow is phased |
 | Human chat | Spring WebSocket and mobile WebSocket client | Backend dependency; feature phased |
 | AI | Spring AI with an external LLM provider | Planned backend phase |
@@ -262,7 +265,7 @@ shipment tools are later read-only work. Seller revenue analysis is planning onl
 - Add multi-seller order and shipment tests.
 - Add AI tool authorization tests.
 - Check product search and pagination performance.
-- Provide Docker Compose for local PostgreSQL/pgvector.
+- Keep the Docker Compose stack (PostgreSQL/pgvector plus backend image) and deployment docs current.
 - Document production and test deployment.
 
 ## 9. Quality Gates
