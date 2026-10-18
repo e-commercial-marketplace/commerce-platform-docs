@@ -120,4 +120,4 @@ Catalog sở hữu danh mục và sản phẩm. Quyền sở hữu sản phẩm 
 
 MVP mobile đầu tiên dùng một ảnh cho mỗi sản phẩm và không mô hình hóa biến thể màu sắc/kích thước. Mô hình biến thể sau này không được âm thầm thay đổi ý nghĩa của trường `stock` cấp sản phẩm.
 
-Migration catalog V2 hiện là placeholder, vì vậy các trường trên mô tả schema logic dự kiến thay vì bảng database đã áp dụng.
+Migration V2 lịch sử là placeholder. Các bảng catalog được tạo trong V13 vì Flyway có thể đã ghi nhận các placeholder trước đó.
