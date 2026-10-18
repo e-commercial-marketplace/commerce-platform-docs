@@ -146,4 +146,5 @@ and stateless, so they should not create a customer-owned session.
 | `ai_messages` | `createdAt` | Time at which the turn was persisted. |
 | `ai_messages` | `sessionId` | Parent `ai_chat_sessions` record. |
 
-These are logical fields from `ERD.md`; the `V10` and `V11` migrations are still placeholders.
+AI session/message fields are created by V13. V11 remains a historical placeholder; pgvector and AI
+document/vector tables are deferred until the RAG schema is finalized.
