@@ -97,5 +97,5 @@ voucher row remains the source of validity and usage-limit checks.
 | `orders` | `voucherCode` | Optional reference to the applied voucher. |
 | `orders` | `discountAmount` | Immutable discount amount calculated for that order. |
 
-The V5 migration is currently a placeholder; the final schema must enforce code uniqueness and
-transaction-safe usage updates.
+The historical V5 migration is a placeholder. V13 creates the voucher schema and uniqueness
+constraints; transaction-safe usage updates remain a service-layer responsibility.
