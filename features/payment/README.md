@@ -129,5 +129,5 @@ remain auditable while a later retry creates another row.
 | `payments` | `paidAt` | Nullable completion timestamp; use `NULL` while not completed. |
 | `payments` | `orderId` | Order that owns the attempt. |
 
-The V6 migration is currently a placeholder. Gateway callback validation, unique constraints, and
-retry behavior must be implemented together with the final payment schema.
+The historical V6 migration is a placeholder. V13 creates the payment schema and transaction ID
+uniqueness; gateway callback validation and retry behavior remain application-layer work.
