@@ -104,4 +104,4 @@ Auth sở hữu ranh giới định danh quanh bảng `users`. Auth không sở 
 | `users` | `enabled` | Tài khoản có được phép xác thực hay không; trường persistence V1 hiện tại. |
 | `users` | `createdAt` / `updatedAt` | Thời điểm tạo tài khoản và cập nhật lần cuối. |
 
-`phone` và `address` là các trường profile logic trong ERD/mô hình class hiện tại nhưng chưa có trong migration V1. Không giả định chúng đã được lưu trữ cho đến khi migration bổ sung chúng.
+`phone` và `address` là các trường profile tùy chọn được bổ sung vào bảng `users` trong migration V13; chúng không thuộc migration V1.
