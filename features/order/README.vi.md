@@ -151,4 +151,4 @@ classDiagram
 | `order_items` | `cancelReason` | Lý do tùy chọn khi áp dụng quy tắc hủy của seller/customer. |
 | `order_items` | `orderId` / `productId` / `sellerId` | Tham chiếu đơn hàng cha, sản phẩm nguồn và seller chịu trách nhiệm. |
 
-Migration V4 hiện là placeholder; các trường logic trên phải được migrate mà không làm mất snapshot checkout bất biến.
+Migration V4 lịch sử là placeholder. V13 tạo các bảng order và giữ các checkout snapshot bất biến như mô tả ở trên.
