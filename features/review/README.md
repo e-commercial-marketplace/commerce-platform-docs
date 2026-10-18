@@ -88,5 +88,5 @@ the source of order eligibility; the review service must verify purchase and del
 | `reviews` | `userId` | Customer author. |
 | `reviews` | `productId` | Product being reviewed. |
 
-The V8 migration is currently a placeholder; the final schema must preserve the uniqueness and rating
-constraints above.
+The historical V8 migration is a placeholder. V13 creates the review table with the uniqueness and
+rating constraints above.
