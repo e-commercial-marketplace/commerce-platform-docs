@@ -143,5 +143,5 @@ multiple independent shipments and outcomes.
 | `shipments` | `sellerId` | Seller owner and stock-restoration scope. |
 | `shipment_order_items` | `shipmentId` / `orderItemId` | Planned mapping that selects which seller-owned order items are in the shipment. |
 
-The V7 migration is currently a placeholder. The first migration should implement whole-line mapping;
+The historical V7 migration is a placeholder. V13 creates shipment tables with whole-line mapping;
 partial shipment quantity and replacement-shipment fields are intentionally deferred.
