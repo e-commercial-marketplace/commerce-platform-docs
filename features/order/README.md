@@ -167,5 +167,5 @@ An order is the customer-level checkout aggregate. Seller ownership is deliberat
 | `order_items` | `cancelReason` | Optional reason when the seller/customer cancellation rule applies. |
 | `order_items` | `orderId` / `productId` / `sellerId` | Parent order, source product, and responsible seller references. |
 
-The V4 migration is currently a placeholder; the logical fields above must be migrated without
-losing the immutable checkout snapshots.
+The historical V4 migration is a placeholder. V13 creates the order tables while preserving the
+immutable checkout snapshots described above.
