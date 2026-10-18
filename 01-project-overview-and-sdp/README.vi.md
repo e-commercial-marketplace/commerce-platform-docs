@@ -86,8 +86,8 @@ Các quyết định sau đây là bắt buộc đối với hệ thống đư�
 
 ## 6. Cơ sở Công nghệ
 
-Các version backend dưới đây phản ánh `backend/pom.xml` và khung Docker Compose hiện tại. 
-Frontend vẫn là khung sườn (scaffold), vì vậy version thư viện của nó cố ý chưa được chốt.
+Các version backend dưới đây phản ánh `backend/pom.xml`, `backend/Dockerfile` và stack Docker Compose
+hiện tại. Frontend vẫn là khung sườn (scaffold), vì vậy version thư viện của nó cố ý chưa được chốt.
 
 | Lĩnh vực | Công nghệ hoặc hướng tiếp cận | Trạng thái |
 |---|---|---|
@@ -100,6 +100,8 @@ Frontend vẫn là khung sườn (scaffold), vì vậy version thư viện của
 | Cơ sở dữ liệu | PostgreSQL 16 with pgvector image | Current local container scaffold |
 | Persistence | Spring Data JPA/Hibernate | Current backend dependency |
 | Migration cơ sở dữ liệu | Flyway | Current backend dependency |
+| Image container backend | `backend/Dockerfile` đa tầng (stage build Maven + runtime Temurin 21 JRE, user không phải root) | Current scaffold |
+| Điều phối cục bộ | Docker Compose: PostgreSQL/pgvector + backend API, chờ DB healthy | Current scaffold |
 | Xác thực | Spring Security with JJWT 0.12.6 | Current backend dependency; flow is phased |
 | Chat giữa người với người | Spring WebSocket and mobile WebSocket client | Backend dependency; feature phased |
 | AI | Spring AI with an external LLM provider | Planned backend phase |
@@ -262,7 +264,7 @@ shipment cho authenticated customer là công việc read-only giai đoạn sau.
 - Thêm test order và shipment đa người bán (multi-seller).
 - Thêm test phân quyền AI tool.
 - Kiểm tra hiệu năng tìm kiếm sản phẩm và phân trang.
-- Cung cấp Docker Compose cho PostgreSQL/pgvector cục bộ.
+- Giữ stack Docker Compose (PostgreSQL/pgvector và image backend) cùng tài liệu triển khai luôn cập nhật.
 - Tài liệu hóa triển khai production và triển khai test.
 
 ## 9. Cổng Chất lượng
