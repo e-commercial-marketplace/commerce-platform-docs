@@ -117,4 +117,4 @@ Payment lưu các lần thử, không chỉ trạng thái thanh toán hiện t�
 | `payments` | `paidAt` | Timestamp hoàn tất nullable; dùng `NULL` khi chưa hoàn tất. |
 | `payments` | `orderId` | Đơn hàng sở hữu lần thử. |
 
-Migration V6 hiện là placeholder. Kiểm tra callback cổng thanh toán, ràng buộc duy nhất và hành vi retry phải được triển khai cùng schema thanh toán cuối cùng.
+Migration V6 lịch sử là placeholder. V13 tạo schema payment và tính duy nhất transaction ID; kiểm tra callback và hành vi retry vẫn thuộc application layer.
