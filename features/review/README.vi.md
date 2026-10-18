@@ -86,4 +86,4 @@ classDiagram
 | `reviews` | `userId` | Customer tác giả. |
 | `reviews` | `productId` | Sản phẩm được đánh giá. |
 
-Migration V8 hiện là placeholder; schema cuối cùng phải giữ các ràng buộc duy nhất và rating trên.
+Migration V8 lịch sử là placeholder. V13 tạo bảng review với các ràng buộc duy nhất và rating nêu trên.
