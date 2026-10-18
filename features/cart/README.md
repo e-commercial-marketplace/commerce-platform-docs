@@ -85,5 +85,5 @@ classDiagram
 Cart items do not own a price snapshot. The order flow must read the current valid product price and
 create an immutable `OrderItem` snapshot during checkout.
 
-The V3 migration is currently a placeholder; the `cart_items` table, foreign keys, and unique
-`(userId, productId)` constraint still need to be implemented in a real migration.
+The historical V3 migration is a placeholder. The `cart_items` table, foreign keys, and unique
+`(userId, productId)` constraint are created by V13 to preserve previously recorded Flyway checksums.
