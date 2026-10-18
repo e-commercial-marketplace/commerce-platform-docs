@@ -92,4 +92,4 @@ Voucher là bảng thuộc sở hữu của nền tảng. Đơn hàng giữ mã 
 | `orders` | `voucherCode` | Tham chiếu tùy chọn tới voucher đã áp dụng. |
 | `orders` | `discountAmount` | Số tiền giảm giá bất biến tính cho đơn hàng đó. |
 
-Migration V5 hiện là placeholder; schema cuối cùng phải thực thi tính duy nhất của mã và cập nhật lượt dùng an toàn transaction.
+Migration V5 lịch sử là placeholder. V13 tạo schema voucher và ràng buộc duy nhất; cập nhật lượt dùng an toàn transaction vẫn thuộc trách nhiệm service.
