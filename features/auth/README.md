@@ -111,5 +111,5 @@ shipment rows; those tables reference `users` for ownership and actor checks.
 | `users` | `enabled` | Whether the account may authenticate; current V1 persistence field. |
 | `users` | `createdAt` / `updatedAt` | Account creation and last-update timestamps. |
 
-`phone` and `address` are logical profile fields in the current ERD/class model but are not present in
-the V1 migration yet. Do not assume they are persisted until a migration adds them.
+`phone` and `address` are optional profile columns added to the `users` table by migration V13; they
+are not part of the V1 migration.
