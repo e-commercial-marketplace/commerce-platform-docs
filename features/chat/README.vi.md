@@ -107,4 +107,4 @@ Human chat có một hàng hội thoại participant và các hàng tin nhắn c
 | `messages` | `conversationId` | Hội thoại cha. |
 | `messages` | `senderId` | Người dùng đã gửi tin nhắn. |
 
-Migration V9 hiện là placeholder; chi tiết bảng và idempotency phải được chốt trước khi triển khai lưu trữ WebSocket.
+Migration V9 lịch sử là placeholder. V13 tạo bảng conversation/message; hành vi idempotency vẫn cần được chốt khi triển khai lưu trữ WebSocket.
