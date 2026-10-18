@@ -141,4 +141,5 @@ Mô hình AI lưu trữ chỉ lưu hội thoại của khách hàng. Yêu cầu 
 | `ai_messages` | `createdAt` | Thời điểm lượt hội thoại được lưu trữ. |
 | `ai_messages` | `sessionId` | Bản ghi `ai_chat_sessions` cha. |
 
-Đây là các trường logic từ `ERD.vi.md`; các migration `V10` và `V11` vẫn là placeholder.
+Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; pgvector và AI
+document/vector tables được hoãn đến khi hoàn tất thiết kế RAG schema.
