@@ -131,4 +131,4 @@ Shipment thuộc phạm vi seller ngay cả khi customer thấy một đơn hàn
 | `shipments` | `sellerId` | Seller sở hữu và phạm vi hoàn tồn kho. |
 | `shipment_order_items` | `shipmentId` / `orderItemId` | Ánh xạ dự kiến chọn các order item thuộc sở hữu của seller nằm trong shipment. |
 
-Migration V7 hiện là placeholder. Migration đầu tiên nên triển khai ánh xạ cả dòng; số lượng shipment từng phần và các trường shipment thay thế được hoãn có chủ ý.
+Migration V7 lịch sử là placeholder. V13 tạo bảng shipment với ánh xạ cả dòng; shipment từng phần và shipment thay thế được hoãn có chủ ý.
