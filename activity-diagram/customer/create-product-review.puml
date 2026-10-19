@@ -1,0 +1,68 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Review - Create Product Review
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+Customer is authenticated; the data belongs
+to the Customer.
+
+Postcondition:
+The product review is stored in the system.
+end note
+:Open the product review function;
+|System|
+:Display the products eligible for review;
+|Customer|
+repeat
+  :Select a purchased and received product, and enter the rating and comment;
+  :Submit the review;
+  |System|
+  if (Processing the request fails?) then (Yes)
+    :Return the system error;
+    |Customer|
+    :View the system error;
+    stop
+  else (No)
+  endif
+  |System|
+  :Check the review eligibility and the rating from 1 to 5;
+  if (Review request is invalid?) then (Yes)
+    :Return the review-cannot-be-created notice;
+    |Customer|
+    :View the review-cannot-be-created notice;
+  else (No)
+    |System|
+    :Store the review;
+    :Display the result;
+    |Customer|
+    :View the result;
+    stop
+  endif
+  |Customer|
+  :Correct the review information or select an eligible product;
+repeat while (Submit review\nagain?) is (Yes) not (No)
+stop
+
+@enduml

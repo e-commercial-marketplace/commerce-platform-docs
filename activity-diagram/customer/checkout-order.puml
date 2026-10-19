@@ -1,0 +1,72 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Order - Checkout Order
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+Customer is authenticated; the data belongs
+to the Customer.
+
+Postcondition:
+The order is created, the stock is updated,
+and the purchased products are removed from
+the cart.
+end note
+|Customer|
+repeat
+  :Open the cart and select checkout;
+  |System|
+  :Display the products and the delivery-address form;
+  |Customer|
+  :Enter the delivery address and select COD;
+  :Submit the order request;
+  |System|
+  if (Processing the request fails?) then (Yes)
+    :Return the system error;
+    |Customer|
+    :View the system error;
+    stop
+  else (No)
+  endif
+  |System|
+  :Check the products, the remaining quantities, and the delivery address;
+  if (Cart empty or stock insufficient?) then (Yes)
+    :Return the order-cannot-be-placed notice;
+    |Customer|
+    :View the order-cannot-be-placed notice;
+  else (No)
+    |System|
+    :Create the order and store the product information at order time;
+    :Update the stock and remove the purchased products from the cart;
+    :Display the created order;
+    |Customer|
+    :View the result;
+    stop
+  endif
+  |Customer|
+  :Update the cart;
+repeat while (Check out\nagain?) is (Yes) not (No)
+stop
+
+@enduml

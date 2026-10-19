@@ -1,0 +1,62 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Category - View Categories
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Admin|
+start
+note right
+Precondition:
+Admin is authenticated.
+
+Postcondition:
+None.
+end note
+:Open the category viewing function;
+|System|
+:Load the information visible to the Admin;
+if (Category data is available?) then (No)
+  :Return the no-data notice;
+  |Admin|
+  :View the no-data notice;
+  stop
+else (Yes)
+endif
+|System|
+:Display the category information;
+|Admin|
+:Select the information to view;
+|System|
+:Load the selected item details;
+if (Loading the details fails?) then (Yes)
+  :Return the system error;
+  |Admin|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Display the item details;
+|Admin|
+:View the item details;
+stop
+
+@enduml

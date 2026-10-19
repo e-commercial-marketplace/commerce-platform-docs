@@ -74,6 +74,13 @@ by `UNAUTHENTICATED USER`, `CUSTOMER`, `SELLER`, and `ADMIN`. Use these diagrams
 permissions and the required `<<include>> Login` and `<<extend>>` relationships before implementing
 an endpoint or screen.
 
+### 7. Activity diagrams
+
+Open [`activity-diagram/README.md`](activity-diagram/README.md) for one PlantUML activity diagram per
+use case in `usecase-specification/`, grouped by actor. Use them to walk a flow step by step —
+including validation, alternative, and exception paths — before implementing or reviewing an endpoint
+or screen.
+
 ## Frontend-to-backend feature mapping
 
 The React Native scaffold separates user journeys where the backend groups related business rules:

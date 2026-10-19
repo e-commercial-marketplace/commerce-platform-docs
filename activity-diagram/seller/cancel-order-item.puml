@@ -1,0 +1,69 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Order - Cancel Order Item
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Seller|
+start
+note right
+Precondition:
+Seller is logged in and the data
+belongs to the Seller.
+
+Postcondition:
+The order item is cancelled, the unsent
+quantity is restored exactly once, and the
+pending payment total is recalculated
+when needed.
+end note
+:Open the order-item cancellation function;
+|System|
+:Display the current order item and the allowed operations;
+|Seller|
+:Choose the information or the operation to process;
+:Send or confirm the request;
+|System|
+if (The system fails to process the request?) then (Yes)
+  :Return the system error;
+  |Seller|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the information, the processing conditions, and the permission to perform;
+if (The order item is already in a shipment or is not eligible for cancellation?) then (Yes)
+  :Return the not-cancellable notice;
+  |Seller|
+  :View the not-cancellable notice;
+  stop
+else (No)
+endif
+|System|
+:Cancel the order item;
+:Restore the unsent quantity exactly once;
+:Recalculate the order total and pending payment when needed;
+:Display the result;
+|Seller|
+:View the result;
+stop
+
+@enduml

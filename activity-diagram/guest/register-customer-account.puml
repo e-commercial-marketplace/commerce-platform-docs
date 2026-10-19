@@ -1,0 +1,76 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Auth - Register Customer Account
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Guest|
+start
+note right
+Precondition:
+Guest is not authenticated.
+
+Postcondition:
+The new account is created and stored
+with a protected password.
+end note
+:Open the registration function;
+|System|
+:Display the registration form;
+|Guest|
+repeat
+  :Enter display name, email, and password;
+  :Submit the registration request;
+  |System|
+  :Validate required fields and data format;
+  if (Registration data is valid?) then (No)
+    :Return the validation errors;
+    |Guest|
+    :View the validation errors;
+  else (Yes)
+    |System|
+    :Check the email is not used by another account;
+    if (Email is already used?) then (Yes)
+      :Return the email-in-use error;
+      |Guest|
+      :View the email-in-use error;
+    else (No)
+      |System|
+      :Create and store the account with a protected password;
+      if (Account storage fails?) then (Yes)
+        :Return the system error;
+        |Guest|
+        :View the system error;
+        stop
+      else (No)
+        |System|
+        :Return the registration result;
+        |Guest|
+        :View the registration result;
+        stop
+      endif
+    endif
+  endif
+  |Guest|
+  :Correct the registration information;
+repeat while (Register\nagain?) is (Yes) not (No)
+stop
+
+@enduml

@@ -74,6 +74,13 @@ theo `UNAUTHENTICATED USER`, `CUSTOMER`, `SELLER` và `ADMIN`. Dùng các sơ đ
 permissions và các quan hệ `<<include>> Login` và `<<extend>>` bắt buộc trước khi implement
 một endpoint hoặc screen.
 
+### 7. Sơ đồ hoạt động
+
+Mở [`activity-diagram/README.vi.md`](activity-diagram/README.vi.md) để xem mỗi use case trong
+`usecase-specification/` một sơ đồ hoạt động PlantUML, phân theo tác nhân. Dùng các sơ đồ này để đi
+từng bước của luồng — gồm validation, luồng thay thế và luồng ngoại lệ — trước khi implement hoặc
+review một endpoint hay screen.
+
 ## Ánh xạ feature frontend-backend
 
 React Native scaffold tách user journeys trong khi backend nhóm các business rules liên quan:

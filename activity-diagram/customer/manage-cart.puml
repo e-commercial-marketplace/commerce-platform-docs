@@ -1,0 +1,64 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Cart - Manage Cart
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+Customer is authenticated; the data belongs
+to the Customer.
+
+Postcondition:
+The cart changes only when the selected action
+completes successfully.
+end note
+:Open the cart management function;
+|System|
+:Display the managed information and the allowed actions;
+if (There is no data to display?) then (Yes)
+  :Return the no-data notice;
+  |Customer|
+  :View the no-data notice;
+  stop
+else (No)
+endif
+|Customer|
+:Select the action to perform;
+|System|
+:Open the corresponding function;
+if (Processing the request fails?) then (Yes)
+  :Return the system error;
+  |Customer|
+  :View the system error;
+  stop
+else (No)
+endif
+|Customer|
+:Perform the selected action;
+|System|
+:Display the result;
+|Customer|
+:View the result;
+stop
+
+@enduml

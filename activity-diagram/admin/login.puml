@@ -1,0 +1,67 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Auth - Admin Login
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Guest|
+start
+note right
+Precondition:
+Guest is not authenticated.
+
+Postcondition:
+The account is logged in when the
+credentials are correct.
+end note
+:Open the login function;
+|System|
+:Display the login form;
+|Guest|
+repeat
+  :Enter the email and password;
+  :Submit the login request;
+  |System|
+  :Check the login credentials;
+  if (The system fails to process the request?) then (Yes)
+    :Return the system error;
+    |Guest|
+    :View the error message;
+    stop
+  else (No)
+  endif
+  |System|
+  if (The email or password is incorrect?) then (Yes)
+    :Return the incorrect-credentials error;
+    |Guest|
+    :View the notice;
+  else (No)
+    |System|
+    :Log the account in and return the result;
+    |Guest|
+    :View the login result;
+    stop
+  endif
+  |Guest|
+  :Re-enter the login information;
+repeat while (Sign in\nagain?) is (Yes) not (No)
+stop
+
+@enduml

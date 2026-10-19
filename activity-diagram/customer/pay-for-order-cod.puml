@@ -1,0 +1,66 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Payment - Pay for Order (COD)
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+The Customer has placed a COD order and the
+payment has not been collected yet.
+
+Postcondition:
+The COD payment is completed after every
+mandatory delivery has been delivered.
+end note
+|Customer|
+repeat
+  :Receive the package and pay the COD amount on delivery;
+  |System|
+  :Record the delivery result of the package;
+  if (Recording the delivery result fails?) then (Yes)
+    :Return the system error;
+    |Customer|
+    :View the system error;
+    stop
+  else (No)
+  endif
+  |System|
+  :Check the mandatory deliveries of the order;
+  if (All mandatory deliveries have been delivered?) then (No)
+    :Keep the payment in the pending-collection state;
+  else (Yes)
+    |System|
+    :Complete the COD payment only when all mandatory deliveries have been delivered;
+    :Update the order status and the payment according to the delivery result;
+    :Display the payment status;
+    :Display the result;
+    |Customer|
+    :View the result;
+    stop
+  endif
+  |Customer|
+  :Continue receiving the remaining deliveries;
+repeat while (Another\ndelivery?) is (Yes) not (No)
+stop
+
+@enduml
