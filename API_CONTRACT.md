@@ -22,7 +22,9 @@ product variants, and review attachments are deferred from this contract's first
 
 ### 2.1 Base path and authentication
 
-All endpoints use the `/api` base path. Protected requests send:
+All business endpoints use the `/api/v1` base path. The version prefix is added centrally (`api.prefix`
+in `application.yml`, applied by `WebConfig`), so controllers declare routes without it; operational
+paths (actuator, OpenAPI, Swagger UI) stay unversioned. Protected requests send:
 
 ```http
 Authorization: Bearer <access-token>
@@ -80,7 +82,8 @@ Every rejected request uses the same shape:
 ```
 
 `fieldErrors` is optional and may be `null`. The backend must not expose framework binding details,
-stack traces, provider secrets, or SQL errors.
+stack traces, provider secrets, or SQL errors. A request to a route that does not exist returns
+`404 Not Found` with error code `RESOURCE_NOT_FOUND`.
 
 Initial error codes:
 
@@ -125,7 +128,7 @@ HTTP mapping for the first MVP:
 ### Register
 
 ```http
-POST /api/auth/register
+POST /api/v1/auth/register
 Content-Type: application/json
 ```
 
@@ -145,7 +148,7 @@ never create an `ADMIN` account.
 ### Login
 
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 Content-Type: application/json
 ```
 
@@ -202,7 +205,7 @@ wire response:
 ```
 
 ```http
-POST /api/auth/refresh
+POST /api/v1/auth/refresh
 Content-Type: application/json
 ```
 
@@ -218,7 +221,7 @@ the used refresh token. Refresh tokens expire per backend configuration and can 
 revocation storage (`refresh_tokens`, migration `V12`) is implemented in Phase 1.
 
 ```http
-POST /api/auth/logout
+POST /api/v1/auth/logout
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -238,7 +241,7 @@ implemented in Phase 1.
 ### List products
 
 ```http
-GET /api/products?q=headphone&categoryId=category-uuid&minPrice=10&maxPrice=500&minRating=4&sort=relevance&page=0&size=20
+GET /api/v1/products?q=headphone&categoryId=category-uuid&minPrice=10&maxPrice=500&minRating=4&sort=relevance&page=0&size=20
 ```
 
 All query parameters are optional:
@@ -297,7 +300,7 @@ The complete wire response is `ApiResponse<PageResponse<ProductSummaryDto>>`:
 ### Categories
 
 ```http
-GET /api/categories
+GET /api/v1/categories
 ```
 
 The complete wire response is `ApiResponse<List<CategorySummaryDto>>`:
@@ -320,7 +323,7 @@ The complete wire response is `ApiResponse<List<CategorySummaryDto>>`:
 ### Product detail
 
 ```http
-GET /api/products/{productId}
+GET /api/v1/products/{productId}
 ```
 
 The response uses the same product fields as the list response. The first MVP supports one
@@ -357,7 +360,7 @@ The actual wire response is `ApiResponse<ProductDto>`:
 All cart endpoints require a `CUSTOMER` token. The server resolves the cart owner from the token.
 
 ```http
-GET /api/cart
+GET /api/v1/cart
 ```
 
 ```json
@@ -388,7 +391,7 @@ GET /api/cart
 The complete wire response is `ApiResponse<CartDto>`.
 
 ```http
-POST /api/cart/items
+POST /api/v1/cart/items
 Content-Type: application/json
 ```
 
@@ -400,7 +403,7 @@ Content-Type: application/json
 ```
 
 ```http
-PATCH /api/cart/items/{cartItemId}
+PATCH /api/v1/cart/items/{cartItemId}
 Content-Type: application/json
 ```
 
@@ -411,7 +414,7 @@ Content-Type: application/json
 ```
 
 ```http
-DELETE /api/cart/items/{cartItemId}
+DELETE /api/v1/cart/items/{cartItemId}
 ```
 
 The backend validates product activity and stock. The frontend must not treat a displayed price as
@@ -429,7 +432,7 @@ The server reads the authenticated customer's cart, validates products and stock
 name/price, decreases or reserves stock, and clears purchased cart items in one transaction.
 
 ```http
-POST /api/orders
+POST /api/v1/orders
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -489,17 +492,17 @@ single-item checkout can be added later if the UX requires it.
 ### Customer orders
 
 ```http
-GET /api/orders?page=0&size=20
-GET /api/orders/{orderId}
+GET /api/v1/orders?page=0&size=20
+GET /api/v1/orders/{orderId}
 ```
 
 The backend returns only orders owned by the authenticated customer. Shipment outcomes remain
 seller-scoped inside the order detail; a mixed seller result must not be collapsed into one false
 order-level delivery status.
 
-`GET /api/orders` returns `ApiResponse<PageResponse<OrderSummaryDto>>`. Each summary
+`GET /api/v1/orders` returns `ApiResponse<PageResponse<OrderSummaryDto>>`. Each summary
 contains `id`, `status`, `paymentStatus`, `paymentMethod`, `createdAt`, and `totalAmount`.
-`GET /api/orders/{orderId}` returns `ApiResponse<OrderDto>`; it reuses the order-creation fields and adds
+`GET /api/v1/orders/{orderId}` returns `ApiResponse<OrderDto>`; it reuses the order-creation fields and adds
 `shipments: ShipmentDto[]`. The shipment DTO below is therefore part of the order detail, not a
 standalone top-level response.
 
@@ -538,11 +541,11 @@ Reviews are publicly readable. Only an authenticated customer who purchased and 
 may create one review for that product.
 
 ```http
-GET /api/products/{productId}/reviews?page=0&size=20
+GET /api/v1/products/{productId}/reviews?page=0&size=20
 ```
 
 ```http
-POST /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -589,7 +592,7 @@ require an authenticated customer; the backend resolves identity from the securi
 trusts a client-supplied user ID.
 
 ```http
-POST /api/ai/ask
+POST /api/v1/ai/ask
 Content-Type: application/json
 ```
 
