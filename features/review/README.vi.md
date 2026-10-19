@@ -19,8 +19,8 @@ MVP mobile đầu tiên hỗ trợ một đánh giá của customer đủ điề
 ## API dự kiến
 
 ```text
-POST /api/products/{productId}/reviews
-GET  /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
+GET  /api/v1/products/{productId}/reviews
 ```
 
 ## Phân quyền
