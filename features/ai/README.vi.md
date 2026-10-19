@@ -20,7 +20,7 @@ giới hạn mức sử dụng (rate-limited).
 
 ## Trách nhiệm
 
-- Cung cấp `POST /api/ai/ask` dưới dạng endpoint public (không yêu cầu đăng nhập cho dữ liệu công khai).
+- Cung cấp `POST /api/v1/ai/ask` dưới dạng endpoint public (không yêu cầu đăng nhập cho dữ liệu công khai).
 - Cấu hình `ChatClient` với provider DeepSeek từ cấu hình môi trường.
 - Trả về lỗi `AI_UNAVAILABLE` có kiểm soát khi provider thiếu hoặc lỗi.
 - Lưu trữ lịch sử `AiChatSession` và `AiMessage` cho khách hàng đã xác thực.
@@ -34,9 +34,9 @@ giới hạn mức sử dụng (rate-limited).
 ## API dự kiến
 
 ```text
-POST /api/ai/ask                         # public for catalog search; customer scope when authenticated
-GET  /api/ai/sessions                    # CUSTOMER only
-GET  /api/ai/sessions/{id}/messages      # CUSTOMER and own session only
+POST /api/v1/ai/ask                         # public for catalog search; customer scope when authenticated
+GET  /api/v1/ai/sessions                    # CUSTOMER only
+GET  /api/v1/ai/sessions/{id}/messages      # CUSTOMER and own session only
 ```
 
 ## Phân quyền
