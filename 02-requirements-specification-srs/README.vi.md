@@ -35,7 +35,7 @@ hiệu lực ngay cả khi màn hình seller/admin hoặc màn hình hậu mãi 
 | Payment | Ưu tiên COD; payment vẫn ở trạng thái pending cho đến khi tất cả các seller shipment bắt buộc đã delivered | Tích hợp request/callback VNPAY và thanh toán từng phần COD |
 | Voucher | Không có UI voucher hoặc áp dụng khi checkout trong lát cắt đầu tiên | Validate voucher và tiêu thụ an toàn đồng thời |
 | Review | Một review hợp lệ của customer gồm rating và comment | Thẻ review và tải ảnh lên |
-| AI | Tìm kiếm sản phẩm công khai/customer qua `POST /api/ai/ask`; request của guest có thể stateless | Các tool order/shipment, RAG, chat AI có lưu trữ, phân tích doanh thu seller |
+| AI | Tìm kiếm sản phẩm công khai/customer qua `POST /api/v1/ai/ask`; request của guest có thể stateless | Các tool order/shipment, RAG, chat AI có lưu trữ, phân tích doanh thu seller |
 | Giao hàng | Trạng thái shipment và quy tắc stock của backend là bắt buộc | UI theo dõi của Customer và màn hình shipment của Seller |
 | Chat giữa người với người | Không thuộc cột mốc mobile đầu tiên | Các conversation qua WebSocket |
 
@@ -75,9 +75,9 @@ thanh toán và quyền truy cập AI tool.
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/refresh
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
 ```
 
 ### 5.2 Catalog
@@ -94,14 +94,14 @@ POST /api/auth/refresh
 Các endpoint theo kế hoạch:
 
 ```text
-GET    /api/products
-GET    /api/products/{id}
-GET    /api/categories
+GET    /api/v1/products
+GET    /api/v1/products/{id}
+GET    /api/v1/categories
 
-POST   /api/seller/products
-PATCH  /api/seller/products/{id}
-DELETE /api/seller/products/{id}
-PATCH  /api/seller/products/{id}/stock
+POST   /api/v1/seller/products
+PATCH  /api/v1/seller/products/{id}
+DELETE /api/v1/seller/products/{id}
+PATCH  /api/v1/seller/products/{id}/stock
 ```
 
 ### 5.3 Cart
@@ -117,10 +117,10 @@ PATCH  /api/seller/products/{id}/stock
 Các endpoint theo kế hoạch:
 
 ```text
-GET    /api/cart
-POST   /api/cart/items
-PATCH  /api/cart/items/{id}
-DELETE /api/cart/items/{id}
+GET    /api/v1/cart
+POST   /api/v1/cart/items
+PATCH  /api/v1/cart/items/{id}
+DELETE /api/v1/cart/items/{id}
 ```
 
 ### 5.4 Checkout và order
@@ -143,9 +143,9 @@ DELETE /api/cart/items/{id}
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/orders
-GET  /api/orders
-GET  /api/orders/{id}
+POST /api/v1/orders
+GET  /api/v1/orders
+GET  /api/v1/orders/{id}
 ```
 
 ### 5.5 Xử lý order của seller
@@ -160,9 +160,9 @@ GET  /api/orders/{id}
 Các endpoint theo kế hoạch:
 
 ```text
-GET   /api/seller/order-items
-PATCH /api/seller/order-items/{id}/confirm
-PATCH /api/seller/order-items/{id}/cancel
+GET   /api/v1/seller/order-items
+PATCH /api/v1/seller/order-items/{id}/confirm
+PATCH /api/v1/seller/order-items/{id}/cancel
 ```
 
 ### 5.6 Payment
@@ -180,8 +180,8 @@ PATCH /api/seller/order-items/{id}/cancel
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/payments/vnpay/create
-POST /api/payments/vnpay/callback
+POST /api/v1/payments/vnpay/create
+POST /api/v1/payments/vnpay/callback
 ```
 
 ### 5.7 Shipment và giao hàng
@@ -205,10 +205,10 @@ POST /api/payments/vnpay/callback
 Các endpoint theo kế hoạch:
 
 ```text
-POST  /api/seller/shipments
-GET   /api/seller/shipments
-PATCH /api/seller/shipments/{id}/status
-GET   /api/orders/{orderId}/shipments
+POST  /api/v1/seller/shipments
+GET   /api/v1/seller/shipments
+PATCH /api/v1/seller/shipments/{id}/status
+GET   /api/v1/orders/{orderId}/shipments
 ```
 
 ### 5.8 Voucher
@@ -223,8 +223,8 @@ GET   /api/orders/{orderId}/shipments
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/orders/{id}/voucher
-GET  /api/vouchers/{code}/validate
+POST /api/v1/orders/{id}/voucher
+GET  /api/v1/vouchers/{code}/validate
 ```
 
 ### 5.9 Review
@@ -238,8 +238,8 @@ GET  /api/vouchers/{code}/validate
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/products/{productId}/reviews
-GET  /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
+GET  /api/v1/products/{productId}/reviews
 ```
 
 ### 5.10 Chat giữa người với người
@@ -256,8 +256,8 @@ Các giao diện theo kế hoạch:
 
 ```text
 WS  /ws/chat
-GET /api/conversations
-GET /api/conversations/{id}/messages
+GET /api/v1/conversations
+GET /api/v1/conversations/{id}/messages
 ```
 
 ### 5.11 Trợ lý AI
@@ -265,7 +265,7 @@ GET /api/conversations/{id}/messages
 | ID | Yêu cầu |
 |---|---|
 | FR-AI-01 | Trợ lý AI phải chạy bên trong Spring Boot monolith thông qua Spring AI. |
-| FR-AI-02 | Hệ thống phải cung cấp `POST /api/ai/ask`. |
+| FR-AI-02 | Hệ thống phải cung cấp `POST /api/v1/ai/ask`. |
 | FR-AI-03 | Bản triển khai AI đầu tiên phải sử dụng các tool chỉ đọc (read-only tool). |
 | FR-AI-04 | Các AI tool được bảo vệ phải xác định authenticated customer từ Spring Security context; request của guest chỉ giới hạn ở dữ liệu catalog công khai. |
 | FR-AI-05 | Các AI tool phải gọi các application service hiện có thay vì bỏ qua chúng bằng truy cập repository trực tiếp, trừ khi có lý do chính đáng. |
@@ -279,9 +279,9 @@ GET /api/conversations/{id}/messages
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/ai/ask                         (public catalog search; CUSTOMER protected scope)
-GET  /api/ai/sessions                    (CUSTOMER only)
-GET  /api/ai/sessions/{id}/messages      (CUSTOMER and own session only)
+POST /api/v1/ai/ask                         (public catalog search; CUSTOMER protected scope)
+GET  /api/v1/ai/sessions                    (CUSTOMER only)
+GET  /api/v1/ai/sessions/{id}/messages      (CUSTOMER and own session only)
 ```
 
 ## 6. Quy tắc Nghiệp vụ và Bất biến Miền
