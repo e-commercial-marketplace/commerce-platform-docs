@@ -22,8 +22,8 @@ Lát cắt checkout đầu tiên triển khai COD. Mô hình `Payment` và các 
 ## API dự kiến
 
 ```text
-POST /api/payments/vnpay/create
-POST /api/payments/vnpay/callback
+POST /api/v1/payments/vnpay/create
+POST /api/v1/payments/vnpay/callback
 ```
 
 ## Phân quyền
