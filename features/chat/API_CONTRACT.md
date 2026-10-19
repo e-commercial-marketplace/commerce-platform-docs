@@ -9,15 +9,15 @@ Planned/confirmed surface:
 
 ```text
 WS  /ws/chat
-GET /api/conversations
-GET /api/conversations/{id}/messages
+GET /api/v1/conversations
+GET /api/v1/conversations/{id}/messages
 ```
 
 Predicted surface (not yet frozen; included for forward compatibility):
 
 ```text
-POST /api/conversations                     (Predicted)
-POST /api/conversations/{id}/messages       (Predicted)
+POST /api/v1/conversations                     (Predicted)
+POST /api/v1/conversations/{id}/messages       (Predicted)
 ```
 
 Human chat is deferred from the first mobile milestone and the first MVP wire contract (see SRS
@@ -50,7 +50,7 @@ Maps to: `FR-CHAT-01`, `FR-CHAT-03`, `FR-CHAT-05`.
 
 ---
 
-### GET /api/conversations
+### GET /api/v1/conversations
 
 List conversations owned by the caller.
 
@@ -97,7 +97,7 @@ Maps to: `FR-CHAT-01`, `FR-CHAT-02`.
 
 ---
 
-### GET /api/conversations/{id}/messages
+### GET /api/v1/conversations/{id}/messages
 
 Load persisted message history for one conversation (offline history loading).
 
@@ -156,7 +156,7 @@ Maps to: `FR-CHAT-01`, `FR-CHAT-02`, `FR-CHAT-05`.
 
 ---
 
-### POST /api/conversations — Predicted
+### POST /api/v1/conversations — Predicted
 
 Get-or-create a conversation for a customer/seller pair.
 
@@ -185,7 +185,7 @@ Request body (raw JSON):
 | `orderId` | Optional order context, else `null` |
 
 Success: `200 OK` (existing conversation) or `201 Created` (new conversation) with
-`ApiResponse<ConversationDto>` (same shape as `GET /api/conversations` element).
+`ApiResponse<ConversationDto>` (same shape as `GET /api/v1/conversations` element).
 
 Errors:
 
@@ -200,7 +200,7 @@ Maps to: `FR-CHAT-01` (Predicted creation path).
 
 ---
 
-### POST /api/conversations/{id}/messages — Predicted
+### POST /api/v1/conversations/{id}/messages — Predicted
 
 REST fallback for sending a message (used when the WebSocket is unavailable; retry path).
 
@@ -213,7 +213,7 @@ REST fallback for sending a message (used when the WebSocket is unavailable; ret
   same key return the original message rather than creating a duplicate (`FR-CHAT-04`).
 
 ```http
-POST /api/conversations/{id}/messages
+POST /api/v1/conversations/{id}/messages
 Authorization: Bearer <access-token>
 Content-Type: application/json
 Idempotency-Key: client-generated-key
