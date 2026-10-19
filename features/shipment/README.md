@@ -21,10 +21,10 @@ flow. Customer tracking and Seller shipment-management screens are deferred from
 ## Planned API
 
 ```text
-POST  /api/seller/shipments
-GET   /api/seller/shipments
-PATCH /api/seller/shipments/{id}/status
-GET   /api/orders/{orderId}/shipments
+POST  /api/v1/seller/shipments
+GET   /api/v1/seller/shipments
+PATCH /api/v1/seller/shipments/{id}/status
+GET   /api/v1/orders/{orderId}/shipments
 ```
 
 ## Permissions
