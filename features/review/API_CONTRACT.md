@@ -8,8 +8,8 @@ product reviews.
 Planned surface is exactly 2 endpoints:
 
 ```text
-POST /api/products/{productId}/reviews
-GET  /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
+GET  /api/v1/products/{productId}/reviews
 ```
 
 MVP boundary: one eligible customer review containing `rating` and `comment` only. Review tags and
@@ -28,7 +28,7 @@ Feature source: `features/review/README.md`. No field outside that README is int
 
 ---
 
-### POST /api/products/{productId}/reviews
+### POST /api/v1/products/{productId}/reviews
 
 Create one review for a product.
 
@@ -88,7 +88,7 @@ Maps to: `FR-REV-01`, `FR-REV-02`, `FR-REV-03`.
 
 ---
 
-### GET /api/products/{productId}/reviews
+### GET /api/v1/products/{productId}/reviews
 
 List public reviews for a product.
 
