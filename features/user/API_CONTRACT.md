@@ -2,11 +2,11 @@
 
 Scope: admin user management and seller approval state. All endpoints below are **Predicted** (not in the first MVP root contract). All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2).
 
-Conventions: base path `/api`; identifiers are UUID strings; timestamps ISO-8601 UTC. User DTO fields follow the user feature model: `users{id, email, name (V1 column full_name), role, sellerStatus, enabled, createdAt, updatedAt}`. `passwordHash` is never returned. `sellerStatus` (`PENDING`, `APPROVED`, `REJECTED`, `SUSPENDED`) is non-null only when `role = SELLER`; it is `null` for `CUSTOMER` and `ADMIN`.
+Conventions: base path `/api/v1`; identifiers are UUID strings; timestamps ISO-8601 UTC. User DTO fields follow the user feature model: `users{id, email, name (V1 column full_name), role, sellerStatus, enabled, createdAt, updatedAt}`. `passwordHash` is never returned. `sellerStatus` (`PENDING`, `APPROVED`, `REJECTED`, `SUSPENDED`) is non-null only when `role = SELLER`; it is `null` for `CUSTOMER` and `ADMIN`.
 
 State rule: seller onboarding is `PENDING -> APPROVED` (approve), `PENDING -> REJECTED` is a possible rejection path, and an approved seller may move to `SUSPENDED`. Only `APPROVED` sellers may use seller-authorized operations.
 
-### GET /api/admin/users
+### GET /api/v1/admin/users
 
 Status: Predicted.
 
@@ -52,7 +52,7 @@ Status: Predicted.
 | `FORBIDDEN` | 403 | Authenticated actor is not `ADMIN` |
 | `VALIDATION_ERROR` | 400 | Invalid `page`, `size`, or `role` value |
 
-### GET /api/admin/users/{id}
+### GET /api/v1/admin/users/{id}
 
 Status: Predicted.
 
@@ -82,7 +82,7 @@ Status: Predicted.
 | `FORBIDDEN` | 403 | Not `ADMIN` |
 | `RESOURCE_NOT_FOUND` | 404 | No user with `id` |
 
-### POST /api/admin/users
+### POST /api/v1/admin/users
 
 Status: Predicted.
 
@@ -110,7 +110,7 @@ Status: Predicted.
 | `FORBIDDEN` | 403 | Not `ADMIN` |
 | `VALIDATION_ERROR` | 400 | Invalid email/password/name/role; duplicate email; `sellerStatus` set for non-seller |
 
-### PATCH /api/admin/users/{id}
+### PATCH /api/v1/admin/users/{id}
 
 Status: Predicted.
 
@@ -138,7 +138,7 @@ Status: Predicted.
 | `VALIDATION_ERROR` | 400 | Invalid role/status transition (e.g. non-null `sellerStatus` for non-seller) |
 | `RESOURCE_NOT_FOUND` | 404 | No user with `id` |
 
-### DELETE /api/admin/users/{id}
+### DELETE /api/v1/admin/users/{id}
 
 Status: Predicted.
 
@@ -154,7 +154,7 @@ Status: Predicted.
 | `FORBIDDEN` | 403 | Not `ADMIN` |
 | `RESOURCE_NOT_FOUND` | 404 | No user with `id` |
 
-### PATCH /api/admin/sellers/{id}/approve
+### PATCH /api/v1/admin/sellers/{id}/approve
 
 Status: Predicted.
 
@@ -172,7 +172,7 @@ Status: Predicted.
 | `RESOURCE_NOT_FOUND` | 404 | No seller user with `id` |
 | `VALIDATION_ERROR` | 400 | Target is not a `SELLER`, or current `sellerStatus` is not `PENDING` |
 
-### PATCH /api/admin/sellers/{id}/suspend
+### PATCH /api/v1/admin/sellers/{id}/suspend
 
 Status: Predicted.
 
