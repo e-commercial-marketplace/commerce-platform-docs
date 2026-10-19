@@ -5,7 +5,7 @@
 Covers customer voucher validation/application and platform voucher
 administration. This file defines only voucher-scoped endpoints.
 
-Common conventions — base path `/api`, `ApiResponse<T>` envelope, UUID
+Common conventions — base path `/api/v1`, `ApiResponse<T>` envelope, UUID
 identifiers, ISO-8601 UTC timestamps, money as VND decimal strings, zero-based
 pagination, and shared error codes/HTTP mapping — are defined in
 `..\..\API_CONTRACT.md` (§2) and are not repeated here.
@@ -21,7 +21,7 @@ the first MVP).
 
 ## 2. Customer endpoints
 
-### GET /api/vouchers/{code}/validate — Predicted
+### GET /api/v1/vouchers/{code}/validate — Predicted
 
 Validate a voucher code without applying it.
 Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
@@ -59,7 +59,7 @@ Errors (common envelope):
 
 Maps to FR-VCH-02, FR-VCH-03.
 
-### POST /api/orders/{id}/voucher — Predicted
+### POST /api/v1/orders/{id}/voucher — Predicted
 
 Apply one voucher to the customer's own order.
 Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
@@ -132,11 +132,11 @@ Maps to FR-VCH-01, FR-VCH-02, FR-VCH-03, FR-VCH-04.
 
 ## 3. Admin endpoints — Predicted
 
-Prefix: `/api/admin/vouchers`. Actor: `ADMIN`
+Prefix: `/api/v1/admin/vouchers`. Actor: `ADMIN`
 (`Authorization: Bearer <access-token>` required) for all four endpoints.
 `FORBIDDEN` (`403`) when the caller is not `ADMIN`.
 
-### GET /api/admin/vouchers — Predicted
+### GET /api/v1/admin/vouchers — Predicted
 
 List platform vouchers (paginated). Query: `page` (default `0`), `size`
 (default `20`).
@@ -158,7 +158,7 @@ Success: `200 OK`, `ApiResponse<PageResponse<VoucherDto>>`. Item `data` shape:
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`).
 
-### POST /api/admin/vouchers — Predicted
+### POST /api/v1/admin/vouchers — Predicted
 
 Create a platform voucher.
 
@@ -183,7 +183,7 @@ Success: `201 Created`, `ApiResponse<VoucherDto>` (shape above).
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
 `VALIDATION_ERROR` (`400`) for constraint violations or duplicate `code`.
 
-### PATCH /api/admin/vouchers/{id} — Predicted
+### PATCH /api/v1/admin/vouchers/{id} — Predicted
 
 Update a platform voucher (`{id}`: voucher UUID).
 
@@ -209,7 +209,7 @@ Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
 `RESOURCE_NOT_FOUND` (`404`) for unknown `{id}`; `VALIDATION_ERROR` (`400`)
 for constraint violations.
 
-### DELETE /api/admin/vouchers/{id} — Predicted
+### DELETE /api/v1/admin/vouchers/{id} — Predicted
 
 Expire a platform voucher (`{id}`: voucher UUID). This is an expiry operation,
 not a physical delete: it sets `validTo = now` so in-flight validation and the
