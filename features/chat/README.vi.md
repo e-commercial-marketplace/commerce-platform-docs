@@ -17,8 +17,8 @@ Sở hữu hội thoại customer/seller, tin nhắn lưu trữ, cập nhật th
 
 ```text
 WS  /ws/chat
-GET /api/conversations
-GET /api/conversations/{id}/messages
+GET /api/v1/conversations
+GET /api/v1/conversations/{id}/messages
 ```
 
 ## Phân quyền
