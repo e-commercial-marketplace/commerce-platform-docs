@@ -15,13 +15,13 @@ Sở hữu danh mục (category), sản phẩm, khả năng hiển thị sản p
 ## API dự kiến
 
 ```text
-GET    /api/products
-GET    /api/products/{id}
-GET    /api/categories
-POST   /api/seller/products
-PATCH  /api/seller/products/{id}
-DELETE /api/seller/products/{id}
-PATCH  /api/seller/products/{id}/stock
+GET    /api/v1/products
+GET    /api/v1/products/{id}
+GET    /api/v1/categories
+POST   /api/v1/seller/products
+PATCH  /api/v1/seller/products/{id}
+DELETE /api/v1/seller/products/{id}
+PATCH  /api/v1/seller/products/{id}/stock
 ```
 
 ## Phân quyền
