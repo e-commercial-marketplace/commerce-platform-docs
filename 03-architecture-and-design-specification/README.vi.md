@@ -309,24 +309,29 @@ xử lý idempotent.
 Các nhóm REST theo kế hoạch là:
 
 ```text
-/api/auth
-/api/products
-/api/categories
-/api/seller/products
-/api/cart
-/api/orders
-/api/seller/order-items
-/api/vouchers
-/api/payments/vnpay
-/api/seller/shipments
-/api/orders/{orderId}/shipments
-/api/products/{productId}/reviews
-/api/conversations
-/api/ai
+/api/v1/auth
+/api/v1/products
+/api/v1/categories
+/api/v1/seller/products
+/api/v1/cart
+/api/v1/orders
+/api/v1/seller/order-items
+/api/v1/vouchers
+/api/v1/payments/vnpay
+/api/v1/seller/shipments
+/api/v1/orders/{orderId}/shipments
+/api/v1/products/{productId}/reviews
+/api/v1/conversations
+/api/v1/ai
 ```
 
 Controller thể hiện các mối quan tâm vận chuyển (transport concern). Service thực thi business rule, quyền sở hữu, ranh giới transaction
 và các lệnh gọi tới các feature service khác.
+
+Prefix `/api/v1` được thêm tập trung cho `@RestController` của ứng dụng (`api.prefix` trong
+`application.yml`, áp dụng bởi `WebConfig`) nên controller khai báo route không kèm prefix. Actuator,
+OpenAPI/Swagger UI và `/error` giữ đường dẫn không version, còn security matcher trong
+`SecurityConfig` dùng URL đã có prefix.
 
 ### 8.2 Ranh giới chat giữa người với người
 
