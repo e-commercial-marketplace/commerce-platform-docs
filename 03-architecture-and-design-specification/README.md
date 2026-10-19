@@ -306,27 +306,32 @@ idempotent processing.
 
 ### 8.1 REST boundaries
 
-The planned REST groups are:
+All planned REST groups are versioned with the same base prefix:
 
 ```text
-/api/auth
-/api/products
-/api/categories
-/api/seller/products
-/api/cart
-/api/orders
-/api/seller/order-items
-/api/vouchers
-/api/payments/vnpay
-/api/seller/shipments
-/api/orders/{orderId}/shipments
-/api/products/{productId}/reviews
-/api/conversations
-/api/ai
+/api/v1/auth
+/api/v1/products
+/api/v1/categories
+/api/v1/seller/products
+/api/v1/cart
+/api/v1/orders
+/api/v1/seller/order-items
+/api/v1/vouchers
+/api/v1/payments/vnpay
+/api/v1/seller/shipments
+/api/v1/orders/{orderId}/shipments
+/api/v1/products/{productId}/reviews
+/api/v1/conversations
+/api/v1/ai
 ```
 
 Controllers expose transport concerns. Services enforce business rules, ownership, transaction
 boundaries, and calls to other feature services.
+
+The `/api/v1` prefix is added centrally for `@RestController`s of this application (`api.prefix` in
+`application.yml`, applied by `WebConfig`), so controllers declare routes without it. Actuator,
+OpenAPI/Swagger UI, and `/error` keep their unversioned paths, and the security matchers in
+`SecurityConfig` use the prefixed URLs.
 
 ### 8.2 Human chat boundary
 
