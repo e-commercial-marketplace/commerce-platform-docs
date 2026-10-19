@@ -5,7 +5,7 @@
 Covers seller shipment creation/management and customer shipment lookup. This
 file defines only shipment-scoped endpoints.
 
-Common conventions — base path `/api`, `ApiResponse<T>` envelope, UUID
+Common conventions — base path `/api/v1`, `ApiResponse<T>` envelope, UUID
 identifiers, ISO-8601 UTC timestamps, VND decimal strings, zero-based
 pagination, and shared error codes/HTTP mapping — are defined in
 `..\..\API_CONTRACT.md` (§2) and are not repeated here. The nested shipment
@@ -24,7 +24,7 @@ first MVP).
 
 ## 2. Endpoints
 
-### POST /api/seller/shipments — Predicted
+### POST /api/v1/seller/shipments — Predicted
 
 Create a shipment from the seller's own confirmed order items.
 Actor: `SELLER` (`Authorization: Bearer <access-token>` required).
@@ -88,7 +88,7 @@ Errors:
 
 Maps to FR-SHIP-01, FR-SHIP-02, FR-SHIP-03, FR-SHIP-04, FR-SHIP-13.
 
-### GET /api/seller/shipments — Predicted
+### GET /api/v1/seller/shipments — Predicted
 
 List shipments owned by the authenticated seller.
 Actor: `SELLER`.
@@ -97,14 +97,14 @@ Query (all optional): `orderId` (UUID), `status` (`ShipmentStatus` value),
 `page` (default `0`), `size` (default `20`).
 
 Success: `200 OK`, `ApiResponse<PageResponse<ShipmentDto>>` (item shape as in
-`POST /api/seller/shipments`).
+`POST /api/v1/seller/shipments`).
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`) when caller is
 not `SELLER`; `VALIDATION_ERROR` (`400`) for an unknown `status` value.
 
 Maps to FR-SHIP-02, FR-SHIP-09.
 
-### PATCH /api/seller/shipments/{id}/status — Predicted
+### PATCH /api/v1/seller/shipments/{id}/status — Predicted
 
 Advance one seller-owned shipment along the allowed state machine.
 Actor: `SELLER`.
@@ -160,7 +160,7 @@ Errors:
 Maps to FR-SHIP-05, FR-SHIP-06, FR-SHIP-07, FR-SHIP-09, FR-SHIP-10, FR-SHIP-11,
 FR-SHIP-12.
 
-### GET /api/orders/{orderId}/shipments — Predicted
+### GET /api/v1/orders/{orderId}/shipments — Predicted
 
 List shipments for one order owned by the authenticated customer.
 Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
