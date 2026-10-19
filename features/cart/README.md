@@ -15,10 +15,10 @@ Owns the customer's current shopping cart before checkout.
 ## Planned API
 
 ```text
-GET    /api/cart
-POST   /api/cart/items
-PATCH  /api/cart/items/{id}
-DELETE /api/cart/items/{id}
+GET    /api/v1/cart
+POST   /api/v1/cart/items
+PATCH  /api/v1/cart/items/{id}
+DELETE /api/v1/cart/items/{id}
 ```
 
 ## Permissions
