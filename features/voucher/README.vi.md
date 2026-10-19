@@ -19,8 +19,8 @@ Quản trị voucher và áp dụng voucher của customer được hoãn khỏi
 ## API dự kiến
 
 ```text
-POST /api/orders/{id}/voucher
-GET  /api/vouchers/{code}/validate
+POST /api/v1/orders/{id}/voucher
+GET  /api/v1/vouchers/{code}/validate
 ```
 
 ## Phân quyền
