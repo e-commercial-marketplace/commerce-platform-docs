@@ -8,9 +8,9 @@ calling, and persisted AI chat history for authenticated customers.
 Planned surface:
 
 ```text
-POST /api/ai/ask
-GET  /api/ai/sessions
-GET  /api/ai/sessions/{id}/messages
+POST /api/v1/ai/ask
+GET  /api/v1/ai/sessions
+GET  /api/v1/ai/sessions/{id}/messages
 ```
 
 Authorization boundary (hard rules):
@@ -29,11 +29,11 @@ string), and shared error codes/HTTP mapping are defined in
 endpoint-specific behavior.
 
 Feature source: `features/ai/README.md`. No field outside that README (plus the root-contract
-`AiProductSearchResponse` shape for `POST /api/ai/ask`) is introduced below.
+`AiProductSearchResponse` shape for `POST /api/v1/ai/ask`) is introduced below.
 
 ---
 
-### POST /api/ai/ask
+### POST /api/v1/ai/ask
 
 Map a natural-language request to a constrained catalog query and return a grounded answer.
 
@@ -102,7 +102,7 @@ Maps to: `FR-AI-01`, `FR-AI-02`, `FR-AI-03`, `FR-AI-04`, `FR-AI-06`, `NFR-AI-01`
 
 ---
 
-### GET /api/ai/sessions
+### GET /api/v1/ai/sessions
 
 List persisted AI sessions owned by the caller.
 
@@ -138,7 +138,7 @@ Maps to: `FR-AI-10`, `NFR-AI-01`.
 
 ---
 
-### GET /api/ai/sessions/{id}/messages
+### GET /api/v1/ai/sessions/{id}/messages
 
 Load persisted turns for one caller-owned AI session.
 
