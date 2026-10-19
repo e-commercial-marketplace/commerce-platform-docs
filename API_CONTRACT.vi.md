@@ -22,7 +22,9 @@ product variants và review attachments được hoãn khỏi implementation đ�
 
 ### 2.1 Base path và authentication
 
-Mọi endpoints dùng base path `/api`. Các protected requests gửi:
+Mọi endpoint nghiệp vụ dùng base path `/api/v1`. Prefix version được thêm tập trung (`api.prefix`
+trong `application.yml`, áp dụng bởi `WebConfig`) nên controller khai báo route không kèm prefix; các
+đường dẫn vận hành (actuator, OpenAPI, Swagger UI) không gắn version. Các protected requests gửi:
 
 ```http
 Authorization: Bearer <access-token>
@@ -80,7 +82,8 @@ Mọi rejected request dùng cùng shape:
 ```
 
 `fieldErrors` là optional và có thể `null`. Backend không được expose framework binding details,
-stack traces, provider secrets hoặc SQL errors.
+stack traces, provider secrets hoặc SQL errors. Request tới route không tồn tại trả về `404 Not Found`
+với error code `RESOURCE_NOT_FOUND`.
 
 Các error codes ban đầu:
 
@@ -125,7 +128,7 @@ INTERNAL_ERROR
 ### Đăng ký
 
 ```http
-POST /api/auth/register
+POST /api/v1/auth/register
 Content-Type: application/json
 ```
 
@@ -145,7 +148,7 @@ Content-Type: application/json
 ### Đăng nhập
 
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 Content-Type: application/json
 ```
 
@@ -200,7 +203,7 @@ Code block sau chỉ hiển thị object `data` bên trong auth response; không
 ```
 
 ```http
-POST /api/auth/refresh
+POST /api/v1/auth/refresh
 Content-Type: application/json
 ```
 
@@ -216,7 +219,7 @@ khi hết hạn. Client phải dùng cặp token do refresh trả về. Lưu tr�
 (`refresh_tokens`, migration `V12`) được implement trong Phase 1.
 
 ```http
-POST /api/auth/logout
+POST /api/v1/auth/logout
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -235,7 +238,7 @@ Logout thu hồi refresh token đã cho. Sau logout, token bị thu hồi dùng 
 ### Liệt kê products
 
 ```http
-GET /api/products?q=headphone&categoryId=category-uuid&minPrice=10&maxPrice=500&minRating=4&sort=relevance&page=0&size=20
+GET /api/v1/products?q=headphone&categoryId=category-uuid&minPrice=10&maxPrice=500&minRating=4&sort=relevance&page=0&size=20
 ```
 
 Mọi query parameters đều optional:
@@ -294,7 +297,7 @@ Wire response đầy đủ là `ApiResponse<PageResponse<ProductSummaryDto>>`:
 ### Categories
 
 ```http
-GET /api/categories
+GET /api/v1/categories
 ```
 
 Wire response đầy đủ là `ApiResponse<List<CategorySummaryDto>>`:
@@ -317,7 +320,7 @@ Wire response đầy đủ là `ApiResponse<List<CategorySummaryDto>>`:
 ### Chi tiết product
 
 ```http
-GET /api/products/{productId}
+GET /api/v1/products/{productId}
 ```
 
 Response dùng cùng product fields như list response. MVP đầu tiên hỗ trợ một
@@ -354,7 +357,7 @@ Wire response đầy đủ là `ApiResponse<ProductDto>`:
 Mọi cart endpoints yêu cầu token `CUSTOMER`. Server suy ra cart owner từ token.
 
 ```http
-GET /api/cart
+GET /api/v1/cart
 ```
 
 ```json
@@ -385,7 +388,7 @@ GET /api/cart
 Wire response đầy đủ là `ApiResponse<CartDto>`.
 
 ```http
-POST /api/cart/items
+POST /api/v1/cart/items
 Content-Type: application/json
 ```
 
@@ -397,7 +400,7 @@ Content-Type: application/json
 ```
 
 ```http
-PATCH /api/cart/items/{cartItemId}
+PATCH /api/v1/cart/items/{cartItemId}
 Content-Type: application/json
 ```
 
@@ -408,7 +411,7 @@ Content-Type: application/json
 ```
 
 ```http
-DELETE /api/cart/items/{cartItemId}
+DELETE /api/v1/cart/items/{cartItemId}
 ```
 
 Backend validate product activity và stock. Frontend không được coi displayed price là
@@ -426,7 +429,7 @@ Server đọc cart của authenticated customer, validate products và stock, sn
 name/price, giảm hoặc giữ stock, và xóa purchased cart items trong một transaction.
 
 ```http
-POST /api/orders
+POST /api/v1/orders
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -486,17 +489,17 @@ single-item checkout riêng có thể bổ sung sau nếu UX yêu cầu.
 ### Orders của customer
 
 ```http
-GET /api/orders?page=0&size=20
-GET /api/orders/{orderId}
+GET /api/v1/orders?page=0&size=20
+GET /api/v1/orders/{orderId}
 ```
 
 Backend chỉ trả về orders thuộc sở hữu của authenticated customer. Shipment outcomes vẫn
 seller-scoped bên trong order detail; một mixed seller result không được collapsed thành một false
 order-level delivery status.
 
-`GET /api/orders` trả về `ApiResponse<PageResponse<OrderSummaryDto>>`. Mỗi summary
+`GET /api/v1/orders` trả về `ApiResponse<PageResponse<OrderSummaryDto>>`. Mỗi summary
 chứa `id`, `status`, `paymentStatus`, `paymentMethod`, `createdAt` và `totalAmount`.
-`GET /api/orders/{orderId}` trả về `ApiResponse<OrderDto>`; nó tái dùng các order-creation fields và thêm
+`GET /api/v1/orders/{orderId}` trả về `ApiResponse<OrderDto>`; nó tái dùng các order-creation fields và thêm
 `shipments: ShipmentDto[]`. Shipment DTO dưới đây do đó là một phần của order detail, không phải
 standalone top-level response.
 
@@ -535,11 +538,11 @@ Reviews publicly readable. Chỉ authenticated customer đã purchased và recei
 mới được tạo một review cho product đó.
 
 ```http
-GET /api/products/{productId}/reviews?page=0&size=20
+GET /api/v1/products/{productId}/reviews?page=0&size=20
 ```
 
 ```http
-POST /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
 Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
@@ -587,7 +590,7 @@ khoản yêu cầu customer đã xác thực; backend phân giải định danh 
 tin user ID do client gửi.
 
 ```http
-POST /api/ai/ask
+POST /api/v1/ai/ask
 Content-Type: application/json
 ```
 
