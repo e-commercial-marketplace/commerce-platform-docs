@@ -21,7 +21,7 @@ contract: VNPAY request/callback payloads are not frozen for the first MVP).
 
 ## 2. Endpoints
 
-### POST /api/payments/vnpay/create — Predicted
+### POST /api/v1/payments/vnpay/create — Predicted
 
 Create a `PENDING` VNPAY payment attempt for the customer's own payable order
 and return redirect parameters for the provider.
@@ -84,7 +84,7 @@ Errors (common envelope):
 
 Maps to FR-PAY-01, FR-PAY-03, FR-PAY-06, FR-PAY-07.
 
-### POST /api/payments/vnpay/callback — Predicted
+### POST /api/v1/payments/vnpay/callback — Predicted
 
 Handle the VNPAY server/redirect callback. Actor: `PUBLIC` (no bearer token;
 called by the payment provider / return redirect).
@@ -126,7 +126,7 @@ Behavior (FR-PAY-03 – FR-PAY-07):
   `FAILED` only.
 - A `FAILED` attempt MUST NOT destroy/modify the order; the order stays payable
   and a retry creates another `Payment` record via
-  `POST /api/payments/vnpay/create`.
+  `POST /api/v1/payments/vnpay/create`.
 
 Success: `200 OK`, `ApiResponse<PaymentDto>`. `data` payload:
 
