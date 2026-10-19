@@ -102,6 +102,7 @@ hiện tại. Frontend vẫn là khung sườn (scaffold), vì vậy version th�
 | Migration cơ sở dữ liệu | Flyway | Current backend dependency |
 | Image container backend | `backend/Dockerfile` đa tầng (stage build Maven + runtime Temurin 21 JRE, user không phải root) | Current scaffold |
 | Điều phối cục bộ | Docker Compose: PostgreSQL/pgvector + backend API, chờ DB healthy | Current scaffold |
+| Cấu hình | Một file runtime `application.yml`; giá trị DB và JWT đọc từ biến môi trường (import `.env` tùy chọn); REST controller được thêm prefix tập trung `/api/v1` | Current scaffold |
 | Xác thực | Spring Security with JJWT 0.12.6 | Current backend dependency; flow is phased |
 | Chat giữa người với người | Spring WebSocket and mobile WebSocket client | Backend dependency; feature phased |
 | AI | Spring AI with an external LLM provider | Planned backend phase |
