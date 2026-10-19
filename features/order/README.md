@@ -29,12 +29,12 @@ management screens are deferred.
 ## Planned API
 
 ```text
-POST  /api/orders
-GET   /api/orders
-GET   /api/orders/{id}
-GET   /api/seller/order-items
-PATCH /api/seller/order-items/{id}/confirm
-PATCH /api/seller/order-items/{id}/cancel
+POST  /api/v1/orders
+GET   /api/v1/orders
+GET   /api/v1/orders/{id}
+GET   /api/v1/seller/order-items
+PATCH /api/v1/seller/order-items/{id}/confirm
+PATCH /api/v1/seller/order-items/{id}/cancel
 ```
 
 ## Permissions
