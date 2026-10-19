@@ -79,8 +79,9 @@ React Native (Expo)
 
 | Layer | Technology | Status |
 |---|---|---|
-| Backend runtime | Spring Boot 3.3.5, Java 21, Maven 3.9+ | Current scaffold |
-| Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.5.0, Actuator | Current scaffold |
+| Backend runtime | Spring Boot 3.4.4, Java 21, Maven 3.9+ | Current scaffold |
+| Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
+| Backend mapping | MapStruct 1.6.3 with Lombok binding for entity/DTO mapping | Current backend dependency |
 | Backend persistence | Spring Data JPA/Hibernate, PostgreSQL 16, Flyway | Current scaffold |
 | Backend security | Spring Security and JJWT 0.12.6 | Current dependency; flow is phased |
 | Backend realtime | Spring WebSocket | Dependency present; human chat is phased |

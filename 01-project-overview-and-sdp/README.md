@@ -92,8 +92,9 @@ yet.
 
 | Area | Technology or approach | Status |
 |---|---|---|
-| Backend runtime | Spring Boot 3.3.5, Java 21, Maven 3.9+ | Current scaffold |
-| Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.5.0, Actuator | Current scaffold |
+| Backend runtime | Spring Boot 3.4.4, Java 21, Maven 3.9+ | Current scaffold |
+| Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
+| Backend mapping | MapStruct 1.6.3 with Lombok binding for entity/DTO mapping | Current backend dependency |
 | Mobile runtime | React Native with Expo | Scaffold; version TBD |
 | HTTP client | Axios | Planned frontend dependency |
 | Server state | TanStack Query | Planned frontend dependency |

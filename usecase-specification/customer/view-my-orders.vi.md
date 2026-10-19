@@ -6,7 +6,7 @@
 <tr><td colspan="2"><b>Tác nhân chính:</b> Customer</td></tr>
 <tr><td colspan="2"><b>Tác nhân phụ:</b> Không có.</td></tr>
 <tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Customer đã đăng nhập; dữ liệu thuộc về Customer.</li></ul></td></tr>
-<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Đơn hàng không thay đổi khi được xem.</li></ul></td></tr>
+<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Không</li></ul></td></tr>
 <tr><td colspan="2"><b>Luồng chính:</b></td></tr>
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
 <tr><td>1. Mở chức năng xem đơn hàng của tôi.</td><td></td></tr>

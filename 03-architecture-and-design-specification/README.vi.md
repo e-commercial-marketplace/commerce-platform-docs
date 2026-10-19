@@ -79,8 +79,9 @@ React Native (Expo)
 
 | Lớp | Công nghệ | Trạng thái |
 |---|---|---|
-| Runtime backend | Spring Boot 3.3.5, Java 21, Maven 3.9+ | Current scaffold |
-| API backend | Spring Web MVC, Validation, Springdoc OpenAPI 2.5.0, Actuator | Current scaffold |
+| Runtime backend | Spring Boot 3.4.4, Java 21, Maven 3.9+ | Current scaffold |
+| API backend | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
+| Mapping backend | MapStruct 1.6.3 với Lombok binding để ánh xạ entity/DTO | Current backend dependency |
 | Persistence backend | Spring Data JPA/Hibernate, PostgreSQL 16, Flyway | Current scaffold |
 | Bảo mật backend | Spring Security and JJWT 0.12.6 | Current dependency; flow is phased |
 | Realtime backend | Spring WebSocket | Dependency present; human chat is phased |

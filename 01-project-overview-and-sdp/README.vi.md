@@ -91,8 +91,9 @@ hiện tại. Frontend vẫn là khung sườn (scaffold), vì vậy version th�
 
 | Lĩnh vực | Công nghệ hoặc hướng tiếp cận | Trạng thái |
 |---|---|---|
-| Runtime backend | Spring Boot 3.3.5, Java 21, Maven 3.9+ | Current scaffold |
-| API backend | Spring Web MVC, Validation, Springdoc OpenAPI 2.5.0, Actuator | Current scaffold |
+| Runtime backend | Spring Boot 3.4.4, Java 21, Maven 3.9+ | Current scaffold |
+| API backend | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
+| Mapping backend | MapStruct 1.6.3 với Lombok binding để ánh xạ entity/DTO | Current backend dependency |
 | Runtime mobile | React Native with Expo | Scaffold; version TBD |
 | Client HTTP | Axios | Planned frontend dependency |
 | Trạng thái server (Server state) | TanStack Query | Planned frontend dependency |
