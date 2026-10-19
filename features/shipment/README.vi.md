@@ -20,10 +20,10 @@ Chuyển trạng thái shipment và quy tắc hoàn tồn kho vẫn là yêu c�
 ## API dự kiến
 
 ```text
-POST  /api/seller/shipments
-GET   /api/seller/shipments
-PATCH /api/seller/shipments/{id}/status
-GET   /api/orders/{orderId}/shipments
+POST  /api/v1/seller/shipments
+GET   /api/v1/seller/shipments
+PATCH /api/v1/seller/shipments/{id}/status
+GET   /api/v1/orders/{orderId}/shipments
 ```
 
 ## Phân quyền
