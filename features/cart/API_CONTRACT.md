@@ -2,11 +2,11 @@
 
 Scope: authenticated customer cart management before checkout. All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2 conventions, §5 cart).
 
-Conventions: base path `/api`; money as decimal string in `VND`. Cart items carry no price snapshot; checkout recalculates prices server-side. Rules: `(user, product)` is unique (POST on an existing product increments quantity), `quantity >= 1`, inactive products and insufficient stock are rejected.
+Conventions: base path `/api/v1`; money as decimal string in `VND`. Cart items carry no price snapshot; checkout recalculates prices server-side. Rules: `(user, product)` is unique (POST on an existing product increments quantity), `quantity >= 1`, inactive products and insufficient stock are rejected.
 
 ## Endpoints (Confirmed)
 
-### GET /api/cart
+### GET /api/v1/cart
 
 Status: Confirmed (root §5, SRS §5.3).
 
@@ -40,7 +40,7 @@ Status: Confirmed (root §5, SRS §5.3).
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
 | `FORBIDDEN` | 403 | Authenticated actor is not `CUSTOMER` |
 
-### POST /api/cart/items
+### POST /api/v1/cart/items
 
 Status: Confirmed (root §5, SRS §5.3).
 
@@ -68,7 +68,7 @@ Status: Confirmed (root §5, SRS §5.3).
 | `PRODUCT_INACTIVE` | 400 | Product is unlisted/soft-deleted (`active = false`) |
 | `INSUFFICIENT_STOCK` | 409 | Requested (combined) quantity exceeds `products.stock` |
 
-### PATCH /api/cart/items/{id}
+### PATCH /api/v1/cart/items/{id}
 
 Status: Confirmed (root §5, SRS §5.3).
 
@@ -95,7 +95,7 @@ Status: Confirmed (root §5, SRS §5.3).
 | `PRODUCT_INACTIVE` | 400 | Referenced product became inactive |
 | `INSUFFICIENT_STOCK` | 409 | Requested quantity exceeds current stock |
 
-### DELETE /api/cart/items/{id}
+### DELETE /api/v1/cart/items/{id}
 
 Status: Confirmed (root §5, SRS §5.3).
 
