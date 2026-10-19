@@ -2,9 +2,9 @@
 
 Scope: customer register/login/refresh entry points. All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2 conventions, §3 auth).
 
-Conventions: base path `/api`; money as decimal string in `VND`; timestamps ISO-8601 UTC; `expiresIn` is `900` seconds. Passwords are hashed with Spring Security `PasswordEncoder` and never stored or returned in plaintext (FR-AUTH-03).
+Conventions: base path `/api/v1`; money as decimal string in `VND`; timestamps ISO-8601 UTC; `expiresIn` is `900` seconds. Passwords are hashed with Spring Security `PasswordEncoder` and never stored or returned in plaintext (FR-AUTH-03).
 
-### POST /api/auth/register
+### POST /api/v1/auth/register
 
 Status: Confirmed (root §3, SRS §5.1).
 
@@ -55,7 +55,7 @@ Status: Confirmed (root §3, SRS §5.1).
 | `VALIDATION_ERROR` | 400 | Missing/invalid email, password, or name; duplicate email |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |
 
-### POST /api/auth/login
+### POST /api/v1/auth/login
 
 Status: Confirmed (root §3, SRS §5.1).
 
@@ -79,7 +79,7 @@ Status: Confirmed (root §3, SRS §5.1).
 | `AUTHENTICATION_REQUIRED` | 401 | Wrong email or password, disabled account (`users.enabled = false`) |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |
 
-### POST /api/auth/refresh
+### POST /api/v1/auth/refresh
 
 Status: Confirmed (root §3, SRS §5.1).
 
@@ -103,7 +103,7 @@ Status: Confirmed (root §3, SRS §5.1).
 | `AUTHENTICATION_REQUIRED` | 401 | Expired, revoked, or invalid refresh token |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |
 
-### POST /api/auth/logout
+### POST /api/v1/auth/logout
 
 Status: Planned — implement in Phase 1 (contract frozen here; `refresh_tokens` storage already designed in migration V12).
 
