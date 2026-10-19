@@ -5,7 +5,7 @@
 Covers customer checkout from cart and order lookup, plus seller order-item
 processing. This file defines only order-scoped endpoints.
 
-Common conventions — base path `/api`, `Authorization: Bearer <access-token>`,
+Common conventions — base path `/api/v1`, `Authorization: Bearer <access-token>`,
 UUID identifiers, ISO-8601 UTC timestamps, money as VND decimal strings,
 zero-based pagination, `ApiResponse<T>` envelope, and shared error codes/HTTP
 mapping — are defined in `..\..\API_CONTRACT.md` (§2) and are not repeated here.
@@ -20,7 +20,7 @@ Endpoints marked `Predicted` are planned beyond the first MVP checkout slice
 
 ## 2. Endpoints
 
-### POST /api/orders
+### POST /api/v1/orders
 
 Create an order transactionally from the authenticated customer's cart.
 Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
@@ -95,7 +95,7 @@ Errors (common envelope):
 Maps to FR-ORD-01, FR-ORD-02, FR-ORD-03, FR-ORD-04, FR-ORD-05, FR-ORD-06,
 FR-ORD-07, FR-ORD-08.
 
-### GET /api/orders
+### GET /api/v1/orders
 
 List orders owned by the authenticated customer.
 Actor: `CUSTOMER`.
@@ -127,13 +127,13 @@ Errors: `AUTHENTICATION_REQUIRED` (`401`).
 
 Maps to FR-ORD-09.
 
-### GET /api/orders/{id}
+### GET /api/v1/orders/{id}
 
 Get one order owned by the authenticated customer.
 Actor: `CUSTOMER`.
 
 - `{id}`: order UUID.
-- Returns `ApiResponse<OrderDto>` with the same shape as `POST /api/orders`.
+- Returns `ApiResponse<OrderDto>` with the same shape as `POST /api/v1/orders`.
 - Ownership: an order that does not exist **or** does not belong to the caller
   returns `RESOURCE_NOT_FOUND` (`404`); the backend must not distinguish
   "another customer's order" from "missing order".
@@ -147,7 +147,7 @@ Errors:
 
 Maps to FR-ORD-09.
 
-### GET /api/seller/order-items — Predicted
+### GET /api/v1/seller/order-items — Predicted
 
 Query order items owned by the authenticated seller.
 Actor: `SELLER` (`Authorization: Bearer <access-token>` required).
@@ -186,7 +186,7 @@ not `SELLER`; `VALIDATION_ERROR` (`400`) for an unknown `status` value.
 
 Maps to FR-FUL-01, FR-FUL-03.
 
-### PATCH /api/seller/order-items/{id}/confirm — Predicted
+### PATCH /api/v1/seller/order-items/{id}/confirm — Predicted
 
 Seller confirms one owned order item (`PENDING -> CONFIRMED`).
 Actor: `SELLER`.
@@ -205,7 +205,7 @@ Errors:
 
 Maps to FR-FUL-02, FR-FUL-03, FR-FUL-04.
 
-### PATCH /api/seller/order-items/{id}/cancel — Predicted
+### PATCH /api/v1/seller/order-items/{id}/cancel — Predicted
 
 Seller cancels one owned order item before shipment assignment.
 Actor: `SELLER`.
