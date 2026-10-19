@@ -35,7 +35,7 @@ authoritative even when the corresponding seller/admin or after-sales screen is 
 | Payment | COD first; payment remains pending until all required seller shipments are delivered | VNPAY request/callback integration and partial COD settlement |
 | Voucher | No voucher UI or checkout application in the first slice | Voucher validation and concurrency-safe consumption |
 | Review | One eligible customer review with rating and comment | Review tags and image uploads |
-| AI | Public/customer product search through `POST /api/ai/ask`; guest requests may be stateless | Order/shipment tools, RAG, persisted AI chat, seller revenue analysis |
+| AI | Public/customer product search through `POST /api/v1/ai/ask`; guest requests may be stateless | Order/shipment tools, RAG, persisted AI chat, seller revenue analysis |
 | Delivery | Backend shipment state and stock rules are required | Customer tracking UI and Seller shipment screens |
 | Human chat | Not part of the first mobile milestone | WebSocket conversations |
 
@@ -75,9 +75,9 @@ callbacks, and AI tool access.
 Planned endpoints:
 
 ```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/refresh
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
 ```
 
 ### 5.2 Catalog
@@ -94,14 +94,14 @@ POST /api/auth/refresh
 Planned endpoints:
 
 ```text
-GET    /api/products
-GET    /api/products/{id}
-GET    /api/categories
+GET    /api/v1/products
+GET    /api/v1/products/{id}
+GET    /api/v1/categories
 
-POST   /api/seller/products
-PATCH  /api/seller/products/{id}
-DELETE /api/seller/products/{id}
-PATCH  /api/seller/products/{id}/stock
+POST   /api/v1/seller/products
+PATCH  /api/v1/seller/products/{id}
+DELETE /api/v1/seller/products/{id}
+PATCH  /api/v1/seller/products/{id}/stock
 ```
 
 ### 5.3 Cart
@@ -117,10 +117,10 @@ PATCH  /api/seller/products/{id}/stock
 Planned endpoints:
 
 ```text
-GET    /api/cart
-POST   /api/cart/items
-PATCH  /api/cart/items/{id}
-DELETE /api/cart/items/{id}
+GET    /api/v1/cart
+POST   /api/v1/cart/items
+PATCH  /api/v1/cart/items/{id}
+DELETE /api/v1/cart/items/{id}
 ```
 
 ### 5.4 Checkout and order
@@ -143,9 +143,9 @@ DELETE /api/cart/items/{id}
 Planned endpoints:
 
 ```text
-POST /api/orders
-GET  /api/orders
-GET  /api/orders/{id}
+POST /api/v1/orders
+GET  /api/v1/orders
+GET  /api/v1/orders/{id}
 ```
 
 ### 5.5 Seller order processing
@@ -160,9 +160,9 @@ GET  /api/orders/{id}
 Planned endpoints:
 
 ```text
-GET   /api/seller/order-items
-PATCH /api/seller/order-items/{id}/confirm
-PATCH /api/seller/order-items/{id}/cancel
+GET   /api/v1/seller/order-items
+PATCH /api/v1/seller/order-items/{id}/confirm
+PATCH /api/v1/seller/order-items/{id}/cancel
 ```
 
 ### 5.6 Payment
@@ -180,8 +180,8 @@ PATCH /api/seller/order-items/{id}/cancel
 Planned endpoints:
 
 ```text
-POST /api/payments/vnpay/create
-POST /api/payments/vnpay/callback
+POST /api/v1/payments/vnpay/create
+POST /api/v1/payments/vnpay/callback
 ```
 
 ### 5.7 Shipment and delivery
@@ -205,10 +205,10 @@ POST /api/payments/vnpay/callback
 Planned endpoints:
 
 ```text
-POST  /api/seller/shipments
-GET   /api/seller/shipments
-PATCH /api/seller/shipments/{id}/status
-GET   /api/orders/{orderId}/shipments
+POST  /api/v1/seller/shipments
+GET   /api/v1/seller/shipments
+PATCH /api/v1/seller/shipments/{id}/status
+GET   /api/v1/orders/{orderId}/shipments
 ```
 
 ### 5.8 Vouchers
@@ -223,8 +223,8 @@ GET   /api/orders/{orderId}/shipments
 Planned endpoints:
 
 ```text
-POST /api/orders/{id}/voucher
-GET  /api/vouchers/{code}/validate
+POST /api/v1/orders/{id}/voucher
+GET  /api/v1/vouchers/{code}/validate
 ```
 
 ### 5.9 Reviews
@@ -238,8 +238,8 @@ GET  /api/vouchers/{code}/validate
 Planned endpoints:
 
 ```text
-POST /api/products/{productId}/reviews
-GET  /api/products/{productId}/reviews
+POST /api/v1/products/{productId}/reviews
+GET  /api/v1/products/{productId}/reviews
 ```
 
 ### 5.10 Human chat
@@ -256,8 +256,8 @@ Planned interfaces:
 
 ```text
 WS  /ws/chat
-GET /api/conversations
-GET /api/conversations/{id}/messages
+GET /api/v1/conversations
+GET /api/v1/conversations/{id}/messages
 ```
 
 ### 5.11 AI assistant
@@ -265,7 +265,7 @@ GET /api/conversations/{id}/messages
 | ID | Requirement |
 |---|---|
 | FR-AI-01 | The AI assistant shall run inside the Spring Boot monolith through Spring AI. |
-| FR-AI-02 | The system shall provide `POST /api/ai/ask`. |
+| FR-AI-02 | The system shall provide `POST /api/v1/ai/ask`. |
 | FR-AI-03 | The first AI implementation shall use read-only tools. |
 | FR-AI-04 | Protected AI tools shall resolve the authenticated customer from Spring Security context; guest requests shall be limited to public catalog data. |
 | FR-AI-05 | AI tools shall call existing application services rather than bypassing them with direct repository access unless strongly justified. |
@@ -279,9 +279,9 @@ GET /api/conversations/{id}/messages
 Planned endpoints:
 
 ```text
-POST /api/ai/ask                         (public catalog search; CUSTOMER protected scope)
-GET  /api/ai/sessions                    (CUSTOMER only)
-GET  /api/ai/sessions/{id}/messages      (CUSTOMER and own session only)
+POST /api/v1/ai/ask                         (public catalog search; CUSTOMER protected scope)
+GET  /api/v1/ai/sessions                    (CUSTOMER only)
+GET  /api/v1/ai/sessions/{id}/messages      (CUSTOMER and own session only)
 ```
 
 ## 6. Business Rules and Domain Invariants
