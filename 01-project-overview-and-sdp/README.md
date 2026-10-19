@@ -103,6 +103,7 @@ yet.
 | Database migrations | Flyway | Current backend dependency |
 | Backend container image | Multi-stage `backend/Dockerfile` (Maven build stage + Temurin 21 JRE runtime, non-root user) | Current scaffold |
 | Local orchestration | Docker Compose: PostgreSQL/pgvector + backend API, DB health-gated | Current scaffold |
+| Configuration | Single runtime `application.yml`; DB and JWT values come from environment variables (optional `.env` import); REST controllers get a central `/api/v1` prefix | Current scaffold |
 | Authentication | Spring Security with JJWT 0.12.6 | Current backend dependency; flow is phased |
 | Human chat | Spring WebSocket and mobile WebSocket client | Backend dependency; feature phased |
 | AI | Spring AI with an external LLM provider | Planned backend phase |
