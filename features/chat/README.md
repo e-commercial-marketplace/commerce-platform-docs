@@ -17,8 +17,8 @@ Owns customer/seller conversations, persisted messages, real-time updates, and m
 
 ```text
 WS  /ws/chat
-GET /api/conversations
-GET /api/conversations/{id}/messages
+GET /api/v1/conversations
+GET /api/v1/conversations/{id}/messages
 ```
 
 ## Permissions
