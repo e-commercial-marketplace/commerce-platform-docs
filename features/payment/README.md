@@ -27,8 +27,8 @@ is verified end to end.
 ## Planned API
 
 ```text
-POST /api/payments/vnpay/create
-POST /api/payments/vnpay/callback
+POST /api/v1/payments/vnpay/create
+POST /api/v1/payments/vnpay/callback
 ```
 
 ## Permissions
