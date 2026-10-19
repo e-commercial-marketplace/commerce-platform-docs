@@ -32,10 +32,10 @@ configuration (never hard-coded credentials).
 ## Planned API
 
 ```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/refresh
-POST /api/auth/logout
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
 ```
 
 ## Permissions
