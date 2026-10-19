@@ -2,11 +2,11 @@
 
 Scope: public product/category browsing plus seller product management and admin category management. All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2 conventions, §4 catalog).
 
-Conventions: base path `/api`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants.
+Conventions: base path `/api/v1`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants.
 
 ## Public catalog (Confirmed)
 
-### GET /api/products
+### GET /api/v1/products
 
 Status: Confirmed (root §4, SRS §5.2).
 
@@ -56,7 +56,7 @@ Status: Confirmed (root §4, SRS §5.2).
 |---|---|---|
 | `VALIDATION_ERROR` | 400 | Invalid `sort`, `minRating`, price range, or pagination |
 
-### GET /api/products/{id}
+### GET /api/v1/products/{id}
 
 Status: Confirmed (root §4, SRS §5.2).
 
@@ -70,7 +70,7 @@ Status: Confirmed (root §4, SRS §5.2).
 |---|---|---|
 | `RESOURCE_NOT_FOUND` | 404 | No active product with `id` |
 
-### GET /api/categories
+### GET /api/v1/categories
 
 Status: Confirmed (root §4, SRS §5.2).
 
@@ -90,7 +90,7 @@ Status: Confirmed (root §4, SRS §5.2).
 
 All endpoints below require `Authorization: Bearer <access-token>` with role `SELLER` and `sellerStatus = APPROVED`. Ownership rule: `product.sellerId == authenticatedSeller.id` (FR-CAT-06).
 
-### POST /api/seller/products
+### POST /api/v1/seller/products
 
 Status: Confirmed (SRS §5.2).
 
@@ -119,7 +119,7 @@ Status: Confirmed (SRS §5.2).
 | `FORBIDDEN` | 403 | Not a seller, or seller not `APPROVED` |
 | `VALIDATION_ERROR` | 400 | `price <= 0`, `stock < 0`, missing name/category, unknown `categoryId` |
 
-### PATCH /api/seller/products/{id}
+### PATCH /api/v1/seller/products/{id}
 
 Status: Confirmed (SRS §5.2).
 
@@ -148,7 +148,7 @@ Status: Confirmed (SRS §5.2).
 | `RESOURCE_NOT_FOUND` | 404 | No product with `id` |
 | `VALIDATION_ERROR` | 400 | Invalid field values or unknown `categoryId` |
 
-### DELETE /api/seller/products/{id}
+### DELETE /api/v1/seller/products/{id}
 
 Status: Confirmed (SRS §5.2).
 
@@ -164,7 +164,7 @@ Status: Confirmed (SRS §5.2).
 | `FORBIDDEN` | 403 | Not an approved seller, or product owned by another seller |
 | `RESOURCE_NOT_FOUND` | 404 | No product with `id` |
 
-### PATCH /api/seller/products/{id}/stock
+### PATCH /api/v1/seller/products/{id}/stock
 
 Status: Confirmed (SRS §5.2).
 
@@ -192,7 +192,7 @@ Status: Confirmed (SRS §5.2).
 
 All endpoints below require `ADMIN`. Category fields: `categories{id, name}` (`name` unique).
 
-### POST /api/admin/categories
+### POST /api/v1/admin/categories
 
 Status: Predicted.
 
@@ -223,7 +223,7 @@ Status: Predicted.
 | `FORBIDDEN` | 403 | Not `ADMIN` |
 | `VALIDATION_ERROR` | 400 | Missing/blank or duplicate `name` |
 
-### PATCH /api/admin/categories/{id}
+### PATCH /api/v1/admin/categories/{id}
 
 Status: Predicted.
 
@@ -247,7 +247,7 @@ Status: Predicted.
 | `RESOURCE_NOT_FOUND` | 404 | No category with `id` |
 | `VALIDATION_ERROR` | 400 | Missing/blank or duplicate `name` |
 
-### DELETE /api/admin/categories/{id}
+### DELETE /api/v1/admin/categories/{id}
 
 Status: Predicted.
 
