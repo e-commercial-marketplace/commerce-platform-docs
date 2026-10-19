@@ -21,7 +21,7 @@ AI endpoint is rate-limited.
 
 ## Responsibilities
 
-- Provide `POST /api/ai/ask` as a public endpoint (no login required for public data).
+- Provide `POST /api/v1/ai/ask` as a public endpoint (no login required for public data).
 - Configure `ChatClient` with the DeepSeek provider from environment configuration.
 - Return a controlled `AI_UNAVAILABLE` error when the provider is missing or failing.
 - Persist `AiChatSession` and `AiMessage` history for authenticated customers.
@@ -36,9 +36,9 @@ AI endpoint is rate-limited.
 ## Planned API
 
 ```text
-POST /api/ai/ask                         # public for catalog search; customer scope when authenticated
-GET  /api/ai/sessions                    # CUSTOMER only
-GET  /api/ai/sessions/{id}/messages      # CUSTOMER and own session only
+POST /api/v1/ai/ask                         # public for catalog search; customer scope when authenticated
+GET  /api/v1/ai/sessions                    # CUSTOMER only
+GET  /api/v1/ai/sessions/{id}/messages      # CUSTOMER and own session only
 ```
 
 ## Permissions
