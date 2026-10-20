@@ -77,7 +77,7 @@ Các quyết định sau đây là bắt buộc đối với hệ thống đư�
 1. Giữ hệ thống dưới dạng modular monolith. Không tách thành microservices.
 2. Không đưa vào API Gateway, service discovery, Feign, REST nội bộ (internal REST), Kafka, Saga hoặc các mẫu
    transaction phân tán (distributed transaction pattern) trừ khi yêu cầu sau này yêu cầu rõ ràng.
-3. Tổ chức backend theo feature, sau đó tách trách nhiệm kỹ thuật bên trong mỗi feature.
+3. Tổ chức backend theo tầng kỹ thuật (`controller`, `service`, `repository`, `entity`, `dto`, ...); tên class cho biết feature.
 4. Giữ controller ở dạng thin. Nghiệp vụ thuộc về service hoặc domain logic.
 5. Sử dụng PostgreSQL transaction cho checkout, cập nhật stock, tiêu thụ voucher và callback thanh toán.
 6. Giữ Spring AI trong cùng monolith dưới feature `ai`.
@@ -113,18 +113,18 @@ hiện tại. Frontend vẫn là khung sườn (scaffold), vì vậy version th�
 
 ## 7. Tổ chức Backend
 
-Backend sử dụng package-by-feature. Các feature cấp cao nhất theo kế hoạch là:
+Backend sử dụng package-by-layer dưới `com.marketplace`. Mỗi tầng chứa class của mọi feature nghiệp vụ
+(`auth`, `user`, `catalog`, `cart`, `order`, `payment`, `shipment`, `voucher`, `review`, `chat`, `ai`);
+tên class cho biết feature, ví dụ `AuthController`, `ProductService` hoặc `OrderRepository`.
 
 ```text
-auth | user | catalog | cart | order | payment
-shipment | voucher | review | chat | ai | common
+config | controller | service (+ impl) | repository | entity | enums
+dto (request, response) | mapper | security | exception | util
+websocket | vnpay | ai (tools, rag, memory)
 ```
 
-Mỗi feature có thể chứa các layer kỹ thuật như `controller`, `service`, `repository`, `entity`,
-`dto`, `mapper`, `security`, `config`, `websocket` hoặc `vnpay` khi cần thiết.
-
-Dự án phải tránh một cấu trúc toàn cục duy nhất như `controller/`, `service/`, `repository/` và
-`entity/`, vì cách đó phân tán một feature nghiệp vụ trên toàn bộ codebase.
+Tên class phải duy nhất trong toàn dự án vì các tầng dùng chung. Các feature chỉ gọi nhau qua service
+interface, không gọi repository của feature khác.
 
 ## 8. Kế hoạch Phát triển Phần mềm
 
@@ -136,7 +136,7 @@ Dự án phải tránh một cấu trúc toàn cục duy nhất như `controller
 - Tạo response lỗi chung (common error response).
 - Thêm bộ xử lý ngoại lệ toàn cục (global exception handler).
 - Cấu hình validation.
-- Thiết lập quy ước package-by-feature.
+- Thiết lập quy ước package-by-layer.
 - Thêm thiết lập test cơ sở (base test setup).
 
 **Cổng hoàn thành:** ứng dụng khởi động được, database migration chạy thành công và `/actuator/health` ở trạng thái

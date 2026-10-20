@@ -77,7 +77,7 @@ The following decisions are mandatory for the planned system:
 1. Keep the system as a modular monolith. Do not split it into microservices.
 2. Do not introduce API Gateway, service discovery, Feign, internal REST, Kafka, Saga, or distributed
    transaction patterns unless a later requirement explicitly needs them.
-3. Organize the backend by feature, then separate technical responsibilities inside each feature.
+3. Organize the backend by technical layer (`controller`, `service`, `repository`, `entity`, `dto`, ...); a class name identifies its feature.
 4. Keep controllers thin. Business rules belong in services or domain logic.
 5. Use PostgreSQL transactions for checkout, stock updates, voucher consumption, and payment callbacks.
 6. Keep Spring AI inside the same monolith under the `ai` feature.
@@ -114,18 +114,19 @@ yet.
 
 ## 7. Backend Organization
 
-The backend uses package-by-feature. The planned top-level features are:
+The backend uses package-by-layer under `com.marketplace`. Each layer holds the classes of all
+business features (`auth`, `user`, `catalog`, `cart`, `order`, `payment`, `shipment`, `voucher`,
+`review`, `chat`, `ai`); a class name identifies its feature, for example `AuthController`,
+`ProductService`, or `OrderRepository`.
 
 ```text
-auth | user | catalog | cart | order | payment
-shipment | voucher | review | chat | ai | common
+config | controller | service (+ impl) | repository | entity | enums
+dto (request, response) | mapper | security | exception | util
+websocket | vnpay | ai (tools, rag, memory)
 ```
 
-Each feature may contain technical layers such as `controller`, `service`, `repository`, `entity`,
-`dto`, `mapper`, `security`, `config`, `websocket`, or `vnpay` when useful.
-
-The project must avoid one global structure such as `controller/`, `service/`, `repository/`, and
-`entity/`, because that scatters one business feature across the whole codebase.
+Class names stay unique across the project because layers are shared. Features call each other only
+through service interfaces, never through another feature's repository.
 
 ## 8. Software Development Plan
 
@@ -137,7 +138,7 @@ The project must avoid one global structure such as `controller/`, `service/`, `
 - Create the common error response.
 - Add the global exception handler.
 - Configure validation.
-- Establish the package-by-feature convention.
+- Establish the package-by-layer convention.
 - Add the base test setup.
 
 **Completion gate:** the application starts, database migration runs, and `/actuator/health` is
