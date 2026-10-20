@@ -105,7 +105,7 @@ Status: Confirmed (root §3, SRS §5.1).
 
 ### POST /api/v1/auth/logout
 
-Status: Planned — implement in Phase 1 (contract frozen here; `refresh_tokens` storage already designed in migration V12).
+Status: Confirmed — implemented in Phase 1 (`refresh_tokens` storage from migration V12).
 
 - Actor/auth: authenticated customer/seller/admin (access token) revoking their own refresh token.
 - Maps to: FR-AUTH-02, FR-AUTH-04.
@@ -117,7 +117,7 @@ Status: Planned — implement in Phase 1 (contract frozen here; `refresh_tokens`
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<null>` (envelope with `data: null`). The refresh token is revoked;
+- Success: `200 OK`, `ApiResponse<null>` (the envelope omits `data`). The refresh token is revoked;
   reuse returns `401` with `AUTHENTICATION_REQUIRED`.
 - Errors:
 
