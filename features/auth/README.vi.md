@@ -79,6 +79,10 @@ classDiagram
 
 Auth thiết lập định danh. Các service tính năng vẫn phải thực thi quyền sở hữu tài nguyên; riêng role `SELLER` không ủy quyền truy cập sản phẩm, order item hay shipment của seller khác.
 
+## Luồng bảo mật
+
+Sơ đồ luồng đã triển khai (chuỗi filter, đăng nhập, request có token, refresh và logout), bảng so sánh hai loại token và các luật URL nằm trong [SECURITY_FLOW.vi.md](SECURITY_FLOW.vi.md).
+
 ## Mô hình dữ liệu
 
 Auth sở hữu ranh giới định danh quanh bảng `users`. Auth không sở hữu các hàng product, order, payment hay shipment; các bảng đó tham chiếu `users` cho kiểm tra sở hữu và tác nhân.

@@ -85,6 +85,10 @@ classDiagram
 Auth establishes identity. Feature services must still enforce resource ownership; a `SELLER` role by
 itself does not authorize access to another seller's product, order item, or shipment.
 
+## Security flow
+
+Diagrams of the implemented flow (filter chain, login, authenticated request, refresh and logout), the token comparison, and the URL rules are in [SECURITY_FLOW.md](SECURITY_FLOW.md).
+
 ## Data model
 
 Auth owns the identity boundary around the `users` table. It does not own product, order, payment, or
