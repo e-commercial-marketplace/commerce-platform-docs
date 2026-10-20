@@ -85,26 +85,26 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 
 | Diagram | Use case | API route (status) |
 |---|---|---|
-| [`admin/approve-or-suspend-seller.md`](admin/approve-or-suspend-seller.md) | User - Approve or Suspend Seller | `PATCH /api/v1/admin/sellers/{id}/approve or /suspend` (Predicted) |
+| [`admin/approve-or-suspend-seller.md`](admin/approve-or-suspend-seller.md) | User - Approve or Suspend Seller | `PATCH /api/v1/admin/sellers/{id}/approve or /suspend` (Confirmed) |
 | [`admin/approve-refund.md`](admin/approve-refund.md) | Payment - Approve Refund | `No refund endpoint is defined; route TBD` (TBD) |
 | [`admin/configure-platform-delivery.md`](admin/configure-platform-delivery.md) | Shipment - Configure Platform Delivery | `No endpoint is defined; route TBD` (TBD) |
 | [`admin/create-category.md`](admin/create-category.md) | Category - Create Category | `POST /api/v1/admin/categories` (Predicted) |
-| [`admin/create-user.md`](admin/create-user.md) | User - Create User | `POST /api/v1/admin/users` (Predicted) |
+| [`admin/create-user.md`](admin/create-user.md) | User - Create User | `POST /api/v1/admin/users` (Confirmed) |
 | [`admin/create-voucher.md`](admin/create-voucher.md) | Voucher - Create Voucher | `POST /api/v1/admin/vouchers` (Predicted) |
 | [`admin/delete-category.md`](admin/delete-category.md) | Category - Delete Category | `DELETE /api/v1/admin/categories/{id}` (Predicted) |
 | [`admin/delete-or-expire-voucher.md`](admin/delete-or-expire-voucher.md) | Voucher - Delete or Expire Voucher | `DELETE /api/v1/admin/vouchers/{id} (expires the voucher)` (Predicted) |
-| [`admin/disable-or-delete-user.md`](admin/disable-or-delete-user.md) | User - Disable or Delete User | `PATCH /api/v1/admin/users/{id} or DELETE /api/v1/admin/users/{id}` (Predicted) |
+| [`admin/disable-or-delete-user.md`](admin/disable-or-delete-user.md) | User - Disable or Delete User | `PATCH /api/v1/admin/users/{id} or DELETE /api/v1/admin/users/{id}` (Confirmed) |
 | [`admin/login.md`](admin/login.md) | Auth - Admin Login | `POST /api/v1/auth/login` (Confirmed) |
 | [`admin/manage-categories.md`](admin/manage-categories.md) | Category - Manage Categories | `GET /api/v1/categories; POST/PATCH/DELETE /api/v1/admin/categories` (Mixed: confirmed public read + predicted admin writes) |
-| [`admin/manage-users.md`](admin/manage-users.md) | User - Manage Users | `GET/POST/PATCH/DELETE /api/v1/admin/users` (Predicted) |
+| [`admin/manage-users.md`](admin/manage-users.md) | User - Manage Users | `GET/POST/PATCH/DELETE /api/v1/admin/users` (Confirmed) |
 | [`admin/manage-vouchers.md`](admin/manage-vouchers.md) | Voucher - Manage Vouchers | `GET/POST/PATCH/DELETE /api/v1/admin/vouchers` (Predicted) |
 | [`admin/moderate-reviews-and-violations.md`](admin/moderate-reviews-and-violations.md) | Review - Moderate Reviews and Violations | `No admin moderation endpoint exists in the current MVP contract` (Out of current API scope) |
 | [`admin/monitor-marketplace-operations.md`](admin/monitor-marketplace-operations.md) | Admin - Monitor Marketplace Operations | `No monitoring endpoint is defined; route TBD` (TBD) |
 | [`admin/update-category.md`](admin/update-category.md) | Category - Update Category | `PATCH /api/v1/admin/categories/{id}` (Predicted) |
-| [`admin/update-user.md`](admin/update-user.md) | User - Update User | `PATCH /api/v1/admin/users/{id}` (Predicted) |
+| [`admin/update-user.md`](admin/update-user.md) | User - Update User | `PATCH /api/v1/admin/users/{id}` (Confirmed) |
 | [`admin/update-voucher.md`](admin/update-voucher.md) | Voucher - Update Voucher | `PATCH /api/v1/admin/vouchers/{id}` (Predicted) |
 | [`admin/view-categories.md`](admin/view-categories.md) | Category - View Categories | `GET /api/v1/categories (public route; admin-specific listing is not specified)` (Confirmed public read) |
-| [`admin/view-users.md`](admin/view-users.md) | User - View Users | `GET /api/v1/admin/users` (Predicted) |
+| [`admin/view-users.md`](admin/view-users.md) | User - View Users | `GET /api/v1/admin/users` (Confirmed) |
 | [`admin/view-vouchers.md`](admin/view-vouchers.md) | Voucher - View Vouchers | `GET /api/v1/admin/vouchers` (Predicted) |
 
 ### Tích hợp

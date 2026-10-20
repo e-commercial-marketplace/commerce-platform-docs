@@ -152,9 +152,10 @@ healthy.
 - Add JWT access and refresh tokens.
 - Encode passwords.
 - Configure Spring Security authorization.
-- Add seller approval state if it is part of the MVP.
+- Add the seller approval state.
+- Add admin user management and seller approval, so a `PENDING` seller can be approved.
 
-**Completion gate:** CUSTOMER, SELLER, and ADMIN login and authorization are verifiable by tests.
+**Completion gate:** CUSTOMER, SELLER, and ADMIN login and authorization are verifiable by tests, and an admin can approve a seller who then manages products.
 
 ### Phase 2 - Catalog
 

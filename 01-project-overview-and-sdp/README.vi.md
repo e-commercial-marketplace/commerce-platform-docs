@@ -150,9 +150,10 @@ healthy.
 - Thêm JWT access token và refresh token.
 - Mã hóa mật khẩu (password encoding).
 - Cấu hình phân quyền (authorization) Spring Security.
-- Thêm trạng thái phê duyệt seller nếu thuộc phạm vi MVP.
+- Thêm trạng thái phê duyệt seller.
+- Thêm quản lý người dùng và duyệt seller cho admin, để seller `PENDING` có thể được duyệt.
 
-**Cổng hoàn thành:** việc login và phân quyền của CUSTOMER, SELLER và ADMIN có thể kiểm chứng được bằng test.
+**Cổng hoàn thành:** việc login và phân quyền của CUSTOMER, SELLER và ADMIN có thể kiểm chứng được bằng test, và admin duyệt được seller để seller đó quản lý sản phẩm.
 
 ### Giai đoạn 2 - Catalog
 

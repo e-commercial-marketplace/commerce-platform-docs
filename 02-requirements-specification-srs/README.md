@@ -70,7 +70,9 @@ callbacks, and AI tool access.
 | FR-AUTH-02 | The system shall support register, login, and refresh operations. |
 | FR-AUTH-03 | The system shall use password hashing through Spring Security `PasswordEncoder`; plaintext passwords shall not be stored. |
 | FR-AUTH-04 | The system shall use JWT access and refresh flow. |
-| FR-AUTH-05 | The system may apply seller approval states: `PENDING`, `APPROVED`, `REJECTED`, and `SUSPENDED`. |
+| FR-AUTH-05 | The system shall apply seller approval states: `PENDING`, `APPROVED`, `REJECTED`, and `SUSPENDED`. Only `APPROVED` sellers may manage products. |
+| FR-AUTH-06 | The system shall let an admin list, view, create, update, and disable users, and filter the list by role and search text. Disabling an account keeps its data and blocks login and refresh. |
+| FR-AUTH-07 | The system shall let an admin approve, suspend, or reject sellers. An admin shall not be able to disable or demote their own account. |
 
 Planned endpoints:
 
@@ -78,6 +80,15 @@ Planned endpoints:
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+
+GET    /api/v1/users/me
+GET    /api/v1/admin/users
+POST   /api/v1/admin/users
+GET    /api/v1/admin/users/{id}
+PATCH  /api/v1/admin/users/{id}
+DELETE /api/v1/admin/users/{id}
+PATCH  /api/v1/admin/sellers/{id}/approve
+PATCH  /api/v1/admin/sellers/{id}/suspend
 ```
 
 ### 5.2 Catalog

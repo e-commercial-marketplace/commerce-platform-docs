@@ -210,5 +210,5 @@ All errors use the common `ApiResponse` envelope described in [API_CONTRACT.md](
 
 - An access token cannot be revoked. A user who is locked keeps working until the access token expires (at most 15 minutes).
 - The token carries only the role. Seller approval (`sellerStatus`) and resource ownership are not in the token, so feature services check the database. The seller product endpoints do this in `SellerProductServiceImpl` (Phase 2); future seller features must do the same.
-- Not implemented yet: login rate limiting, forgot password, admin approval of sellers.
+- Not implemented yet: login rate limiting, forgot password.
 - Browser calls need CORS. It is off by default and enabled with `APP_CORS_ALLOWED_ORIGIN_PATTERNS`; use `*` only during development.

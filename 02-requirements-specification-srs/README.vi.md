@@ -70,7 +70,9 @@ thanh toán và quyền truy cập AI tool.
 | FR-AUTH-02 | Hệ thống phải hỗ trợ các thao tác register, login và refresh. |
 | FR-AUTH-03 | Hệ thống phải sử dụng băm mật khẩu (password hashing) qua Spring Security `PasswordEncoder`; không được lưu mật khẩu dạng plaintext. |
 | FR-AUTH-04 | Hệ thống phải sử dụng luồng JWT access và refresh. |
-| FR-AUTH-05 | Hệ thống có thể áp dụng các trạng thái phê duyệt seller: `PENDING`, `APPROVED`, `REJECTED` và `SUSPENDED`. |
+| FR-AUTH-05 | Hệ thống phải áp dụng các trạng thái phê duyệt seller: `PENDING`, `APPROVED`, `REJECTED` và `SUSPENDED`. Chỉ seller `APPROVED` mới được quản lý sản phẩm. |
+| FR-AUTH-06 | Hệ thống phải cho admin xem danh sách, xem chi tiết, tạo, cập nhật và vô hiệu hóa người dùng, lọc danh sách theo role và từ khóa. Vô hiệu hóa tài khoản vẫn giữ dữ liệu và chặn đăng nhập, refresh. |
+| FR-AUTH-07 | Hệ thống phải cho admin duyệt, tạm khóa hoặc từ chối seller. Admin không được tự vô hiệu hóa hoặc tự hạ role của chính mình. |
 
 Các endpoint theo kế hoạch:
 

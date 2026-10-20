@@ -1,10 +1,10 @@
 # User - Update User — Sequence Diagram
 
 - **Use-case spec:** [update-user.vi.md](../../usecase-specification/admin/update-user.vi.md)
-- **API route/status:** `PATCH /api/v1/admin/users/{id}` — Predicted
+- **API route/status:** `PATCH /api/v1/admin/users/{id}` — Confirmed
 - **Feature API contract:** [features/user/API_CONTRACT.md](../../features/user/API_CONTRACT.md)
 
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
+> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
 
 ```mermaid
 sequenceDiagram
@@ -26,7 +26,7 @@ sequenceDiagram
         Repo->>DB: SELECT, validate, then UPDATE
         DB-->>Repo: Domain row(s) or persistence result
         Repo-->>Service: Entity/result
-        Note over Controller,Repo: Admin user endpoints are Predicted in the User API contract.
+        Note over Controller,Repo: Admin user endpoints are Confirmed in the User API contract.
         Service-->>Controller: Use-case result
         Controller-->>Client: 200 OK response defined by the contract
         Client-->>Admin: Display the result
