@@ -101,7 +101,7 @@ choices for the first Expo implementation, not evidence of a completed mobile bu
 
 | Feature | Main responsibility | Planned internal layers |
 |---|---|---|
-| `auth` | Register, login, refresh, JWT, security | `controller`, `service`, `dto`, `security`, `config` |
+| `auth` | Register, login, refresh, JWT, security | `controller`, `service`, `repository`, `dto`, `security`, `config` |
 | `user` | User data, roles, seller status | `entity`, `repository`, `service`, `dto`, `mapper` |
 | `catalog` | Categories, products, stock, customer catalog | `entity`, `repository`, `service`, `controller`, `dto`, `mapper` |
 | `cart` | Customer cart items and cart validation | `entity`, `repository`, `service`, `controller`, `dto` |
@@ -111,7 +111,7 @@ choices for the first Expo implementation, not evidence of a completed mobile bu
 | `voucher` | Voucher data, validation, usage | `entity`, `repository`, `service`, `controller`, `dto` |
 | `review` | Review eligibility and product reviews | `entity`, `repository`, `service`, `controller`, `dto` |
 | `chat` | Human conversations, messages, WebSocket | `entity`, `repository`, `service`, `websocket`, `dto` |
-| `ai` | ChatClient, tools, RAG, memory, AI persistence | `controller`, `service`, `config`, `tools`, `rag`, `memory`, `entity`, `dto` |
+| `ai` | ChatClient, tools, RAG, memory, AI persistence | `controller`, `service`, `repository`, `config`, `tools`, `rag`, `memory`, `entity`, `dto` |
 | `common` | Shared errors, responses, config, utilities | `exception`, `response`, `config`, `util` |
 
 ### 5.2 Package structure
@@ -121,6 +121,7 @@ com.marketplace
 ├── auth
 │   ├── controller
 │   ├── service
+│   ├── repository
 │   ├── dto
 │   ├── security
 │   └── config
@@ -144,6 +145,23 @@ com.marketplace
 
 Each feature expands into the layers shown in section 5.1 when that responsibility is needed. The
 architecture avoids a global `controller/`, `service/`, `repository/`, `entity/` layout.
+
+### 5.3 Service and persistence call path
+
+The planned synchronous request path is:
+
+```text
+React Native -> FeatureController -> FeatureService -> FeatureRepository -> PostgreSQL
+```
+
+`FeatureService` is the feature's service layer: the controller calls it directly in the same JVM, and
+it owns use-case orchestration and business rules. It may call another feature through that feature's
+service. Repositories own persistence access through Spring Data JPA. Provider calls (for example
+VNPAY or the LLM provider) are feature-specific and appear only in the corresponding sequence
+diagrams.
+
+This is the target architecture, not a claim about completed code: the current backend scaffold does
+not yet contain the controller/service/repository layers.
 
 ## 6. Domain Model Design
 

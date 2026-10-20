@@ -81,6 +81,14 @@ use case in `usecase-specification/`, grouped by actor. Use them to walk a flow 
 including validation, alternative, and exception paths — before implementing or reviewing an endpoint
 or screen.
 
+### 8. Sequence diagrams
+
+Open [`sequence-diagram/README.md`](sequence-diagram/README.md) for a technical sequence diagram per
+use case. These Mermaid diagrams trace the planned request through the feature controller, service,
+repository, and database; feature-specific provider calls are included only when supported by the
+contract. The layers are a target design and do not imply that
+the current backend scaffold already implements them.
+
 ## Frontend-to-backend feature mapping
 
 The React Native scaffold separates user journeys where the backend groups related business rules:

@@ -81,6 +81,13 @@ Mở [`activity-diagram/README.vi.md`](activity-diagram/README.vi.md) để xem 
 từng bước của luồng — gồm validation, luồng thay thế và luồng ngoại lệ — trước khi implement hoặc
 review một endpoint hay screen.
 
+### 8. Sơ đồ tuần tự
+
+Mở [`sequence-diagram/README.vi.md`](sequence-diagram/README.vi.md) để xem sequence diagram kỹ thuật
+cho từng use case. Các sơ đồ Mermaid mô tả request đi qua controller của feature, service, repository
+và database; provider call chỉ được vẽ khi contract có căn cứ.
+Đây là kiến trúc mục tiêu, không khẳng định backend scaffold hiện tại đã có đủ các layer đó.
+
 ## Ánh xạ feature frontend-backend
 
 React Native scaffold tách user journeys trong khi backend nhóm các business rules liên quan:

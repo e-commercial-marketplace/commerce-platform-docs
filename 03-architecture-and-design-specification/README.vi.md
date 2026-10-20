@@ -101,7 +101,7 @@ cho bản triển khai Expo đầu tiên, không phải bằng chứng của m�
 
 | Feature | Trách nhiệm chính | Các layer nội bộ theo kế hoạch |
 |---|---|---|
-| `auth` | Register, login, refresh, JWT, bảo mật (security) | `controller`, `service`, `dto`, `security`, `config` |
+| `auth` | Register, login, refresh, JWT, bảo mật (security) | `controller`, `service`, `repository`, `dto`, `security`, `config` |
 | `user` | Dữ liệu user, role, trạng thái seller | `entity`, `repository`, `service`, `dto`, `mapper` |
 | `catalog` | Category, product, stock, catalog của customer | `entity`, `repository`, `service`, `controller`, `dto`, `mapper` |
 | `cart` | Cart item của customer và validate cart | `entity`, `repository`, `service`, `controller`, `dto` |
@@ -111,7 +111,7 @@ cho bản triển khai Expo đầu tiên, không phải bằng chứng của m�
 | `voucher` | Dữ liệu voucher, validate, sử dụng | `entity`, `repository`, `service`, `controller`, `dto` |
 | `review` | Điều kiện review và review sản phẩm | `entity`, `repository`, `service`, `controller`, `dto` |
 | `chat` | Conversation giữa người với người, message, WebSocket | `entity`, `repository`, `service`, `websocket`, `dto` |
-| `ai` | ChatClient, tool, RAG, memory, persistence AI | `controller`, `service`, `config`, `tools`, `rag`, `memory`, `entity`, `dto` |
+| `ai` | ChatClient, tool, RAG, memory, persistence AI | `controller`, `service`, `repository`, `config`, `tools`, `rag`, `memory`, `entity`, `dto` |
 | `common` | Lỗi chung, response, config, tiện ích | `exception`, `response`, `config`, `util` |
 
 ### 5.2 Cấu trúc package
@@ -121,6 +121,7 @@ com.marketplace
 ├── auth
 │   ├── controller
 │   ├── service
+│   ├── repository
 │   ├── dto
 │   ├── security
 │   └── config
@@ -144,6 +145,22 @@ com.marketplace
 
 Mỗi feature mở rộng thành các layer nêu trong mục 5.1 khi cần trách nhiệm đó. 
 Kiến trúc tránh bố cục toàn cục `controller/`, `service/`, `repository/`, `entity/`.
+
+### 5.3 Luồng gọi qua service và persistence
+
+Luồng request đồng bộ theo kiến trúc mục tiêu:
+
+```text
+React Native -> FeatureController -> FeatureService -> FeatureRepository -> PostgreSQL
+```
+
+`FeatureService` là tầng service của feature: controller gọi trực tiếp trong cùng JVM; tầng này điều
+phối use case và sở hữu business rules, có thể gọi feature khác thông qua service của feature đó.
+Repository phụ trách persistence qua Spring Data JPA. Provider calls (ví dụ VNPAY hoặc LLM provider)
+chỉ xuất hiện trong sequence diagram của feature tương ứng.
+
+Đây là kiến trúc mục tiêu, không khẳng định code đã hoàn thiện: backend scaffold hiện chưa có các
+layer controller/service/repository.
 
 ## 6. Thiết kế Mô hình Miền
 

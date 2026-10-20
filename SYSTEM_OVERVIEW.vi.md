@@ -48,7 +48,7 @@ flowchart LR
 
 - Backend là một ứng dụng Spring Boot, một JVM process, một deployment unit và một primary
   PostgreSQL database.
-- Tổ chức top-level là package-by-feature.
+- Tổ chức top-level là package-by-layer (`controller`, `service`, `repository`, `entity`, `dto`, ...).
 - Các feature giao tiếp qua normal Spring bean method calls trong cùng JVM.
 - Controllers giữ thin; services/domain logic sở hữu business rules.
 - Checkout, stock updates, voucher consumption và payment callbacks dùng PostgreSQL transactions.
@@ -70,22 +70,30 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    participant C as React Native Client
-    participant API as Spring Boot API
-    participant S as Feature Service
+    actor User
+    participant App as React Native App
+    participant Security as Spring Security
+    participant Controller as FeatureController
+    participant Service as FeatureService
+    participant Repository as FeatureRepository
     participant DB as PostgreSQL
-    participant EXT as External Provider
 
-    C->>API: REST request (JWT when required)
-    API->>API: Authenticate and authorize
-    API->>S: Call feature service
-    S->>DB: Read or transactional write
-    DB-->>S: Domain data/result
-    S-->>API: DTO or business exception
-    API-->>C: Consistent API response
-    API->>EXT: VNPAY or LLM call when required
-    EXT-->>API: Callback or model result
+    User->>App: Start a feature use case
+    App->>Security: REST request (JWT when required)
+    Security->>Controller: Forward authenticated request
+    Controller->>Service: Invoke the feature operation
+    Service->>Repository: Read or persist feature data
+    Repository->>DB: JPA query or transactional write
+    DB-->>Repository: Rows or write result
+    Repository-->>Service: Domain data/result
+    Service-->>Controller: Result or business exception
+    Controller-->>App: Consistent API response
+    App-->>User: Display the result
 ```
+
+Đây là luồng đồng bộ theo kiến trúc mục tiêu, không phải bằng chứng mọi layer đã được implement.
+External provider calls chỉ thuộc feature tương ứng và được thể hiện trong sequence diagram riêng;
+chúng không diễn ra sau mọi API response.
 
 ## 4. Luồng AI
 
