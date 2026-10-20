@@ -35,7 +35,7 @@ sequenceDiagram
         DB-->>Repo: Persisted review
         Repo-->>Service: Review entity
         Service-->>Controller: Created result
-        Controller-->>Client: 201 Created ApiResponse<ReviewDto>
+        Controller-->>Client: 201 Created ApiResponse<ReviewResponse>
         Client-->>Customer: Display the created review
     else Not purchased/received, duplicate review, or invalid rating
         Service-->>Controller: Propagate exception

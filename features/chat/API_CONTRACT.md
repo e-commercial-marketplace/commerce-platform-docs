@@ -61,7 +61,7 @@ List conversations owned by the caller.
 - `ADMIN` monitoring, if ever exposed, is not participant impersonation and is not part of this
   endpoint.
 
-Success: `200 OK` with `ApiResponse<List<ConversationDto>>`. Each `data` element uses only feature
+Success: `200 OK` with `ApiResponse<List<ConversationResponse>>`. Each `data` element uses only feature
 README fields:
 
 ```json
@@ -118,7 +118,7 @@ Query parameters (all optional):
 | `page` | Zero-based page index; default `0` |
 | `size` | Page size; default `20`, backend applies a maximum |
 
-Success: `200 OK` with `ApiResponse<PageResponse<MessageDto>>`. Each `content` element uses only
+Success: `200 OK` with `ApiResponse<PageResponse<MessageResponse>>`. Each `content` element uses only
 feature README fields:
 
 ```json
@@ -185,7 +185,7 @@ Request body (raw JSON):
 | `orderId` | Optional order context, else `null` |
 
 Success: `200 OK` (existing conversation) or `201 Created` (new conversation) with
-`ApiResponse<ConversationDto>` (same shape as `GET /api/v1/conversations` element).
+`ApiResponse<ConversationResponse>` (same shape as `GET /api/v1/conversations` element).
 
 Errors:
 
@@ -228,7 +228,7 @@ Request body (raw JSON):
 }
 ```
 
-Success: `201 Created` with `ApiResponse<MessageDto>` (same shape as message-history element).
+Success: `201 Created` with `ApiResponse<MessageResponse>` (same shape as message-history element).
 
 Errors:
 

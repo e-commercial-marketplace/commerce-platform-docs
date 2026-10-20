@@ -37,7 +37,7 @@ sequenceDiagram
         LinkRepo->>DB: INSERT shipment_order_items in same transaction
         Note over Service,DB: Both inserts commit in the same transaction.
         Service-->>Controller: Created result
-        Controller-->>Client: 201 Created ApiResponse<ShipmentDto>
+        Controller-->>Client: 201 Created ApiResponse<ShipmentResponse>
         Client-->>Seller: Display the created shipment
     else Items are not eligible, not owned, or already in another shipment
         Service-->>Controller: Propagate exception

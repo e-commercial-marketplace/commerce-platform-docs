@@ -61,7 +61,7 @@ sequenceDiagram
         CartService-->>Service: Cart cleared
         Note over Service,DB: All reads and writes above join the single checkout transaction, which commits after the cart is cleared.
         Service-->>Controller: Created order result
-        Controller-->>Client: 201 Created ApiResponse<OrderDto>
+        Controller-->>Client: 201 Created ApiResponse<OrderResponse>
         Client-->>Customer: Display the created order
     else Invalid address/cart/product/stock/voucher
         Service-->>Controller: Propagate exception, transaction rolls back

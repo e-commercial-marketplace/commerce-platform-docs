@@ -52,7 +52,7 @@ sequenceDiagram
             PaymentService-->>Service: Recalculated amounts
         end
         Service-->>Controller: Cancelled item result
-        Controller-->>Client: 200 OK ApiResponse<OrderItemDto>
+        Controller-->>Client: 200 OK ApiResponse<OrderItemResponse>
         Client-->>Seller: Display the cancelled item
     else Item is not owned, already assigned to a shipment, or paid without a refund policy
         Service-->>Controller: Propagate exception, nothing is committed

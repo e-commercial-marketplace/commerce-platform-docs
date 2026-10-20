@@ -29,7 +29,7 @@ Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
 - `{code}`: voucher business code (e.g. `SALE10`).
 - Read-only: does not increment `timesUsed` or attach the voucher to any order.
 
-Success: `200 OK`, `ApiResponse<VoucherValidityDto>`. `data` payload:
+Success: `200 OK`, `ApiResponse<VoucherValidityResponse>`. `data` payload:
 
 ```json
 {
@@ -86,7 +86,7 @@ Behavior (FR-VCH-01 – FR-VCH-04):
   otherwise reject. Recompute `discountAmount`/`totalAmount` snapshots from the
   order-item snapshots (never reread current product prices).
 
-Success: `200 OK`, `ApiResponse<OrderDto>` (order shape per the order contract,
+Success: `200 OK`, `ApiResponse<OrderResponse>` (order shape per the order contract,
 with `voucherCode` and updated snapshots):
 
 ```json
@@ -141,7 +141,7 @@ Prefix: `/api/v1/admin/vouchers`. Actor: `ADMIN`
 List platform vouchers (paginated). Query: `page` (default `0`), `size`
 (default `20`).
 
-Success: `200 OK`, `ApiResponse<PageResponse<VoucherDto>>`. Item `data` shape:
+Success: `200 OK`, `ApiResponse<PageResponse<VoucherResponse>>`. Item `data` shape:
 
 ```json
 {
@@ -178,7 +178,7 @@ Request body:
 Rules: `code` unique/non-blank; `discountPercent` in `1..100`;
 `validFrom < validTo`; `usageLimit >= 1`. `timesUsed` starts at `0`.
 
-Success: `201 Created`, `ApiResponse<VoucherDto>` (shape above).
+Success: `201 Created`, `ApiResponse<VoucherResponse>` (shape above).
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
 `VALIDATION_ERROR` (`400`) for constraint violations or duplicate `code`.
@@ -203,7 +203,7 @@ Request body (all fields optional; only present fields change):
 `timesUsed` is rejected. Shortening `validTo` to the past effectively expires
 the voucher.
 
-Success: `200 OK`, `ApiResponse<VoucherDto>`.
+Success: `200 OK`, `ApiResponse<VoucherResponse>`.
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
 `RESOURCE_NOT_FOUND` (`404`) for unknown `{id}`; `VALIDATION_ERROR` (`400`)
@@ -216,7 +216,7 @@ not a physical delete: it sets `validTo = now` so in-flight validation and the
 atomic consumption guard reject further uses, while history (`timesUsed`,
 applied orders) is preserved.
 
-Success: `200 OK`, `ApiResponse<VoucherDto>` reflecting the expired
+Success: `200 OK`, `ApiResponse<VoucherResponse>` reflecting the expired
 `validTo`.
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);

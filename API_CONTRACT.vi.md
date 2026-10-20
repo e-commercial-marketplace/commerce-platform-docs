@@ -260,7 +260,7 @@ backend search score, tiếp theo là `ratingAverage DESC`, `reviewCount DESC` v
 tie-breakers. Các sorts khác dùng `id ASC` làm tie-breaker cuối cùng. Sort `popular` được hoãn lại cho đến khi
 separate popularity metric được định nghĩa.
 
-Wire response đầy đủ là `ApiResponse<PageResponse<ProductSummaryDto>>`:
+Wire response đầy đủ là `ApiResponse<PageResponse<ProductSummaryResponse>>`:
 
 ```json
 {
@@ -300,7 +300,7 @@ Wire response đầy đủ là `ApiResponse<PageResponse<ProductSummaryDto>>`:
 GET /api/v1/categories
 ```
 
-Wire response đầy đủ là `ApiResponse<List<CategorySummaryDto>>`:
+Wire response đầy đủ là `ApiResponse<List<CategorySummaryResponse>>`:
 
 ```json
 {
@@ -326,7 +326,7 @@ GET /api/v1/products/{productId}
 Response dùng cùng product fields như list response. MVP đầu tiên hỗ trợ một
 `imageUrl` và không chọn color/size variant.
 
-Wire response đầy đủ là `ApiResponse<ProductDto>`:
+Wire response đầy đủ là `ApiResponse<ProductResponse>`:
 
 ```json
 {
@@ -385,7 +385,7 @@ GET /api/v1/cart
 }
 ```
 
-Wire response đầy đủ là `ApiResponse<CartDto>`.
+Wire response đầy đủ là `ApiResponse<CartResponse>`.
 
 ```http
 POST /api/v1/cart/items
@@ -417,7 +417,7 @@ DELETE /api/v1/cart/items/{cartItemId}
 Backend validate product activity và stock. Frontend không được coi displayed price là
 authoritative checkout price. Nếu product đã có trong cart của customer, `POST` tăng
 existing quantity thay vì tạo duplicate row. Combined quantity được validated với current stock.
-Các mutations `POST`, `PATCH` và `DELETE` thành công trả về `ApiResponse<CartDto>` với status `200`
+Các mutations `POST`, `PATCH` và `DELETE` thành công trả về `ApiResponse<CartResponse>` với status `200`
 trong MVP đầu tiên; `INSUFFICIENT_STOCK` hoặc `CART_ITEM_NOT_FOUND` được trả về trong common error
 envelope khi mutation không thể áp dụng.
 
@@ -443,7 +443,7 @@ Content-Type: application/json
 
 `paymentMethod` là `COD` cho MVP đầu tiên. `VNPAY` được dành cho payment slice tiếp theo.
 
-Wire response đầy đủ là `ApiResponse<OrderDto>`:
+Wire response đầy đủ là `ApiResponse<OrderResponse>`:
 
 ```json
 {
@@ -497,14 +497,14 @@ Backend chỉ trả về orders thuộc sở hữu của authenticated customer.
 seller-scoped bên trong order detail; một mixed seller result không được collapsed thành một false
 order-level delivery status.
 
-`GET /api/v1/orders` trả về `ApiResponse<PageResponse<OrderSummaryDto>>`. Mỗi summary
+`GET /api/v1/orders` trả về `ApiResponse<PageResponse<OrderSummaryResponse>>`. Mỗi summary
 chứa `id`, `status`, `paymentStatus`, `paymentMethod`, `createdAt` và `totalAmount`.
-`GET /api/v1/orders/{orderId}` trả về `ApiResponse<OrderDto>`; nó tái dùng các order-creation fields và thêm
-`shipments: ShipmentDto[]`. Shipment DTO dưới đây do đó là một phần của order detail, không phải
+`GET /api/v1/orders/{orderId}` trả về `ApiResponse<OrderResponse>`; nó tái dùng các order-creation fields và thêm
+`shipments: ShipmentResponse[]`. Shipment response dưới đây do đó là một phần của order detail, không phải
 standalone top-level response.
 
-Order detail chứa nested `ShipmentDto` data shape sau. Đây không phải standalone top-level response và
-không được trả về bên ngoài envelope `ApiResponse<OrderDto>`:
+Order detail chứa nested `ShipmentResponse` data shape sau. Đây không phải standalone top-level response và
+không được trả về bên ngoài envelope `ApiResponse<OrderResponse>`:
 
 ```json
 {
@@ -556,7 +556,7 @@ Content-Type: application/json
 
 Review tags và image attachments không thuộc hợp đồng MVP đầu tiên.
 
-Tạo review thành công trả về `201` với `ApiResponse<ReviewDto>`:
+Tạo review thành công trả về `201` với `ApiResponse<ReviewResponse>`:
 
 ```json
 {
@@ -575,7 +575,7 @@ Tạo review thành công trả về `201` với `ApiResponse<ReviewDto>`:
 }
 ```
 
-Review listing trả về `ApiResponse<PageResponse<ReviewDto>>`; `data` chứa `content`, `page`, `size`,
+Review listing trả về `ApiResponse<PageResponse<ReviewResponse>>`; `data` chứa `content`, `page`, `size`,
 `totalElements` và
 `totalPages`. Một ineligible customer nhận
 `REVIEW_NOT_ELIGIBLE`; một second review cho cùng customer/product nhận `REVIEW_ALREADY_EXISTS`.

@@ -55,7 +55,7 @@ Behavior (FR-SHIP-01 – FR-SHIP-04, FR-SHIP-13):
 - New shipment starts as `PENDING` with `trackingCode/shippedAt/deliveredAt =
   null`.
 
-Success: `201 Created`, `ApiResponse<ShipmentDto>`. `data` payload:
+Success: `201 Created`, `ApiResponse<ShipmentResponse>`. `data` payload:
 
 ```json
 {
@@ -96,7 +96,7 @@ Actor: `SELLER`.
 Query (all optional): `orderId` (UUID), `status` (`ShipmentStatus` value),
 `page` (default `0`), `size` (default `20`).
 
-Success: `200 OK`, `ApiResponse<PageResponse<ShipmentDto>>` (item shape as in
+Success: `200 OK`, `ApiResponse<PageResponse<ShipmentResponse>>` (item shape as in
 `POST /api/v1/seller/shipments`).
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`) when caller is
@@ -145,7 +145,7 @@ Field requirements (FR-SHIP-05, FR-SHIP-06):
   order-`DELIVERED` aggregate (all required non-cancelled shipments delivered;
   mixed outcomes stay per-shipment, FR-SHIP-07 – FR-SHIP-12).
 
-Success: `200 OK`, `ApiResponse<ShipmentDto>` (same shape as creation,
+Success: `200 OK`, `ApiResponse<ShipmentResponse>` (same shape as creation,
 reflecting the new status/timestamps).
 
 Errors:
@@ -170,7 +170,7 @@ Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
   customer's order (unknown or another customer's `orderId` yields `RESOURCE_NOT_FOUND`
   `404`).
 
-Success: `200 OK`, `ApiResponse<List<ShipmentDto>>`:
+Success: `200 OK`, `ApiResponse<List<ShipmentResponse>>`:
 
 ```json
 {

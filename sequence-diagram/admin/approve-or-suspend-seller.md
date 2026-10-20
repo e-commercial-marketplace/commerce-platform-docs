@@ -34,7 +34,7 @@ sequenceDiagram
             Email-->>Service: Delivery result, failure does not roll back status
         end
         Service-->>Controller: Result
-        Controller-->>Client: 200 OK ApiResponse<UserDto>
+        Controller-->>Client: 200 OK ApiResponse<UserResponse>
         Client-->>Admin: Display the decision result
     else Invalid seller or status transition
         Service-->>Controller: Propagate exception

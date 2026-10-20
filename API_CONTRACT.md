@@ -263,7 +263,7 @@ backend search score, followed by `ratingAverage DESC`, `reviewCount DESC`, and 
 tie-breakers. Other sorts use `id ASC` as the final tie-breaker. A `popular` sort is deferred until a
 separate popularity metric is defined.
 
-The complete wire response is `ApiResponse<PageResponse<ProductSummaryDto>>`:
+The complete wire response is `ApiResponse<PageResponse<ProductSummaryResponse>>`:
 
 ```json
 {
@@ -303,7 +303,7 @@ The complete wire response is `ApiResponse<PageResponse<ProductSummaryDto>>`:
 GET /api/v1/categories
 ```
 
-The complete wire response is `ApiResponse<List<CategorySummaryDto>>`:
+The complete wire response is `ApiResponse<List<CategorySummaryResponse>>`:
 
 ```json
 {
@@ -329,7 +329,7 @@ GET /api/v1/products/{productId}
 The response uses the same product fields as the list response. The first MVP supports one
 `imageUrl` and no color/size variant selection.
 
-The actual wire response is `ApiResponse<ProductDto>`:
+The actual wire response is `ApiResponse<ProductResponse>`:
 
 ```json
 {
@@ -388,7 +388,7 @@ GET /api/v1/cart
 }
 ```
 
-The complete wire response is `ApiResponse<CartDto>`.
+The complete wire response is `ApiResponse<CartResponse>`.
 
 ```http
 POST /api/v1/cart/items
@@ -421,7 +421,7 @@ The backend validates product activity and stock. The frontend must not treat a 
 the authoritative checkout price. If the product is already in the customer's cart, `POST` increments
 the existing quantity instead of creating a duplicate row. The combined quantity is validated against
 current stock. Successful `POST`, `PATCH`, and `DELETE` mutations return
-`ApiResponse<CartDto>` with status `200` in the first MVP; `INSUFFICIENT_STOCK` or
+`ApiResponse<CartResponse>` with status `200` in the first MVP; `INSUFFICIENT_STOCK` or
 `CART_ITEM_NOT_FOUND` is returned in the common error envelope when the mutation cannot be applied.
 
 ## 6. Checkout and orders
@@ -446,7 +446,7 @@ Content-Type: application/json
 
 `paymentMethod` is `COD` for the first MVP. `VNPAY` is reserved for the next payment slice.
 
-The complete wire response is `ApiResponse<OrderDto>`:
+The complete wire response is `ApiResponse<OrderResponse>`:
 
 ```json
 {
@@ -500,14 +500,14 @@ The backend returns only orders owned by the authenticated customer. Shipment ou
 seller-scoped inside the order detail; a mixed seller result must not be collapsed into one false
 order-level delivery status.
 
-`GET /api/v1/orders` returns `ApiResponse<PageResponse<OrderSummaryDto>>`. Each summary
+`GET /api/v1/orders` returns `ApiResponse<PageResponse<OrderSummaryResponse>>`. Each summary
 contains `id`, `status`, `paymentStatus`, `paymentMethod`, `createdAt`, and `totalAmount`.
-`GET /api/v1/orders/{orderId}` returns `ApiResponse<OrderDto>`; it reuses the order-creation fields and adds
-`shipments: ShipmentDto[]`. The shipment DTO below is therefore part of the order detail, not a
+`GET /api/v1/orders/{orderId}` returns `ApiResponse<OrderResponse>`; it reuses the order-creation fields and adds
+`shipments: ShipmentResponse[]`. The shipment response below is therefore part of the order detail, not a
 standalone top-level response.
 
-The order detail contains the following nested `ShipmentDto` data shape. This is not a standalone
-top-level response and must not be returned without the `ApiResponse<OrderDto>` envelope:
+The order detail contains the following nested `ShipmentResponse` data shape. This is not a standalone
+top-level response and must not be returned without the `ApiResponse<OrderResponse>` envelope:
 
 ```json
 {
@@ -559,7 +559,7 @@ Content-Type: application/json
 
 Review tags and image attachments are not part of the first MVP contract.
 
-Successful review creation returns `201` with `ApiResponse<ReviewDto>`:
+Successful review creation returns `201` with `ApiResponse<ReviewResponse>`:
 
 ```json
 {
@@ -578,7 +578,7 @@ Successful review creation returns `201` with `ApiResponse<ReviewDto>`:
 }
 ```
 
-Review listing returns `ApiResponse<PageResponse<ReviewDto>>`; its `data` contains `content`, `page`, `size`,
+Review listing returns `ApiResponse<PageResponse<ReviewResponse>>`; its `data` contains `content`, `page`, `size`,
 `totalElements`, and `totalPages`. An ineligible customer receives
 `REVIEW_NOT_ELIGIBLE`; a second review for the same customer/product receives `REVIEW_ALREADY_EXISTS`.
 

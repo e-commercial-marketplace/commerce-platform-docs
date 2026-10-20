@@ -50,7 +50,7 @@ sequenceDiagram
             PaymentService-->>Service: Reconciliation result
         end
         Service-->>Controller: Updated result
-        Controller-->>Client: 200 OK ApiResponse<ShipmentDto>
+        Controller-->>Client: 200 OK ApiResponse<ShipmentResponse>
         Client-->>Seller: Display the new status
     else Ownership or transition rule fails
         Service-->>Controller: Propagate exception

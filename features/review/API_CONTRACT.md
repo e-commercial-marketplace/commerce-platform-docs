@@ -60,7 +60,7 @@ Request body (raw JSON):
 | `rating` | integer | Required, `1..5` (`FR-REV-03`) |
 | `comment` | string | Customer feedback text |
 
-Success: `201 Created` with `ApiResponse<ReviewDto>`. The `data` object is:
+Success: `201 Created` with `ApiResponse<ReviewResponse>`. The `data` object is:
 
 ```json
 {
@@ -93,7 +93,7 @@ Maps to: `FR-REV-01`, `FR-REV-02`, `FR-REV-03`.
 List public reviews for a product.
 
 - Actor/Auth: public. No token required.
-- Only public review fields are exposed (same `ReviewDto` shape as creation).
+- Only public review fields are exposed (same `ReviewResponse` shape as creation).
 
 Query parameters (all optional):
 
@@ -102,7 +102,7 @@ Query parameters (all optional):
 | `page` | Zero-based page index; default `0` |
 | `size` | Page size; default `20`, backend applies a maximum |
 
-Success: `200 OK` with `ApiResponse<PageResponse<ReviewDto>>`:
+Success: `200 OK` with `ApiResponse<PageResponse<ReviewResponse>>`:
 
 ```json
 {

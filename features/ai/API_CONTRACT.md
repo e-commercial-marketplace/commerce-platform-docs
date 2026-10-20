@@ -110,7 +110,7 @@ List persisted AI sessions owned by the caller.
 - Ownership: returns only sessions where `ai_chat_sessions.userId == principal.id`. The owner ID
   is never accepted from the request body. `SELLER`/`ADMIN` have no AI access in the current scope.
 
-Success: `200 OK` with `ApiResponse<List<AiChatSessionDto>>`. Each `data` element uses only
+Success: `200 OK` with `ApiResponse<List<AiChatSessionResponse>>`. Each `data` element uses only
 feature README fields:
 
 ```json
@@ -153,7 +153,7 @@ Path parameters:
 |---|---|---|
 | `id` | UUID string | AI session identifier |
 
-Success: `200 OK` with `ApiResponse<List<AiMessageDto>>`. Each `data` element uses only feature
+Success: `200 OK` with `ApiResponse<List<AiMessageResponse>>`. Each `data` element uses only feature
 README fields:
 
 ```json

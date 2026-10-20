@@ -128,7 +128,7 @@ Behavior (FR-PAY-03 – FR-PAY-07):
   and a retry creates another `Payment` record via
   `POST /api/v1/payments/vnpay/create`.
 
-Success: `200 OK`, `ApiResponse<PaymentDto>`. `data` payload:
+Success: `200 OK`, `ApiResponse<PaymentResponse>`. `data` payload:
 
 ```json
 {

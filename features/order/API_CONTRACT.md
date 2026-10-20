@@ -49,7 +49,7 @@ Behavior (transactional, FR-ORD-01 – FR-ORD-08):
 - Reserve/decrease stock, save `discountAmount`/`shippingFee`/`totalAmount`
   snapshots, clear purchased cart items.
 
-Success: `201 Created`, `ApiResponse<OrderDto>`. `data` payload:
+Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
 
 ```json
 {
@@ -102,7 +102,7 @@ Actor: `CUSTOMER`.
 
 Query: `page` (default `0`), `size` (default `20`, backend-capped).
 
-Success: `200 OK`, `ApiResponse<PageResponse<OrderSummaryDto>>`. `data` payload:
+Success: `200 OK`, `ApiResponse<PageResponse<OrderSummaryResponse>>`. `data` payload:
 
 ```json
 {
@@ -133,7 +133,7 @@ Get one order owned by the authenticated customer.
 Actor: `CUSTOMER`.
 
 - `{id}`: order UUID.
-- Returns `ApiResponse<OrderDto>` with the same shape as `POST /api/v1/orders`.
+- Returns `ApiResponse<OrderResponse>` with the same shape as `POST /api/v1/orders`.
 - Ownership: an order that does not exist **or** does not belong to the caller
   returns `RESOURCE_NOT_FOUND` (`404`); the backend must not distinguish
   "another customer's order" from "missing order".
@@ -158,7 +158,7 @@ Query parameters (all optional): `status` (`PENDING | CONFIRMED | CANCELLED`),
 Enforces `orderItem.seller.id == authenticatedSeller.id`; never returns another
 seller's lines.
 
-Success: `200 OK`, `ApiResponse<PageResponse<OrderItemDto>>`. `data` payload:
+Success: `200 OK`, `ApiResponse<PageResponse<OrderItemResponse>>`. `data` payload:
 
 ```json
 {
@@ -191,7 +191,7 @@ Maps to FR-FUL-01, FR-FUL-03.
 Seller confirms one owned order item (`PENDING -> CONFIRMED`).
 Actor: `SELLER`.
 
-No request body. Success: `200 OK`, `ApiResponse<OrderItemDto>` (same item
+No request body. Success: `200 OK`, `ApiResponse<OrderItemResponse>` (same item
 shape as above, `status: "CONFIRMED"`).
 
 Errors:
@@ -231,7 +231,7 @@ Rules:
   and every still-`PENDING` payment `amount` from remaining non-cancelled
   snapshots; cancelled snapshots stay unchanged for history.
 
-Success: `200 OK`, `ApiResponse<OrderItemDto>` (`status: "CANCELLED"`).
+Success: `200 OK`, `ApiResponse<OrderItemResponse>` (`status: "CANCELLED"`).
 
 Errors:
 

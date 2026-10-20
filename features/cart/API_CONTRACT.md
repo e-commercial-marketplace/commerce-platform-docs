@@ -12,7 +12,7 @@ Status: Confirmed (root §5, SRS §5.3).
 
 - Actor/auth: `CUSTOMER` only, `Authorization: Bearer <access-token>` required. The server resolves the cart owner from the token; a customer sees only their own cart.
 - Maps to: FR-CART-01.
-- Success: `200 OK`, `ApiResponse<CartDto>`. `data` payload:
+- Success: `200 OK`, `ApiResponse<CartResponse>`. `data` payload:
 
 ```json
 {
@@ -56,7 +56,7 @@ Status: Confirmed (root §5, SRS §5.3).
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<CartDto>` with the full updated cart (same shape as GET).
+- Success: `200 OK`, `ApiResponse<CartResponse>` with the full updated cart (same shape as GET).
 - Errors:
 
 | Code | HTTP | When |
@@ -83,7 +83,7 @@ Status: Confirmed (root §5, SRS §5.3).
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<CartDto>` with the full updated cart.
+- Success: `200 OK`, `ApiResponse<CartResponse>` with the full updated cart.
 - Errors:
 
 | Code | HTTP | When |
@@ -102,7 +102,7 @@ Status: Confirmed (root §5, SRS §5.3).
 - Actor/auth: `CUSTOMER` only + own cart row.
 - Maps to: FR-CART-02.
 - Params: `id` (path, cart-item UUID). Empty request body.
-- Success: `200 OK`, `ApiResponse<CartDto>` with the full updated cart.
+- Success: `200 OK`, `ApiResponse<CartResponse>` with the full updated cart.
 - Errors:
 
 | Code | HTTP | When |

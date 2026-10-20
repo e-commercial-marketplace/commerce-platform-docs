@@ -25,7 +25,7 @@ Status: Confirmed (root §4, SRS §5.2).
 | `size` | Page size, default `20` |
 
 - Default sort is `relevance` when `q` is present, `rating_desc` otherwise; deterministic `id ASC` tie-breaker.
-- Success: `200 OK`, `ApiResponse<PageResponse<ProductSummaryDto>>`. `data` payload:
+- Success: `200 OK`, `ApiResponse<PageResponse<ProductSummaryResponse>>`. `data` payload:
 
 ```json
 {
@@ -63,7 +63,7 @@ Status: Confirmed (root §4, SRS §5.2).
 - Actor/auth: public, no token required.
 - Maps to: FR-CAT-03.
 - Params: `id` (path, product UUID).
-- Success: `200 OK`, `ApiResponse<ProductDto>` — same product fields as the list item above.
+- Success: `200 OK`, `ApiResponse<ProductResponse>` — same product fields as the list item above.
 - Errors:
 
 | Code | HTTP | When |
@@ -76,7 +76,7 @@ Status: Confirmed (root §4, SRS §5.2).
 
 - Actor/auth: public, no token required.
 - Maps to: FR-CAT-03.
-- Success: `200 OK`, `ApiResponse<List<CategorySummaryDto>>`. `data` payload:
+- Success: `200 OK`, `ApiResponse<List<CategorySummaryResponse>>`. `data` payload:
 
 ```json
 [
@@ -110,7 +110,7 @@ Status: Confirmed (SRS §5.2).
 }
 ```
 
-- Success: `201 Created`, `ApiResponse<ProductDto>` with the created product (including `id`, `ratingAverage: "0"`, `reviewCount: 0`, `sellerId` from token).
+- Success: `201 Created`, `ApiResponse<ProductResponse>` with the created product (including `id`, `ratingAverage: "0"`, `reviewCount: 0`, `sellerId` from token).
 - Errors:
 
 | Code | HTTP | When |
@@ -138,7 +138,7 @@ Status: Confirmed (SRS §5.2).
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<ProductDto>` with the updated product. Use the stock endpoint for stock changes.
+- Success: `200 OK`, `ApiResponse<ProductResponse>` with the updated product. Use the stock endpoint for stock changes.
 - Errors:
 
 | Code | HTTP | When |
@@ -178,7 +178,7 @@ Status: Confirmed (SRS §5.2).
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<ProductDto>` with the updated `stock`.
+- Success: `200 OK`, `ApiResponse<ProductResponse>` with the updated `stock`.
 - Errors:
 
 | Code | HTTP | When |
@@ -206,7 +206,7 @@ Status: Predicted.
 }
 ```
 
-- Success: `201 Created`, `ApiResponse<CategorySummaryDto>`:
+- Success: `201 Created`, `ApiResponse<CategorySummaryResponse>`:
 
 ```json
 {
@@ -237,7 +237,7 @@ Status: Predicted.
 }
 ```
 
-- Success: `200 OK`, `ApiResponse<CategorySummaryDto>` with the renamed category.
+- Success: `200 OK`, `ApiResponse<CategorySummaryResponse>` with the renamed category.
 - Errors:
 
 | Code | HTTP | When |

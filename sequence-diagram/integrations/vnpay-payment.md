@@ -46,7 +46,7 @@ sequenceDiagram
         DB-->>PaymentRepo: Updated payment/order state
         PaymentRepo-->>Service: Completed state
         Service-->>Controller: Result
-        Controller-->>VNPAY: 200 OK ApiResponse<PaymentDto>
+        Controller-->>VNPAY: 200 OK ApiResponse<PaymentResponse>
     else Invalid signature, mismatch, or duplicate callback
         Service-->>Controller: Callback result/error
         Controller->>Handler: Normalize callback validation error when rejected
