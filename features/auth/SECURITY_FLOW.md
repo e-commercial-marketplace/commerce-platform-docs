@@ -55,8 +55,9 @@ The rules in `SecurityConfig` are checked from top to bottom and the first match
 | `POST /api/v1/auth/register`, `POST /api/v1/auth/login` | Public |
 | `POST /api/v1/auth/refresh` | Public (it authenticates with the refresh token) |
 | `POST /api/v1/auth/logout` | Authenticated (needs the caller's access token) |
-| `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories` | Public |
+| `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Public |
 | `POST /api/v1/ai/ask` | Public |
+| `/api/v1/seller/**` | Role `SELLER` only (seller approval is checked by the service, see below) |
 | `/api/v1/admin/**` | Role `ADMIN` only |
 | Any other request | Authenticated |
 
@@ -187,6 +188,7 @@ All errors use the common `ApiResponse` envelope described in [API_CONTRACT.md](
 | Wrong email or password, disabled account | 401 | `AUTHENTICATION_REQUIRED` | `AuthServiceImpl` |
 | Invalid, expired or revoked refresh token | 401 | `AUTHENTICATION_REQUIRED` | `RefreshTokenServiceImpl` |
 | Identity known but role not allowed | 403 | `FORBIDDEN` | `RestAccessDeniedHandler` |
+| Seller not `APPROVED`, or product owned by another seller | 403 | `FORBIDDEN` | `SellerProductServiceImpl` |
 | `@PreAuthorize` rejects the call | 403 | `FORBIDDEN` | `GlobalExceptionHandler` |
 | Malformed body or unknown role value | 400 | `VALIDATION_ERROR` | `GlobalExceptionHandler` |
 
@@ -200,12 +202,13 @@ All errors use the common `ApiResponse` envelope described in [API_CONTRACT.md](
 | Authenticated user (id and role, authorities) | `AuthUser` |
 | 401 and 403 JSON bodies | `RestAuthenticationEntryPoint`, `RestAccessDeniedHandler` |
 | Register, login, refresh, logout | `AuthServiceImpl` |
+| Seller approval and product ownership checks | `SellerProductServiceImpl` |
 | Refresh token issue, rotation, revocation | `RefreshTokenServiceImpl` |
 | First admin from environment variables | `AdminBootstrap` |
 
 ## 9. Known limits and not yet implemented
 
 - An access token cannot be revoked. A user who is locked keeps working until the access token expires (at most 15 minutes).
-- The token carries only the role. Seller approval (`sellerStatus`) and resource ownership are not in the token: feature services must check the database (planned for Phase 2).
+- The token carries only the role. Seller approval (`sellerStatus`) and resource ownership are not in the token, so feature services check the database. The seller product endpoints do this in `SellerProductServiceImpl` (Phase 2); future seller features must do the same.
 - Not implemented yet: login rate limiting, forgot password, admin approval of sellers.
 - Browser calls need CORS. It is off by default and enabled with `APP_CORS_ALLOWED_ORIGIN_PATTERNS`; use `*` only during development.

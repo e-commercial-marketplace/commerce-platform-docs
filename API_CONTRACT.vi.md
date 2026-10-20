@@ -30,7 +30,7 @@ trong `application.yml`, áp dụng bởi `WebConfig`) nên controller khai báo
 Authorization: Bearer <access-token>
 ```
 
-Các requests public catalog, guest AI product-search và review-list không yêu cầu token. Các thao tác cart,
+Các requests public catalog (kể cả trang shop của seller), guest AI product-search và review-list không yêu cầu token. Các thao tác cart,
 checkout, order và tạo review yêu cầu `CUSTOMER` đã authenticated.
 
 ### 2.2 Định dạng dữ liệu
@@ -247,6 +247,7 @@ Mọi query parameters đều optional:
 |---|---|
 | `q` | Text search trên product name và description |
 | `categoryId` | Category filter |
+| `sellerId` | Seller (shop) filter: chỉ các product đang bán của seller đó |
 | `minPrice` / `maxPrice` | Khoảng price bao gồm cận |
 | `minRating` | Minimum rating từ `0` tới `5` |
 | `sort` | `relevance`, `price_asc`, `price_desc` hoặc `rating_desc` |
@@ -276,6 +277,7 @@ Wire response đầy đủ là `ApiResponse<PageResponse<ProductSummaryResponse>
         "stock": 12,
         "ratingAverage": "4.50",
         "reviewCount": 99,
+        "active": true,
         "category": {
           "id": "category-uuid",
           "name": "Electronics"
@@ -340,6 +342,7 @@ Wire response đầy đủ là `ApiResponse<ProductResponse>`:
     "stock": 12,
     "ratingAverage": "4.50",
     "reviewCount": 99,
+    "active": true,
     "category": {
       "id": "category-uuid",
       "name": "Electronics"
@@ -351,6 +354,34 @@ Wire response đầy đủ là `ApiResponse<ProductResponse>`:
   "traceId": "request-trace-id"
 }
 ```
+
+### Shop của seller
+
+```http
+GET /api/v1/sellers/{sellerId}
+```
+
+Public. Trang shop của một seller; tên shop là `name` của seller. Các product của shop được đọc bằng
+`GET /api/v1/products?sellerId={sellerId}`. Trả `404 RESOURCE_NOT_FOUND` khi user không tồn tại, không phải
+`SELLER`, hoặc chưa `APPROVED`.
+
+Wire response là `ApiResponse<SellerShopResponse>`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "seller-uuid",
+    "name": "Seller Name",
+    "productCount": 12
+  },
+  "error": null,
+  "timestamp": "2026-10-12T10:30:00Z",
+  "traceId": "request-trace-id"
+}
+```
+
+`productCount` đếm các product đang bán (`active = true`) của seller.
 
 ## 5. Cart
 

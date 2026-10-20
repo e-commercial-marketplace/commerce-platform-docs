@@ -90,6 +90,8 @@ POST /api/v1/auth/refresh
 | FR-CAT-04 | Seller phải có thể tạo, cập nhật, soft-delete/unlist và cập nhật stock cho product của chính mình. |
 | FR-CAT-05 | Một product active phải thuộc về đúng một category và một seller. |
 | FR-CAT-06 | Một seller không được sửa product thuộc sở hữu của seller khác. |
+| FR-CAT-07 | Customer phải có thể xem shop của một seller (tên shop là tên của seller) và các product đang bán của seller đó. |
+| FR-CAT-08 | Seller phải có thể liệt kê và xem product của chính mình, kể cả product đã unlist. |
 
 Các endpoint theo kế hoạch:
 
@@ -97,7 +99,10 @@ Các endpoint theo kế hoạch:
 GET    /api/v1/products
 GET    /api/v1/products/{id}
 GET    /api/v1/categories
+GET    /api/v1/sellers/{id}
 
+GET    /api/v1/seller/products
+GET    /api/v1/seller/products/{id}
 POST   /api/v1/seller/products
 PATCH  /api/v1/seller/products/{id}
 DELETE /api/v1/seller/products/{id}

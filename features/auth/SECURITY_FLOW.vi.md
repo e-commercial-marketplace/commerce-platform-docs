@@ -55,8 +55,9 @@ Các luật trong `SecurityConfig` được kiểm tra từ trên xuống và lu
 | `POST /api/v1/auth/register`, `POST /api/v1/auth/login` | Công khai |
 | `POST /api/v1/auth/refresh` | Công khai (tự xác thực bằng refresh token) |
 | `POST /api/v1/auth/logout` | Phải đăng nhập (cần access token của chính người gọi) |
-| `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories` | Công khai |
+| `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Công khai |
 | `POST /api/v1/ai/ask` | Công khai |
+| `/api/v1/seller/**` | Chỉ role `SELLER` (trạng thái duyệt seller do service kiểm tra, xem bên dưới) |
 | `/api/v1/admin/**` | Chỉ role `ADMIN` |
 | Mọi request còn lại | Phải đăng nhập |
 
@@ -187,6 +188,7 @@ Mọi lỗi dùng khung `ApiResponse` chung, mô tả trong [API_CONTRACT.md](..
 | Sai email hoặc mật khẩu, tài khoản bị khóa | 401 | `AUTHENTICATION_REQUIRED` | `AuthServiceImpl` |
 | Refresh token sai, hết hạn hoặc đã thu hồi | 401 | `AUTHENTICATION_REQUIRED` | `RefreshTokenServiceImpl` |
 | Biết danh tính nhưng role không được phép | 403 | `FORBIDDEN` | `RestAccessDeniedHandler` |
+| Seller chưa `APPROVED`, hoặc product thuộc seller khác | 403 | `FORBIDDEN` | `SellerProductServiceImpl` |
 | `@PreAuthorize` từ chối lời gọi | 403 | `FORBIDDEN` | `GlobalExceptionHandler` |
 | Body sai định dạng hoặc giá trị role không tồn tại | 400 | `VALIDATION_ERROR` | `GlobalExceptionHandler` |
 
@@ -200,12 +202,13 @@ Mọi lỗi dùng khung `ApiResponse` chung, mô tả trong [API_CONTRACT.md](..
 | Người dùng đã xác thực (id, role, authorities) | `AuthUser` |
 | Body JSON của lỗi 401 và 403 | `RestAuthenticationEntryPoint`, `RestAccessDeniedHandler` |
 | Đăng ký, đăng nhập, refresh, logout | `AuthServiceImpl` |
+| Kiểm tra seller đã duyệt và quyền sở hữu product | `SellerProductServiceImpl` |
 | Cấp, xoay vòng, thu hồi refresh token | `RefreshTokenServiceImpl` |
 | Admin đầu tiên từ biến môi trường | `AdminBootstrap` |
 
 ## 9. Giới hạn đã biết và phần chưa triển khai
 
 - Access token không thu hồi được. Người dùng bị khóa vẫn gọi được cho đến khi access token hết hạn (tối đa 15 phút).
-- Token chỉ chứa role. Trạng thái duyệt seller (`sellerStatus`) và quyền sở hữu tài nguyên không nằm trong token: service tính năng phải kiểm tra database (dự kiến ở Phase 2).
+- Token chỉ chứa role. Trạng thái duyệt seller (`sellerStatus`) và quyền sở hữu tài nguyên không nằm trong token nên service tính năng kiểm tra database. Các endpoint product của seller làm việc này trong `SellerProductServiceImpl` (Phase 2); các tính năng seller sau này phải làm tương tự.
 - Chưa triển khai: giới hạn số lần đăng nhập, quên mật khẩu, admin duyệt seller.
 - Trình duyệt gọi API cần CORS. Mặc định tắt và bật bằng `APP_CORS_ALLOWED_ORIGIN_PATTERNS`; chỉ dùng `*` khi phát triển.

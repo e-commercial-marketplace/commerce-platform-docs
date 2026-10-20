@@ -9,19 +9,29 @@ Sở hữu danh mục (category), sản phẩm, khả năng hiển thị sản p
 - Quản lý danh mục cho Admin.
 - Seller tạo, cập nhật, xóa/xóa mềm sản phẩm và quản lý tồn kho.
 - Khách hàng duyệt, tìm kiếm, lọc và phân trang sản phẩm.
+- Khách hàng xem shop của seller (tên shop là `name` của seller) và các sản phẩm đang bán của seller đó.
+- Seller xem sản phẩm của chính mình, kể cả sản phẩm đã ẩn.
 - Thực thi quy tắc hoạt động sản phẩm và tồn kho dùng bởi giỏ hàng và checkout.
 - Giữ mỗi sản phẩm thuộc đúng một danh mục và một seller.
 
 ## API dự kiến
 
+Tất cả endpoint trong danh sách này đã được triển khai (tính đến Phase 2).
+
 ```text
 GET    /api/v1/products
 GET    /api/v1/products/{id}
 GET    /api/v1/categories
+GET    /api/v1/sellers/{id}
+GET    /api/v1/seller/products
+GET    /api/v1/seller/products/{id}
 POST   /api/v1/seller/products
 PATCH  /api/v1/seller/products/{id}
 DELETE /api/v1/seller/products/{id}
 PATCH  /api/v1/seller/products/{id}/stock
+POST   /api/v1/admin/categories
+PATCH  /api/v1/admin/categories/{id}
+DELETE /api/v1/admin/categories/{id}
 ```
 
 ## Phân quyền

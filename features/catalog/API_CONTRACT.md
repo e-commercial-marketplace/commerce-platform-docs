@@ -2,7 +2,7 @@
 
 Scope: public product/category browsing plus seller product management and admin category management. All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2 conventions, §4 catalog).
 
-Conventions: base path `/api/v1`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants.
+Conventions: base path `/api/v1`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants. Product responses include `active`; the public endpoints only ever return `active: true`.
 
 ## Public catalog (Confirmed)
 
@@ -18,6 +18,7 @@ Status: Confirmed (root §4, SRS §5.2).
 |---|---|
 | `q` | Text search against product name and description |
 | `categoryId` | Category filter (UUID) |
+| `sellerId` | Seller (shop) filter (UUID): only that seller's listed products are returned |
 | `minPrice` / `maxPrice` | Inclusive price range |
 | `minRating` | Minimum rating `0`–`5` |
 | `sort` | `relevance`, `price_asc`, `price_desc`, or `rating_desc` |
@@ -39,6 +40,7 @@ Status: Confirmed (root §4, SRS §5.2).
       "stock": 12,
       "ratingAverage": "4.50",
       "reviewCount": 99,
+      "active": true,
       "category": { "id": "category-uuid", "name": "Electronics" },
       "sellerId": "seller-uuid"
     }
@@ -86,9 +88,77 @@ Status: Confirmed (root §4, SRS §5.2).
 
 - Errors: none specific besides `INTERNAL_ERROR` (500).
 
+### GET /api/v1/sellers/{id}
+
+Status: Confirmed (FR-CAT-07).
+
+- Actor/auth: public, no token required.
+- Maps to: FR-CAT-07.
+- Purpose: the shop page of one seller. The shop name is the seller's `name`; the products of the shop are read with `GET /api/v1/products?sellerId={id}`.
+- Params: `id` (path, seller UUID).
+- Success: `200 OK`, `ApiResponse<SellerShopResponse>`. `data` payload:
+
+```json
+{
+  "id": "seller-uuid",
+  "name": "Seller Name",
+  "productCount": 12
+}
+```
+
+`productCount` is the number of the seller's listed (`active = true`) products. No email or other private user field is exposed.
+
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `RESOURCE_NOT_FOUND` | 404 | No such user, the user is not a `SELLER`, or `sellerStatus` is not `APPROVED` (the response does not say which) |
+
 ## Seller products (Confirmed)
 
 All endpoints below require `Authorization: Bearer <access-token>` with role `SELLER` and `sellerStatus = APPROVED`. Ownership rule: `product.sellerId == authenticatedSeller.id` (FR-CAT-06).
+
+Implementation notes (Phase 2): the `SELLER` role is enforced by the URL rules and returns `403 FORBIDDEN` for other roles; `sellerStatus = APPROVED` is checked against the database on every call because the access token carries only the role, so a seller suspended after receiving a token is rejected. A seller can still `PATCH` an unlisted product (`active: false`), for example to set `active: true` and list it again. Names are trimmed before they are stored.
+
+### GET /api/v1/seller/products
+
+Status: Confirmed (FR-CAT-08).
+
+- Actor/auth: `SELLER` (`APPROVED`) only. Returns only the caller's own products, including unlisted ones.
+- Maps to: FR-CAT-08.
+- Query params (all optional):
+
+| Parameter | Meaning |
+|---|---|
+| `q` | Text search against product name and description |
+| `active` | `true` or `false`: filter by visibility; omitted returns both |
+| `page` | Zero-based page index, default `0` |
+| `size` | Page size, default `20`, maximum `100` |
+
+- Order: `name ASC`, then `id ASC`.
+- Success: `200 OK`, `ApiResponse<PageResponse<ProductSummaryResponse>>`, the same shape as the public list (with `active`).
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
+| `FORBIDDEN` | 403 | Not a seller, or seller not `APPROVED` |
+| `VALIDATION_ERROR` | 400 | Invalid `active`, `page` or `size` |
+
+### GET /api/v1/seller/products/{id}
+
+Status: Confirmed (FR-CAT-08).
+
+- Actor/auth: `SELLER` (`APPROVED`) + own product only.
+- Maps to: FR-CAT-08, FR-CAT-06.
+- Success: `200 OK`, `ApiResponse<ProductResponse>`; unlisted products are returned too.
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
+| `FORBIDDEN` | 403 | Not an approved seller, or product owned by another seller |
+| `RESOURCE_NOT_FOUND` | 404 | No product with `id` |
 
 ### POST /api/v1/seller/products
 
@@ -194,10 +264,11 @@ All endpoints below require `ADMIN`. Category fields: `categories{id, name}` (`n
 
 ### POST /api/v1/admin/categories
 
-Status: Predicted.
+Status: Predicted — implemented in Phase 2.
 
 - Actor/auth: `ADMIN` only.
 - Maps to: FR-CAT-05 (category ownership invariant).
+- Business rule: the name is trimmed, and uniqueness is checked case-insensitively (`Books` and `books` are duplicates).
 - Request body (JSON):
 
 ```json
@@ -225,7 +296,7 @@ Status: Predicted.
 
 ### PATCH /api/v1/admin/categories/{id}
 
-Status: Predicted.
+Status: Predicted — implemented in Phase 2.
 
 - Actor/auth: `ADMIN` only.
 - Maps to: FR-CAT-05.
@@ -249,11 +320,11 @@ Status: Predicted.
 
 ### DELETE /api/v1/admin/categories/{id}
 
-Status: Predicted.
+Status: Predicted — implemented in Phase 2.
 
 - Actor/auth: `ADMIN` only.
 - Maps to: FR-CAT-05.
-- Business rule: a category that still contains products must not be deleted (reject or require reassignment per implementation).
+- Business rule: a category that still contains products must not be deleted. The implementation rejects the request with `400 VALIDATION_ERROR` and does not reassign products; unlisted products (`active = false`) also count as contained.
 - Success: `204 No Content` (no body).
 - Errors:
 

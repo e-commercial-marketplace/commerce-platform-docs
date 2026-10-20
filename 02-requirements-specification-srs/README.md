@@ -90,6 +90,8 @@ POST /api/v1/auth/refresh
 | FR-CAT-04 | Sellers shall be able to create, update, soft-delete/unlist, and update stock for their own products. |
 | FR-CAT-05 | An active product shall belong to exactly one category and one seller. |
 | FR-CAT-06 | A seller shall not modify a product owned by another seller. |
+| FR-CAT-07 | Customers shall be able to view a seller's shop (the shop name is the seller's name) and the seller's listed products. |
+| FR-CAT-08 | Sellers shall be able to list and view their own products, including unlisted ones. |
 
 Planned endpoints:
 
@@ -97,7 +99,10 @@ Planned endpoints:
 GET    /api/v1/products
 GET    /api/v1/products/{id}
 GET    /api/v1/categories
+GET    /api/v1/sellers/{id}
 
+GET    /api/v1/seller/products
+GET    /api/v1/seller/products/{id}
 POST   /api/v1/seller/products
 PATCH  /api/v1/seller/products/{id}
 DELETE /api/v1/seller/products/{id}

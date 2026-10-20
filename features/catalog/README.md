@@ -9,19 +9,29 @@ Owns categories, products, product visibility, stock, and customer catalog brows
 - Category management for Admin.
 - Seller product create, update, delete/soft-delete, and stock management.
 - Customer product browse, search, filter, and pagination.
+- Customer view of a seller's shop (the shop name is the seller's `name`) and that seller's listed products.
+- Seller view of their own products, including unlisted ones.
 - Enforce product activity and stock rules used by cart and checkout.
 - Keep each product associated with exactly one category and one seller.
 
 ## Planned API
 
+All endpoints listed here are implemented as of Phase 2.
+
 ```text
 GET    /api/v1/products
 GET    /api/v1/products/{id}
 GET    /api/v1/categories
+GET    /api/v1/sellers/{id}
+GET    /api/v1/seller/products
+GET    /api/v1/seller/products/{id}
 POST   /api/v1/seller/products
 PATCH  /api/v1/seller/products/{id}
 DELETE /api/v1/seller/products/{id}
 PATCH  /api/v1/seller/products/{id}/stock
+POST   /api/v1/admin/categories
+PATCH  /api/v1/admin/categories/{id}
+DELETE /api/v1/admin/categories/{id}
 ```
 
 ## Permissions

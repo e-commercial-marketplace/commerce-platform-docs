@@ -30,7 +30,7 @@ paths (actuator, OpenAPI, Swagger UI) stay unversioned. Protected requests send:
 Authorization: Bearer <access-token>
 ```
 
-Public catalog, guest AI product-search, and review-list requests do not require a token. Cart,
+Public catalog (including seller shop pages), guest AI product-search, and review-list requests do not require a token. Cart,
 checkout, order, and review-creation operations require an authenticated `CUSTOMER`.
 
 ### 2.2 Data formats
@@ -250,6 +250,7 @@ All query parameters are optional:
 |---|---|
 | `q` | Text search against product name and description |
 | `categoryId` | Category filter |
+| `sellerId` | Seller (shop) filter: only that seller's listed products |
 | `minPrice` / `maxPrice` | Inclusive price range |
 | `minRating` | Minimum rating from `0` to `5` |
 | `sort` | `relevance`, `price_asc`, `price_desc`, or `rating_desc` |
@@ -279,6 +280,7 @@ The complete wire response is `ApiResponse<PageResponse<ProductSummaryResponse>>
         "stock": 12,
         "ratingAverage": "4.50",
         "reviewCount": 99,
+        "active": true,
         "category": {
           "id": "category-uuid",
           "name": "Electronics"
@@ -343,6 +345,7 @@ The actual wire response is `ApiResponse<ProductResponse>`:
     "stock": 12,
     "ratingAverage": "4.50",
     "reviewCount": 99,
+    "active": true,
     "category": {
       "id": "category-uuid",
       "name": "Electronics"
@@ -354,6 +357,34 @@ The actual wire response is `ApiResponse<ProductResponse>`:
   "traceId": "request-trace-id"
 }
 ```
+
+### Seller shop
+
+```http
+GET /api/v1/sellers/{sellerId}
+```
+
+Public. The shop page of a seller; the shop name is the seller's `name`. The products of the shop are read with
+`GET /api/v1/products?sellerId={sellerId}`. Returns `404 RESOURCE_NOT_FOUND` when the user does not exist, is
+not a `SELLER`, or is not `APPROVED`.
+
+The wire response is `ApiResponse<SellerShopResponse>`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "seller-uuid",
+    "name": "Seller Name",
+    "productCount": 12
+  },
+  "error": null,
+  "timestamp": "2026-10-12T10:30:00Z",
+  "traceId": "request-trace-id"
+}
+```
+
+`productCount` counts the seller's listed (`active = true`) products.
 
 ## 5. Cart
 
