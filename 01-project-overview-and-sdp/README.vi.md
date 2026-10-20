@@ -119,11 +119,11 @@ tên class cho biết feature, ví dụ `AuthController`, `ProductService` hoặ
 
 ```text
 config | controller | service (+ impl) | repository | entity | enums
-dto (request, response) | mapper | security | exception | util
-websocket | vnpay | ai (tools, rag, memory)
+dto (request, response) | mapper | security | websocket | vnpay | ai (tools, rag, memory)
+common (config, response, exception, util)
 ```
 
-Tên class phải duy nhất trong toàn dự án vì các tầng dùng chung. Các feature chỉ gọi nhau qua service
+Các class dùng chung cho mọi feature (khung response, exception chung, cấu hình web, hàm tiện ích) nằm trong `common`. Tên class phải duy nhất trong toàn dự án vì các tầng dùng chung. Các feature chỉ gọi nhau qua service
 interface, không gọi repository của feature khác.
 
 ## 8. Kế hoạch Phát triển Phần mềm

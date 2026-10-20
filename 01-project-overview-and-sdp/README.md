@@ -121,11 +121,11 @@ business features (`auth`, `user`, `catalog`, `cart`, `order`, `payment`, `shipm
 
 ```text
 config | controller | service (+ impl) | repository | entity | enums
-dto (request, response) | mapper | security | exception | util
-websocket | vnpay | ai (tools, rag, memory)
+dto (request, response) | mapper | security | websocket | vnpay | ai (tools, rag, memory)
+common (config, response, exception, util)
 ```
 
-Class names stay unique across the project because layers are shared. Features call each other only
+Classes shared by every feature (response envelope, shared exceptions, web configuration, helpers) live under `common`. Class names stay unique across the project because layers are shared. Features call each other only
 through service interfaces, never through another feature's repository.
 
 ## 8. Software Development Plan
