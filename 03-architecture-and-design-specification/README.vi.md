@@ -442,7 +442,8 @@ V2-V11 placeholder lịch sử (không sửa sau khi Flyway đã ghi nhận)
 V12 refresh_tokens
 V13 các bảng domain: categories, products, cart_items, orders/items, vouchers, payments,
     shipments/mapping, reviews, conversations/messages, ai_chat_sessions/messages
-V14+ pgvector extension và AI document/vector tables (hoãn đến khi hoàn tất thiết kế RAG schema)
+V14 password_reset_codes (bổ sung Phase 1)
+V15+ pgvector extension và AI document/vector tables (hoãn đến khi hoàn tất thiết kế RAG schema)
 ```
 
 Các ràng buộc và index quan trọng bao gồm:

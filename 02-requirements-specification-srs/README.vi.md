@@ -73,6 +73,11 @@ thanh toán và quyền truy cập AI tool.
 | FR-AUTH-05 | Hệ thống phải áp dụng các trạng thái phê duyệt seller: `PENDING`, `APPROVED`, `REJECTED` và `SUSPENDED`. Chỉ seller `APPROVED` mới được quản lý sản phẩm. |
 | FR-AUTH-06 | Hệ thống phải cho admin xem danh sách, xem chi tiết, tạo, cập nhật và vô hiệu hóa người dùng, lọc danh sách theo role và từ khóa. Vô hiệu hóa tài khoản vẫn giữ dữ liệu và chặn đăng nhập, refresh. |
 | FR-AUTH-07 | Hệ thống phải cho admin duyệt, tạm khóa hoặc từ chối seller. Admin không được tự vô hiệu hóa hoặc tự hạ role của chính mình. |
+| FR-AUTH-08 | Hệ thống phải cho người dùng đã đăng nhập đổi mật khẩu bằng cách nhập mật khẩu hiện tại. Đổi thành công phải thu hồi mọi refresh token của người dùng và trả về cặp token mới. |
+| FR-AUTH-09 | Hệ thống phải cho người dùng quên mật khẩu yêu cầu một mã 6 chữ số dùng một lần qua email và đặt mật khẩu mới bằng mã đó. Yêu cầu không được để lộ email đã đăng ký hay chưa. Mã hết hạn sau 15 phút, cho sai tối đa 5 lần và chỉ dùng được một lần. Đặt lại thành công phải thu hồi mọi refresh token của người dùng. |
+| FR-AUTH-10 | Hệ thống phải gửi email qua nhà cung cấp cấu hình bằng biến môi trường. Lỗi gửi email không được để lộ cho client biết tài khoản có tồn tại hay không. |
+
+FR-AUTH-08 đến FR-AUTH-10 là phần bổ sung vào Phase 1.
 
 Các endpoint theo kế hoạch:
 
@@ -80,6 +85,19 @@ Các endpoint theo kế hoạch:
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+
+GET    /api/v1/users/me
+GET    /api/v1/admin/users
+POST   /api/v1/admin/users
+GET    /api/v1/admin/users/{id}
+PATCH  /api/v1/admin/users/{id}
+DELETE /api/v1/admin/users/{id}
+PATCH  /api/v1/admin/sellers/{id}/approve
+PATCH  /api/v1/admin/sellers/{id}/suspend
+
+POST   /api/v1/auth/password/forgot
+POST   /api/v1/auth/password/reset
+PATCH  /api/v1/users/me/password
 ```
 
 ### 5.2 Catalog
@@ -365,6 +383,12 @@ không bao giờ được gọi trực tiếp provider.
 
 PostgreSQL lưu trữ dữ liệu marketplace. pgvector lưu trữ embedding cho giai đoạn RAG. Dữ liệu transaction trực tiếp
 (live) phải được đọc qua các application service/tool thay vì được coi là nội dung RAG tĩnh.
+
+### 8.5 Nhà cung cấp email
+
+Backend phải gửi email giao dịch, ví dụ mã đặt lại mật khẩu, qua SMTP cấu hình bằng biến môi trường.
+Khi phát triển dùng Gmail SMTP với App Password; chưa chọn nhà cung cấp cho production. Khi tắt email lúc phát triển local, mã được ghi vào log của ứng dụng thay vì
+gửi đi; production phải bật email.
 
 ## 9. Kiểm chứng và Nghiệm thu
 

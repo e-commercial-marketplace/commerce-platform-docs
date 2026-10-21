@@ -154,8 +154,9 @@ healthy.
 - Configure Spring Security authorization.
 - Add the seller approval state.
 - Add admin user management and seller approval, so a `PENDING` seller can be approved.
+- Add password management (Phase 1 addition): change password, forgot password, and reset with a one-time code sent by email.
 
-**Completion gate:** CUSTOMER, SELLER, and ADMIN login and authorization are verifiable by tests, and an admin can approve a seller who then manages products.
+**Completion gate:** CUSTOMER, SELLER, and ADMIN login and authorization are verifiable by tests, an admin can approve a seller who then manages products, and a user can change their password and reset a forgotten one with an emailed code.
 
 ### Phase 2 - Catalog
 

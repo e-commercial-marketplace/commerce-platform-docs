@@ -33,6 +33,40 @@ Status: Confirmed (implemented in Phase 1).
 | `AUTHENTICATION_REQUIRED` | 401 | Missing, invalid, or expired access token |
 | `RESOURCE_NOT_FOUND` | 404 | The authenticated user no longer exists |
 
+### PATCH /api/v1/users/me/password
+
+Status: Confirmed (implemented as a Phase 1 addition).
+
+- Actor/auth: any authenticated user. The account comes from the access token, never from request data.
+- Maps to: FR-AUTH-03, FR-AUTH-08.
+- Business rule: `currentPassword` must match the stored hash and `newPassword` must differ from it.
+  On success the password hash is replaced, all of the user's refresh tokens are revoked (other devices
+  are signed out at their next refresh), and a new token pair is returned so the current device stays
+  signed in. A wrong current password returns `400`, not `401`, so the client does not treat it as an
+  expired session.
+- Request body (JSON):
+
+```json
+{
+  "currentPassword": "old-password",
+  "newPassword": "new-strong-password"
+}
+```
+
+| Field | Rule |
+|---|---|
+| `currentPassword` | Required |
+| `newPassword` | Required, 8 to 72 characters, different from `currentPassword` |
+
+- Success: `200 OK`, `ApiResponse<AuthResponse>` (same shape as login).
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Invalid body, wrong current password, or new password equal to the current one |
+| `AUTHENTICATION_REQUIRED` | 401 | Missing, invalid, or expired access token, or the account is disabled |
+| `RESOURCE_NOT_FOUND` | 404 | The authenticated user no longer exists |
+
 ### GET /api/v1/admin/users
 
 Status: Confirmed (implemented in Phase 1).

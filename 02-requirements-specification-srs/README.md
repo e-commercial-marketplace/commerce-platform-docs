@@ -73,6 +73,11 @@ callbacks, and AI tool access.
 | FR-AUTH-05 | The system shall apply seller approval states: `PENDING`, `APPROVED`, `REJECTED`, and `SUSPENDED`. Only `APPROVED` sellers may manage products. |
 | FR-AUTH-06 | The system shall let an admin list, view, create, update, and disable users, and filter the list by role and search text. Disabling an account keeps its data and blocks login and refresh. |
 | FR-AUTH-07 | The system shall let an admin approve, suspend, or reject sellers. An admin shall not be able to disable or demote their own account. |
+| FR-AUTH-08 | The system shall let a signed-in user change their password by giving the current password. A successful change shall revoke all of the user's refresh tokens and return a new token pair. |
+| FR-AUTH-09 | The system shall let a user who forgot their password request a one-time 6-digit code by email and set a new password with it. The request shall not reveal whether the email is registered. A code shall expire after 15 minutes, allow at most 5 wrong attempts, and be usable once. A successful reset shall revoke all of the user's refresh tokens. |
+| FR-AUTH-10 | The system shall send email through a provider configured by environment variables. An email failure shall not reveal to the client whether an account exists. |
+
+FR-AUTH-08 to FR-AUTH-10 were added to Phase 1.
 
 Planned endpoints:
 
@@ -89,6 +94,10 @@ PATCH  /api/v1/admin/users/{id}
 DELETE /api/v1/admin/users/{id}
 PATCH  /api/v1/admin/sellers/{id}/approve
 PATCH  /api/v1/admin/sellers/{id}/suspend
+
+POST   /api/v1/auth/password/forgot
+POST   /api/v1/auth/password/reset
+PATCH  /api/v1/users/me/password
 ```
 
 ### 5.2 Catalog
@@ -374,6 +383,13 @@ shall never call the provider directly.
 
 PostgreSQL stores marketplace data. pgvector stores embeddings for the RAG phase. Live transactional
 data shall be read through application services/tools rather than treated as static RAG content.
+
+### 8.5 Email provider
+
+The backend shall send transactional email, such as password reset codes, through SMTP configured
+by environment variables. Development uses Gmail SMTP with an App Password; the production provider
+is not selected yet. When email is turned off for local
+development, the code is written to the application log instead; production shall turn email on.
 
 ## 9. Verification and Acceptance
 

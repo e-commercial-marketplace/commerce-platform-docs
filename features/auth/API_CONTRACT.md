@@ -126,3 +126,77 @@ Status: Confirmed — implemented in Phase 1 (`refresh_tokens` storage from migr
 | `VALIDATION_ERROR` | 400 | Missing `refreshToken` |
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired access token, or revoked refresh token |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |
+
+## Password management (Phase 1 addition)
+
+The endpoints below were added to Phase 1 and are implemented. They share these rules:
+
+- The reset code has 6 digits, is valid for 15 minutes, allows at most 5 wrong attempts, and can be
+  used once. Only a hash of the code is stored (`password_reset_codes`, migration V14); the raw code
+  exists only in the email.
+- A new code replaces any earlier unused code of the same user. A user can request a new code at most
+  once per 60 seconds and at most 5 times per hour; requests above these limits are ignored silently.
+- Disabled accounts (`users.enabled = false`) never receive a code and cannot reset their password.
+- A successful reset or change revokes all of the user's refresh tokens. An access token that was
+  already issued keeps working until it expires (at most 15 minutes).
+- The new password follows the register rule (8 to 72 characters).
+- Email is sent through the provider in SRS §8.5. When email is turned off for local development,
+  the code is written to the application log instead.
+
+### POST /api/v1/auth/password/forgot
+
+Status: Confirmed (implemented as a Phase 1 addition).
+
+- Actor/auth: public, no token required.
+- Maps to: FR-AUTH-09, FR-AUTH-10.
+- Business rule: if the email belongs to an enabled account and the limits above allow it, create a
+  new code and email it. The response is the same in every case, so the client cannot tell whether the
+  email is registered. An email failure is logged on the server and does not change the response.
+- Request body (JSON):
+
+```json
+{
+  "email": "customer@example.com"
+}
+```
+
+- Success: `200 OK`, `ApiResponse<null>` (the envelope omits `data`).
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Missing or malformed `email` |
+| `INTERNAL_ERROR` | 500 | Unexpected failure |
+
+### POST /api/v1/auth/password/reset
+
+Status: Confirmed (implemented as a Phase 1 addition).
+
+- Actor/auth: public, no token required. The code proves ownership of the email.
+- Maps to: FR-AUTH-03, FR-AUTH-09.
+- Business rule: checks the latest unused code of the account. A wrong code counts as one attempt;
+  after 5 wrong attempts the code stops working. On success the password hash is replaced, the code is
+  marked used, and all refresh tokens are revoked. The client then logs in with the new password.
+- Request body (JSON):
+
+```json
+{
+  "email": "customer@example.com",
+  "code": "482915",
+  "newPassword": "new-strong-password"
+}
+```
+
+| Field | Rule |
+|---|---|
+| `email` | Required, valid email |
+| `code` | Required, exactly 6 digits |
+| `newPassword` | Required, 8 to 72 characters |
+
+- Success: `200 OK`, `ApiResponse<null>`.
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Invalid body; or the code is wrong, expired, already used, out of attempts, or the email has no usable code. These cases share one message so the client cannot tell them apart. |
+| `INTERNAL_ERROR` | 500 | Unexpected failure |

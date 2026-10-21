@@ -228,5 +228,6 @@ V2-V11 historical placeholders (do not edit after Flyway records them)
 V12 refresh_tokens
 V13 domain tables: categories, products, cart_items, orders/items, vouchers, payments,
     shipments/mapping, reviews, conversations/messages, ai_chat_sessions/messages
-V14+ pgvector extension and AI document/vector tables (deferred until the RAG schema is finalized)
+V14 password_reset_codes (Phase 1 addition)
+V15+ pgvector extension and AI document/vector tables (deferred until the RAG schema is finalized)
 ```

@@ -210,5 +210,6 @@ Mọi lỗi dùng khung `ApiResponse` chung, mô tả trong [API_CONTRACT.md](..
 
 - Access token không thu hồi được. Người dùng bị khóa vẫn gọi được cho đến khi access token hết hạn (tối đa 15 phút).
 - Token chỉ chứa role. Trạng thái duyệt seller (`sellerStatus`) và quyền sở hữu tài nguyên không nằm trong token nên service tính năng kiểm tra database. Các endpoint product của seller làm việc này trong `SellerProductServiceImpl` (Phase 2); các tính năng seller sau này phải làm tương tự.
-- Chưa triển khai: giới hạn số lần đăng nhập, quên mật khẩu.
+- Chưa triển khai: giới hạn số lần đăng nhập.
+- Đổi mật khẩu, quên mật khẩu và đặt lại bằng mã gửi qua email đã được bổ sung vào Phase 1 (`AuthServiceImpl.changePassword`, `PasswordResetServiceImpl`; xem API contract của auth và user). Email được gửi bởi `EmailServiceImpl` qua SMTP (Gmail App Password khi phát triển); khi `APP_MAIL_ENABLED=false` thì mã chỉ được ghi ra log, chỉ dùng khi phát triển local.
 - Trình duyệt gọi API cần CORS. Mặc định tắt và bật bằng `APP_CORS_ALLOWED_ORIGIN_PATTERNS`; chỉ dùng `*` khi phát triển.

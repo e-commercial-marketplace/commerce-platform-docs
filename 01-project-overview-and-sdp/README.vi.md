@@ -152,8 +152,9 @@ healthy.
 - Cấu hình phân quyền (authorization) Spring Security.
 - Thêm trạng thái phê duyệt seller.
 - Thêm quản lý người dùng và duyệt seller cho admin, để seller `PENDING` có thể được duyệt.
+- Thêm quản lý mật khẩu (bổ sung Phase 1): đổi mật khẩu, quên mật khẩu và đặt lại bằng mã dùng một lần gửi qua email.
 
-**Cổng hoàn thành:** việc login và phân quyền của CUSTOMER, SELLER và ADMIN có thể kiểm chứng được bằng test, và admin duyệt được seller để seller đó quản lý sản phẩm.
+**Cổng hoàn thành:** việc login và phân quyền của CUSTOMER, SELLER và ADMIN có thể kiểm chứng được bằng test, admin duyệt được seller để seller đó quản lý sản phẩm, và người dùng đổi được mật khẩu cũng như đặt lại mật khẩu đã quên bằng mã gửi qua email.
 
 ### Giai đoạn 2 - Catalog
 
