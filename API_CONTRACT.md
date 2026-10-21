@@ -464,8 +464,9 @@ purchasable items, and items are listed newest first (`createdAt`). See
 
 ### Create order
 
-The server reads the authenticated customer's cart, validates products and stock, snapshots product
-name/price, decreases or reserves stock, and clears purchased cart items in one transaction.
+The server reads the cart lines the authenticated customer selected (`cartItemIds`), validates
+products and stock, snapshots product name/price, decreases stock, and removes the purchased lines
+from the cart in one transaction. Unselected lines stay in the cart.
 
 ```http
 POST /api/v1/orders
@@ -475,6 +476,7 @@ Content-Type: application/json
 
 ```json
 {
+  "cartItemIds": ["cart-item-uuid-1", "cart-item-uuid-2"],
   "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
   "paymentMethod": "COD"
 }
@@ -500,6 +502,7 @@ The complete wire response is `ApiResponse<OrderResponse>`:
     "items": [
       {
         "id": "order-item-uuid",
+        "productId": "product-uuid",
         "productName": "Headphone",
         "unitPrice": "59.00",
         "quantity": 2,
@@ -522,8 +525,9 @@ its checkout stock is restored exactly once. COD has no prepayment deadline.
 
 The product-detail `buy now` action has no separate checkout contract in the first MVP. It adds the
 selected product and quantity to the authenticated customer's normal cart, then navigates to the
-standard checkout flow. The order endpoint therefore consumes the complete current cart. A separate
-single-item checkout can be added later if the UX requires it.
+standard checkout flow with that line selected. The order endpoint buys only the selected cart lines;
+see [features/order/API_CONTRACT.md](features/order/API_CONTRACT.md). Vouchers are applied from
+Phase 8, so the first checkout has `discountAmount` `"0.00"`.
 
 ### Customer orders
 

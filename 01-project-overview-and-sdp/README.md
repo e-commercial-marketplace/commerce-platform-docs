@@ -182,9 +182,9 @@ healthy.
 
 - Create orders transactionally.
 - Snapshot product name and price in order items.
+- Buy only the cart lines the customer selected; unselected lines stay in the cart.
 - Split seller ownership at the order-item level.
-- Apply vouchers.
-- Calculate totals.
+- Calculate totals (voucher application moved to Phase 8).
 - Update stock.
 - Set the prepayment deadline to 24 hours after order creation; COD follows the delivery collection rule.
 - Complete COD only after all required non-cancelled seller shipments are delivered in the MVP; do not
@@ -228,6 +228,7 @@ attributed order items.
 - Enforce one review per customer/product.
 - Add Admin voucher CRUD.
 - Validate voucher validity and usage.
+- Apply a voucher at checkout (moved from Phase 4).
 
 ### Phase 9 - Human Chat
 

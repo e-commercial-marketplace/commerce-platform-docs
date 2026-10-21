@@ -180,9 +180,9 @@ healthy.
 
 - Tạo order theo cơ chế transaction.
 - Snapshot tên product và giá trong order item.
+- Chỉ mua các dòng giỏ mà customer đã chọn; các dòng không chọn vẫn ở lại giỏ.
 - Tách quyền sở hữu seller ở cấp độ order-item.
-- Áp dụng voucher.
-- Tính toán tổng tiền.
+- Tính toán tổng tiền (áp dụng voucher chuyển sang Giai đoạn 8).
 - Cập nhật stock.
 - Đặt thời hạn prepayment là 24 giờ sau khi tạo order; COD tuân theo quy tắc thu tiền khi giao hàng (delivery collection rule).
 - Chỉ hoàn thành COD sau khi tất cả các seller shipment bắt buộc, không bị hủy (non-cancelled) đều đã delivered trong MVP; không
@@ -226,6 +226,7 @@ order item được gán đúng.
 - Thực thi một review cho mỗi customer/product.
 - Thêm CRUD voucher cho Admin.
 - Validate hiệu lực và mức sử dụng voucher.
+- Áp dụng voucher khi checkout (chuyển từ Giai đoạn 4).
 
 ### Giai đoạn 9 - Chat giữa người với người
 

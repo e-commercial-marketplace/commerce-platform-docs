@@ -13,10 +13,10 @@ management screens are deferred.
 
 ## Responsibilities
 
-- Validate cart products, stock, and voucher before checkout.
+- Validate the selected cart products and stock before checkout (voucher validation arrives in Phase 8).
 - Create `Order(PENDING)` transactionally.
 - Create order items with product name and unit-price snapshots.
-- Reserve/decrease stock and clear purchased cart items.
+- Decrease stock and remove the purchased cart items; unselected cart items stay in the cart.
 - Set a 24-hour prepayment deadline from order creation time; COD remains pending until all required
   non-cancelled shipments are delivered.
 - Apply discount, shipping, and total snapshots.

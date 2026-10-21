@@ -154,13 +154,13 @@ DELETE /api/v1/cart/items/{id}
 
 | ID | Requirement |
 |---|---|
-| FR-ORD-01 | The system shall create an order transactionally from valid cart items. |
+| FR-ORD-01 | The system shall create an order transactionally from the valid cart items the customer selected. |
 | FR-ORD-02 | An order shall contain at least one order item. |
 | FR-ORD-03 | The system shall snapshot product name and unit price in each order item at checkout. |
 | FR-ORD-04 | The system shall reserve or decrease stock during checkout. |
-| FR-ORD-05 | The system shall validate and apply a voucher according to its validity and usage rules. |
+| FR-ORD-05 | The system shall validate and apply a voucher according to its validity and usage rules (delivered in Phase 8). |
 | FR-ORD-06 | The system shall calculate and save discount, shipping, and total snapshots. |
-| FR-ORD-07 | The system shall clear purchased cart items after successful checkout. |
+| FR-ORD-07 | The system shall remove the purchased cart items after successful checkout; unselected items stay in the cart. |
 | FR-ORD-08 | One order may contain order items from multiple sellers. |
 | FR-ORD-09 | A customer shall be able to list and view only their own orders. |
 | FR-ORD-10 | The system shall cancel a prepayment order 24 hours after `Order.createdAt` when payment is incomplete and restore its checkout stock exactly once; COD orders have no prepayment deadline. |

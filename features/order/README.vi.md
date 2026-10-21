@@ -10,10 +10,10 @@ MVP mobile đầu tiên gồm checkout của customer, tạo đơn hàng và tra
 
 ## Trách nhiệm
 
-- Kiểm tra sản phẩm trong giỏ, tồn kho và voucher trước khi checkout.
+- Kiểm tra sản phẩm được chọn trong giỏ và tồn kho trước khi checkout (kiểm tra voucher làm ở Phase 8).
 - Tạo `Order(PENDING)` theo transaction.
 - Tạo order item kèm snapshot tên sản phẩm và đơn giá.
-- Giữ/giảm tồn kho và xóa các cart item đã mua.
+- Giảm tồn kho và xóa các cart item đã mua; các cart item không được chọn vẫn ở lại giỏ.
 - Đặt hạn thanh toán trước 24 giờ tính từ thời điểm tạo đơn; COD vẫn pending cho đến khi mọi shipment bắt buộc không bị hủy được giao.
 - Áp dụng snapshot giảm giá, phí vận chuyển và tổng tiền.
 - Cho phép seller xác nhận hoặc hủy chỉ các order item của mình.

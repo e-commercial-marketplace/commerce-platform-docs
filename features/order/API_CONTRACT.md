@@ -22,32 +22,39 @@ Endpoints marked `Predicted` are planned beyond the first MVP checkout slice
 
 ### POST /api/v1/orders
 
-Create an order transactionally from the authenticated customer's cart.
+Status: Confirmed — implemented in Phase 4 (customer checkout).
+
+Create an order transactionally from the cart lines the authenticated customer selected.
 Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
 
 Request body:
 
 ```json
 {
+  "cartItemIds": ["cart-item-uuid-1", "cart-item-uuid-2"],
   "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
-  "paymentMethod": "COD",
-  "voucherCode": null
+  "paymentMethod": "COD"
 }
 ```
 
 | Field | Rule |
 |---|---|
-| `shippingAddress` | Required, non-blank string (address snapshot). |
-| `paymentMethod` | Required. `COD` in MVP; `VNPAY` reserved (see payment contract). |
-| `voucherCode` | Optional, `null` when unused. At most one voucher per order. |
+| `cartItemIds` | Required, non-empty, no duplicates. Ids of cart lines in the caller's own cart; only these lines are bought. |
+| `shippingAddress` | Required, non-blank string, at most 1000 characters (address snapshot). The app may prefill it from the profile `address`. |
+| `paymentMethod` | Required. `COD` in MVP; `VNPAY` is rejected with `VALIDATION_ERROR` until the payment phase. |
+
+Voucher application is deferred to Phase 8 (Review + Voucher Admin): the request has no
+`voucherCode`, `discountAmount` is `"0.00"` and `voucherCode` is `null` in the response.
 
 Behavior (transactional, FR-ORD-01 – FR-ORD-08):
 
-- Validate every cart product is active and sufficiently stocked.
-- Validate voucher validity/usage when `voucherCode` is present.
+- Only the selected cart lines are bought; unselected lines stay in the cart.
+- Validate every selected product is active and sufficiently stocked.
 - Recalculate prices server-side; snapshot `productName`/`unitPrice` per item.
-- Reserve/decrease stock, save `discountAmount`/`shippingFee`/`totalAmount`
-  snapshots, clear purchased cart items.
+- Decrease stock with a conditional update so concurrent checkouts cannot oversell; save
+  `discountAmount`/`shippingFee`/`totalAmount` snapshots; create one `PENDING` COD payment for
+  `totalAmount`; remove the purchased lines from the cart.
+- Any failure rolls back the whole checkout: no order, stock and cart unchanged.
 
 Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
 
@@ -87,17 +94,20 @@ Errors (common envelope):
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid `CUSTOMER` token. |
-| `VALIDATION_ERROR` | `400` | Blank address, unknown `paymentMethod`, invalid voucher usage. |
-| `EMPTY_CART` | `409` | Cart has no purchasable items. |
-| `PRODUCT_INACTIVE` | `409` | Any cart product is inactive/soft-deleted. |
-| `INSUFFICIENT_STOCK` | `409` | Any line exceeds current stock. |
+| `FORBIDDEN` | `403` | Authenticated actor is not `CUSTOMER`. |
+| `VALIDATION_ERROR` | `400` | Empty or duplicate `cartItemIds`, blank or too long address, unknown or unsupported `paymentMethod`. |
+| `CART_ITEM_NOT_FOUND` | `404` | A selected id is not in the caller's cart (another customer's line is reported the same way). |
+| `PRODUCT_INACTIVE` | `400` | A selected product is inactive/soft-deleted (same status as the cart endpoints). |
+| `INSUFFICIENT_STOCK` | `409` | A selected line exceeds current stock. |
 
-Maps to FR-ORD-01, FR-ORD-02, FR-ORD-03, FR-ORD-04, FR-ORD-05, FR-ORD-06,
-FR-ORD-07, FR-ORD-08.
+Maps to FR-ORD-01, FR-ORD-02, FR-ORD-03, FR-ORD-04, FR-ORD-06, FR-ORD-07,
+FR-ORD-08 (FR-ORD-05 voucher: Phase 8).
 
 ### GET /api/v1/orders
 
-List orders owned by the authenticated customer.
+Status: Confirmed — implemented in Phase 4.
+
+List orders owned by the authenticated customer, newest first.
 Actor: `CUSTOMER`.
 
 Query: `page` (default `0`), `size` (default `20`, backend-capped).
@@ -128,6 +138,8 @@ Errors: `AUTHENTICATION_REQUIRED` (`401`).
 Maps to FR-ORD-09.
 
 ### GET /api/v1/orders/{id}
+
+Status: Confirmed — implemented in Phase 4.
 
 Get one order owned by the authenticated customer.
 Actor: `CUSTOMER`.

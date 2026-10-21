@@ -154,13 +154,13 @@ DELETE /api/v1/cart/items/{id}
 
 | ID | Yêu cầu |
 |---|---|
-| FR-ORD-01 | Hệ thống phải tạo order theo cơ chế transaction từ các cart item hợp lệ. |
+| FR-ORD-01 | Hệ thống phải tạo order theo cơ chế transaction từ các cart item hợp lệ mà customer đã chọn. |
 | FR-ORD-02 | Một order phải chứa ít nhất một order item. |
 | FR-ORD-03 | Hệ thống phải snapshot tên product và đơn giá trong mỗi order item tại thời điểm checkout. |
 | FR-ORD-04 | Hệ thống phải giữ chỗ (reserve) hoặc giảm stock trong quá trình checkout. |
-| FR-ORD-05 | Hệ thống phải validate và áp dụng voucher theo quy tắc hiệu lực và sử dụng của nó. |
+| FR-ORD-05 | Hệ thống phải validate và áp dụng voucher theo quy tắc hiệu lực và sử dụng của nó (làm ở Phase 8). |
 | FR-ORD-06 | Hệ thống phải tính toán và lưu snapshot discount, shipping và total. |
-| FR-ORD-07 | Hệ thống phải xóa các cart item đã mua sau khi checkout thành công. |
+| FR-ORD-07 | Hệ thống phải xóa các cart item đã mua sau khi checkout thành công; các item không được chọn vẫn ở lại giỏ. |
 | FR-ORD-08 | Một order có thể chứa các order item từ nhiều seller. |
 | FR-ORD-09 | Một customer phải có thể liệt kê và chỉ xem các order của chính mình. |
 | FR-ORD-10 | Hệ thống phải hủy order prepayment 24 giờ sau `Order.createdAt` khi payment chưa hoàn tất và hoàn lại stock khi checkout của nó đúng một lần; các order COD không có thời hạn prepayment. |
