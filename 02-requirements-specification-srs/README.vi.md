@@ -76,8 +76,9 @@ thanh toán và quyền truy cập AI tool.
 | FR-AUTH-08 | Hệ thống phải cho người dùng đã đăng nhập đổi mật khẩu bằng cách nhập mật khẩu hiện tại. Đổi thành công phải thu hồi mọi refresh token của người dùng và trả về cặp token mới. |
 | FR-AUTH-09 | Hệ thống phải cho người dùng quên mật khẩu yêu cầu một mã 6 chữ số dùng một lần qua email và đặt mật khẩu mới bằng mã đó. Yêu cầu không được để lộ email đã đăng ký hay chưa. Mã hết hạn sau 15 phút, cho sai tối đa 5 lần và chỉ dùng được một lần. Đặt lại thành công phải thu hồi mọi refresh token của người dùng. |
 | FR-AUTH-10 | Hệ thống phải gửi email qua nhà cung cấp cấu hình bằng biến môi trường. Lỗi gửi email không được để lộ cho client biết tài khoản có tồn tại hay không. |
+| FR-AUTH-11 | Hệ thống phải cho người dùng đã đăng nhập xem và cập nhật tên, số điện thoại, địa chỉ của chính mình, và cho admin cập nhật các thông tin này của bất kỳ người dùng nào. Số điện thoại phải là số di động Việt Nam. |
 
-FR-AUTH-08 đến FR-AUTH-10 là phần bổ sung vào Phase 1.
+FR-AUTH-08 đến FR-AUTH-11 là phần bổ sung vào Phase 1.
 
 Các endpoint theo kế hoạch:
 
@@ -87,6 +88,7 @@ POST /api/v1/auth/login
 POST /api/v1/auth/refresh
 
 GET    /api/v1/users/me
+PATCH  /api/v1/users/me
 GET    /api/v1/admin/users
 POST   /api/v1/admin/users
 GET    /api/v1/admin/users/{id}

@@ -153,6 +153,7 @@ healthy.
 - Thêm trạng thái phê duyệt seller.
 - Thêm quản lý người dùng và duyệt seller cho admin, để seller `PENDING` có thể được duyệt.
 - Thêm quản lý mật khẩu (bổ sung Phase 1): đổi mật khẩu, quên mật khẩu và đặt lại bằng mã dùng một lần gửi qua email.
+- Thêm cập nhật hồ sơ (bổ sung Phase 1): người dùng tự sửa tên, số điện thoại và địa chỉ; admin sửa được các thông tin này của mọi người dùng.
 
 **Cổng hoàn thành:** việc login và phân quyền của CUSTOMER, SELLER và ADMIN có thể kiểm chứng được bằng test, admin duyệt được seller để seller đó quản lý sản phẩm, và người dùng đổi được mật khẩu cũng như đặt lại mật khẩu đã quên bằng mã gửi qua email.
 

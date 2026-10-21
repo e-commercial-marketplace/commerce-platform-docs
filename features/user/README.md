@@ -90,8 +90,8 @@ identity, not a replacement for feature-specific ownership checks.
 | `users` | `name` | Logical display/full name; current V1 SQL uses `full_name`. |
 | `users` | `email` | Unique account/login identifier. |
 | `users` | `passwordHash` | One-way credential hash. |
-| `users` | `phone` | Optional contact value in the logical model; not in V1 SQL yet. |
-| `users` | `address` | Optional profile address in the logical model; not in V1 SQL yet. |
+| `users` | `phone` | Optional Vietnamese mobile number, stored as `0xxxxxxxxx` (column added by V13). |
+| `users` | `address` | Optional profile address, at most 500 characters (column added by V13). |
 | `users` | `role` | `CUSTOMER`, `SELLER`, or `ADMIN`. |
 | `users` | `sellerStatus` | `PENDING`, `APPROVED`, `REJECTED`, or `SUSPENDED`; nullable for non-sellers. |
 | `users` | `enabled` | Account authentication switch; current V1 persistence field. |

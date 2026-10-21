@@ -76,8 +76,9 @@ callbacks, and AI tool access.
 | FR-AUTH-08 | The system shall let a signed-in user change their password by giving the current password. A successful change shall revoke all of the user's refresh tokens and return a new token pair. |
 | FR-AUTH-09 | The system shall let a user who forgot their password request a one-time 6-digit code by email and set a new password with it. The request shall not reveal whether the email is registered. A code shall expire after 15 minutes, allow at most 5 wrong attempts, and be usable once. A successful reset shall revoke all of the user's refresh tokens. |
 | FR-AUTH-10 | The system shall send email through a provider configured by environment variables. An email failure shall not reveal to the client whether an account exists. |
+| FR-AUTH-11 | The system shall let a signed-in user view and update their own name, phone number, and address, and let an admin update them for any user. The phone number shall be a Vietnamese mobile number. |
 
-FR-AUTH-08 to FR-AUTH-10 were added to Phase 1.
+FR-AUTH-08 to FR-AUTH-11 were added to Phase 1.
 
 Planned endpoints:
 
@@ -87,6 +88,7 @@ POST /api/v1/auth/login
 POST /api/v1/auth/refresh
 
 GET    /api/v1/users/me
+PATCH  /api/v1/users/me
 GET    /api/v1/admin/users
 POST   /api/v1/admin/users
 GET    /api/v1/admin/users/{id}

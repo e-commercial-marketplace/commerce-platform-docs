@@ -88,8 +88,8 @@ User là bảng định danh được gần như mọi tính năng nghiệp vụ
 | `users` | `name` | Tên hiển thị/tên đầy đủ logic; SQL V1 hiện tại dùng `full_name`. |
 | `users` | `email` | Định danh tài khoản/đăng nhập duy nhất. |
 | `users` | `passwordHash` | Hash thông tin xác thực một chiều. |
-| `users` | `phone` | Giá trị liên hệ tùy chọn trong mô hình logic; chưa có trong SQL V1. |
-| `users` | `address` | Địa chỉ profile tùy chọn trong mô hình logic; chưa có trong SQL V1. |
+| `users` | `phone` | Số di động Việt Nam tùy chọn, lưu dạng `0xxxxxxxxx` (cột thêm ở V13). |
+| `users` | `address` | Địa chỉ hồ sơ tùy chọn, tối đa 500 ký tự (cột thêm ở V13). |
 | `users` | `role` | `CUSTOMER`, `SELLER` hoặc `ADMIN`. |
 | `users` | `sellerStatus` | `PENDING`, `APPROVED`, `REJECTED` hoặc `SUSPENDED`; nullable với non-seller. |
 | `users` | `enabled` | Công tắc xác thực tài khoản; trường persistence V1 hiện tại. |
