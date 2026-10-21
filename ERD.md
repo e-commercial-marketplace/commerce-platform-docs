@@ -43,6 +43,7 @@ erDiagram
         int quantity
         UUID userId FK
         UUID productId FK
+        datetime createdAt
     }
 
     ORDER {
@@ -229,5 +230,6 @@ V12 refresh_tokens
 V13 domain tables: categories, products, cart_items, orders/items, vouchers, payments,
     shipments/mapping, reviews, conversations/messages, ai_chat_sessions/messages
 V14 password_reset_codes (Phase 1 addition)
-V15+ pgvector extension and AI document/vector tables (deferred until the RAG schema is finalized)
+V15 cart_items.created_at (Phase 3 cart ordering)
+V16+ pgvector extension and AI document/vector tables (deferred until the RAG schema is finalized)
 ```

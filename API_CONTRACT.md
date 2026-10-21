@@ -408,7 +408,9 @@ GET /api/v1/cart
         "quantity": 2,
         "lineTotal": "118.00",
         "availableStock": 12,
-        "sellerId": "seller-uuid"
+        "active": true,
+        "sellerId": "seller-uuid",
+        "createdAt": "2026-10-12T10:30:00Z"
       }
     ],
     "subtotal": "118.00"
@@ -451,7 +453,10 @@ DELETE /api/v1/cart/items/{cartItemId}
 The backend validates product activity and stock. The frontend must not treat a displayed price as
 the authoritative checkout price. If the product is already in the customer's cart, `POST` increments
 the existing quantity instead of creating a duplicate row. The combined quantity is validated against
-current stock. Successful `POST`, `PATCH`, and `DELETE` mutations return
+current stock. Items whose product became inactive or out of stock stay in the cart with
+`active` and `availableStock` set so the client can show them as unavailable; `subtotal` counts only
+purchasable items, and items are listed newest first (`createdAt`). See
+[features/cart/API_CONTRACT.md](features/cart/API_CONTRACT.md) for the full rules. Successful `POST`, `PATCH`, and `DELETE` mutations return
 `ApiResponse<CartResponse>` with status `200` in the first MVP; `INSUFFICIENT_STOCK` or
 `CART_ITEM_NOT_FOUND` is returned in the common error envelope when the mutation cannot be applied.
 

@@ -4,11 +4,25 @@ Scope: authenticated customer cart management before checkout. All responses use
 
 Conventions: base path `/api/v1`; money as decimal string in `VND`. Cart items carry no price snapshot; checkout recalculates prices server-side. Rules: `(user, product)` is unique (POST on an existing product increments quantity), `quantity >= 1`, inactive products and insufficient stock are rejected.
 
+Cart response rules:
+
+- Prices are read from the current product on every request: `unitPrice` is the product price now,
+  `lineTotal = unitPrice x quantity`.
+- An item stays in the cart when its product later becomes inactive or its stock drops below the
+  quantity. `active` and `availableStock` tell the client: an item is **purchasable** only when
+  `active = true` and `quantity <= availableStock`. The client shows other items as unavailable and
+  does not let the customer select them.
+- `subtotal` is the sum of `lineTotal` of purchasable items only. The total of the items the customer
+  selects for checkout is computed by the client; the order endpoint recalculates it server-side.
+- Items are ordered by `createdAt` descending (most recently added first). Adding a product that is
+  already in the cart increments its quantity and keeps its original `createdAt` and position.
+- An empty cart returns `"items": []` and `"subtotal": "0.00"`.
+
 ## Endpoints (Confirmed)
 
 ### GET /api/v1/cart
 
-Status: Confirmed (root §5, SRS §5.3).
+Status: Confirmed (root §5, SRS §5.3) — implemented in Phase 3.
 
 - Actor/auth: `CUSTOMER` only, `Authorization: Bearer <access-token>` required. The server resolves the cart owner from the token; a customer sees only their own cart.
 - Maps to: FR-CART-01.
@@ -26,7 +40,9 @@ Status: Confirmed (root §5, SRS §5.3).
       "quantity": 2,
       "lineTotal": "118.00",
       "availableStock": 12,
-      "sellerId": "seller-uuid"
+      "active": true,
+      "sellerId": "seller-uuid",
+      "createdAt": "2026-10-12T10:30:00Z"
     }
   ],
   "subtotal": "118.00"
@@ -42,7 +58,7 @@ Status: Confirmed (root §5, SRS §5.3).
 
 ### POST /api/v1/cart/items
 
-Status: Confirmed (root §5, SRS §5.3).
+Status: Confirmed (root §5, SRS §5.3) — implemented in Phase 3.
 
 - Actor/auth: `CUSTOMER` only + own cart.
 - Maps to: FR-CART-02, FR-CART-03, FR-CART-04, FR-CART-05.
@@ -70,7 +86,7 @@ Status: Confirmed (root §5, SRS §5.3).
 
 ### PATCH /api/v1/cart/items/{id}
 
-Status: Confirmed (root §5, SRS §5.3).
+Status: Confirmed (root §5, SRS §5.3) — implemented in Phase 3.
 
 - Actor/auth: `CUSTOMER` only + own cart row.
 - Maps to: FR-CART-02, FR-CART-04.
@@ -97,7 +113,7 @@ Status: Confirmed (root §5, SRS §5.3).
 
 ### DELETE /api/v1/cart/items/{id}
 
-Status: Confirmed (root §5, SRS §5.3).
+Status: Confirmed (root §5, SRS §5.3) — implemented in Phase 3.
 
 - Actor/auth: `CUSTOMER` only + own cart row.
 - Maps to: FR-CART-02.

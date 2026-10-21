@@ -41,6 +41,7 @@ classDiagram
     class CartItem {
         UUID id
         int quantity
+        DateTime createdAt
     }
 
     class Product {
@@ -81,6 +82,7 @@ classDiagram
 | `cart_items` | `quantity` | Requested quantity; must be at least `1` and is rechecked against current stock at checkout. |
 | `cart_items` | `userId` | Customer who owns the cart row. |
 | `cart_items` | `productId` | Product selected by the customer. |
+| `cart_items` | `createdAt` | When the product was first added; the cart lists newest first. Added by V15. |
 
 Cart items do not own a price snapshot. The order flow must read the current valid product price and
 create an immutable `OrderItem` snapshot during checkout.

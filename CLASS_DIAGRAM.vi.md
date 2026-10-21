@@ -39,6 +39,7 @@ classDiagram
     class CartItem {
         UUID id
         int quantity
+        DateTime createdAt
     }
 
     class Order {

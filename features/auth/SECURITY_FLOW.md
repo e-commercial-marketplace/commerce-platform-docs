@@ -57,6 +57,7 @@ The rules in `SecurityConfig` are checked from top to bottom and the first match
 | `POST /api/v1/auth/logout` | Authenticated (needs the caller's access token) |
 | `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Public |
 | `POST /api/v1/ai/ask` | Public |
+| `/api/v1/cart/**` | Role `CUSTOMER` only; the cart owner comes from the token |
 | `/api/v1/seller/**` | Role `SELLER` only (seller approval is checked by the service, see below) |
 | `/api/v1/admin/**` | Role `ADMIN` only |
 | Any other request | Authenticated |

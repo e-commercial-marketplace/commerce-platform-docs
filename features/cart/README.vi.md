@@ -41,6 +41,7 @@ classDiagram
     class CartItem {
         UUID id
         int quantity
+        DateTime createdAt
     }
 
     class Product {
@@ -81,6 +82,7 @@ classDiagram
 | `cart_items` | `quantity` | Số lượng được yêu cầu; phải ít nhất là `1` và được kiểm tra lại với tồn kho hiện tại tại lúc checkout. |
 | `cart_items` | `userId` | Customer sở hữu hàng giỏ hàng. |
 | `cart_items` | `productId` | Sản phẩm được customer chọn. |
+| `cart_items` | `createdAt` | Thời điểm sản phẩm được thêm lần đầu; giỏ hàng hiển thị mới nhất trước. Thêm ở V15. |
 
 Cart item không sở hữu snapshot giá. Luồng order phải đọc giá sản phẩm hợp lệ hiện tại và tạo snapshot `OrderItem` bất biến trong lúc checkout.
 
