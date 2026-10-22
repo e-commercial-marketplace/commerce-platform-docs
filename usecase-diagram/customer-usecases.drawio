@@ -274,7 +274,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="i8" edge="1" parent="1" source="logout" style="endArrow=block;endFill=1;endSize=6;dashed=1;dashPattern=5 5;html=1;rounded=0;strokeColor=#475569;strokeWidth=1;fontSize=12;fontColor=#1A1A1A;fontStyle=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="login" value="«include»">
+        <mxCell id="e5" edge="1" parent="1" source="logout" style="endArrow=block;endFill=1;endSize=6;dashed=1;dashPattern=5 5;html=1;rounded=0;strokeColor=#475569;strokeWidth=1;fontSize=12;fontColor=#1A1A1A;fontStyle=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="login" value="«extend»">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="38" y="0" as="offset" />
           </mxGeometry>
