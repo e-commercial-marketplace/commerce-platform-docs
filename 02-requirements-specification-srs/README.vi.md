@@ -404,3 +404,8 @@ yêu cầu khi feature thuộc cột mốc frontend hiện tại.
 
 Các kịch bản kiểm chứng tối thiểu được liệt kê trong `PLAN.md` và được tóm tắt trong mục 9.1 của
 [`01-project-overview-and-sdp/README.vi.md`](../01-project-overview-and-sdp/README.vi.md).
+
+Kiểm chứng tự động hiện tại của frontend được ghi trong
+[`04-testing/README.vi.md`](../04-testing/README.vi.md). Tài liệu đó ghi lại các automated test
+frontend hiện có cho cột mốc hiện tại. Đây **không** phải bằng chứng rằng mọi requirement trong SRS
+này đã vượt qua nghiệm thu; các feature chưa triển khai vẫn chưa được kiểm chứng.

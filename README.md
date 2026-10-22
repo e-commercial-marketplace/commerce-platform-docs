@@ -89,6 +89,13 @@ repository, and database; feature-specific provider calls are included only when
 contract. The layers are a target design and do not imply that
 the current backend scaffold already implements them.
 
+### 9. Testing
+
+Read [`04-testing/README.md`](04-testing/README.md) for the automated frontend test suite: test
+strategy, the full test case specification, the verified result, coverage, and requirement
+traceability. This document covers implemented frontend automated tests only; backend integration,
+system, and acceptance tests remain planned.
+
 ## Frontend-to-backend feature mapping
 
 The React Native scaffold separates user journeys where the backend groups related business rules:

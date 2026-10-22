@@ -88,6 +88,13 @@ cho từng use case. Các sơ đồ Mermaid mô tả request đi qua controller 
 và database; provider call chỉ được vẽ khi contract có căn cứ.
 Đây là kiến trúc mục tiêu, không khẳng định backend scaffold hiện tại đã có đủ các layer đó.
 
+### 9. Kiểm thử
+
+Đọc [`04-testing/README.vi.md`](04-testing/README.vi.md) về bộ automated test của frontend: chiến
+lược kiểm thử, đặc tả test case đầy đủ, kết quả đã kiểm chứng, coverage và truy vết requirement. Tài
+liệu này chỉ bao gồm các automated test frontend đã triển khai; integration, system và acceptance
+test của backend vẫn ở trạng thái kế hoạch.
+
 ## Ánh xạ feature frontend-backend
 
 React Native scaffold tách user journeys trong khi backend nhóm các business rules liên quan:
