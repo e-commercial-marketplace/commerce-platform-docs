@@ -16,6 +16,7 @@ triển khai.
 |---|---|---|
 | [`guest/register-customer-account.puml`](guest/register-customer-account.puml) | Đăng ký tài khoản | [`register-customer-account.vi.md`](../usecase-specification/guest/register-customer-account.vi.md) |
 | [`guest/login.puml`](guest/login.puml) | Đăng nhập (Guest) | [`login.vi.md`](../usecase-specification/guest/login.vi.md) |
+| [`guest/login-with-google.puml`](guest/login-with-google.puml) | Đăng nhập bằng Google (Guest) | [`login-with-google.vi.md`](../usecase-specification/guest/login-with-google.vi.md) |
 | [`guest/browse-public-catalog.puml`](guest/browse-public-catalog.puml) | Duyệt catalog công khai | [`browse-public-catalog.vi.md`](../usecase-specification/guest/browse-public-catalog.vi.md) |
 | [`guest/search-and-filter-products.puml`](guest/search-and-filter-products.puml) | Tìm kiếm và lọc sản phẩm | [`search-and-filter-products.vi.md`](../usecase-specification/guest/search-and-filter-products.vi.md) |
 | [`guest/view-product-details.puml`](guest/view-product-details.puml) | Xem chi tiết sản phẩm | [`view-product-details.vi.md`](../usecase-specification/guest/view-product-details.vi.md) |
@@ -26,6 +27,7 @@ triển khai.
 | Tệp | Use case | Spec |
 |---|---|---|
 | [`customer/login.puml`](customer/login.puml) | Đăng nhập (Customer) | [`login.vi.md`](../usecase-specification/customer/login.vi.md) |
+| [`customer/logout.puml`](customer/logout.puml) | Đăng xuất | [`logout.vi.md`](../usecase-specification/customer/logout.vi.md) |
 | [`customer/browse-catalog.puml`](customer/browse-catalog.puml) | Duyệt catalog | [`browse-catalog.vi.md`](../usecase-specification/customer/browse-catalog.vi.md) |
 | [`customer/search-and-filter-products.puml`](customer/search-and-filter-products.puml) | Tìm kiếm và lọc sản phẩm | [`search-and-filter-products.vi.md`](../usecase-specification/customer/search-and-filter-products.vi.md) |
 | [`customer/view-product-details.puml`](customer/view-product-details.puml) | Xem chi tiết sản phẩm | [`view-product-details.vi.md`](../usecase-specification/customer/view-product-details.vi.md) |

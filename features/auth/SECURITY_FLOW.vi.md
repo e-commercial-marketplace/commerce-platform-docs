@@ -54,6 +54,7 @@ Các luật trong `SecurityConfig` được kiểm tra từ trên xuống và lu
 | `GET /actuator/health`, `/actuator/info`, `/v3/api-docs/**`, `/swagger-ui/**` | Công khai |
 | `POST /api/v1/auth/register`, `POST /api/v1/auth/login` | Công khai |
 | `POST /api/v1/auth/refresh` | Công khai (tự xác thực bằng refresh token) |
+| `POST /api/v1/auth/google` | Công khai (tự xác thực bằng Google ID token; theo kế hoạch) |
 | `POST /api/v1/auth/logout` | Phải đăng nhập (cần access token của chính người gọi) |
 | `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Công khai |
 | `POST /api/v1/ai/ask` | Công khai |

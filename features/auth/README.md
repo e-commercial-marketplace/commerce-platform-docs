@@ -35,6 +35,7 @@ configuration (never hard-coded credentials).
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+POST /api/v1/auth/google
 POST /api/v1/auth/logout
 POST /api/v1/auth/password/forgot
 POST /api/v1/auth/password/reset
@@ -44,7 +45,7 @@ POST /api/v1/auth/password/reset
 
 | Actor | Allowed operation | Constraint |
 |---|---|---|
-| Unauthenticated client | Register, login, refresh | Auth endpoints are public; guest access is separately limited to public catalog search and the public AI product-search flow. Registration accepts only `CUSTOMER` or `SELLER`; `ADMIN` can only come from bootstrap. |
+| Unauthenticated client | Register, login, Google login, refresh | Auth endpoints are public; guest access is separately limited to public catalog search and the public AI product-search flow. Registration accepts only `CUSTOMER` or `SELLER`; `ADMIN` can only come from bootstrap. |
 | Authenticated user | Logout (revoke own refresh token) | Requires access token; the revoked refresh token is rejected on reuse. |
 | CUSTOMER | Use customer-authorized features after login | Identity comes from the authenticated token. |
 | SELLER | Use seller-authorized features after login | Seller ownership and approval are checked separately. |

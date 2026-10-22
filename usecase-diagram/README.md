@@ -6,8 +6,8 @@ This folder contains editable draw.io use-case diagrams for the marketplace acto
 
 | File | Actor | Scope |
 |---|---|---|
-| `guest-usecases.drawio` | UNAUTHENTICATED USER | Public catalog, product details, registration, login, and guest AI product search |
-| `customer-usecases.drawio` | CUSTOMER | Public catalog/search/details, cart, checkout, payment, orders, shipments, reviews, chat, and customer AI search |
+| `guest-usecases.drawio` | UNAUTHENTICATED USER | Public catalog, product details, registration, login, Google login, and guest AI product search |
+| `customer-usecases.drawio` | CUSTOMER | Public catalog/search/details, cart, checkout, payment, orders, shipments, reviews, chat, logout, and customer AI search |
 | `seller-usecases.drawio` | SELLER | Owned products, stock, order items, shipments, and customer chat |
 | `admin-usecases.drawio` | ADMIN | Users, categories, vouchers, moderation, monitoring, delivery configuration, and refunds |
 
@@ -19,6 +19,7 @@ This folder contains editable draw.io use-case diagrams for the marketplace acto
 - In this project, `«include» Login` is an authentication precondition shorthand; it does not mean
   that an already-authenticated user logs in again for every request.
 - `«include» Login` is drawn from each manager / standalone authenticated use case.
+- `Logout` is drawn only in the Customer diagram. Seller and Admin share the same use case and the same endpoint, so they have no diagram of their own.
   CRUD leaves are covered transitively through their `«extend»` to the manager.
 - Dashed arrow labelled `«extend»`: points from the extension (CRUD leaf) to the
   base manager use case, per UML; it shows which CRUD operations belong to each manager.

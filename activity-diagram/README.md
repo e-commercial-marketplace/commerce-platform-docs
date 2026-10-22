@@ -16,6 +16,7 @@ the implementation code.
 |---|---|---|
 | [`guest/register-customer-account.puml`](guest/register-customer-account.puml) | Register Customer Account | [`register-customer-account.vi.md`](../usecase-specification/guest/register-customer-account.vi.md) |
 | [`guest/login.puml`](guest/login.puml) | Guest Login | [`login.vi.md`](../usecase-specification/guest/login.vi.md) |
+| [`guest/login-with-google.puml`](guest/login-with-google.puml) | Guest Login with Google | [`login-with-google.vi.md`](../usecase-specification/guest/login-with-google.vi.md) |
 | [`guest/browse-public-catalog.puml`](guest/browse-public-catalog.puml) | Browse Public Catalog | [`browse-public-catalog.vi.md`](../usecase-specification/guest/browse-public-catalog.vi.md) |
 | [`guest/search-and-filter-products.puml`](guest/search-and-filter-products.puml) | Search and Filter Products | [`search-and-filter-products.vi.md`](../usecase-specification/guest/search-and-filter-products.vi.md) |
 | [`guest/view-product-details.puml`](guest/view-product-details.puml) | View Product Details | [`view-product-details.vi.md`](../usecase-specification/guest/view-product-details.vi.md) |
@@ -26,6 +27,7 @@ the implementation code.
 | File | Use case | Specification |
 |---|---|---|
 | [`customer/login.puml`](customer/login.puml) | Customer Login | [`login.vi.md`](../usecase-specification/customer/login.vi.md) |
+| [`customer/logout.puml`](customer/logout.puml) | Logout | [`logout.vi.md`](../usecase-specification/customer/logout.vi.md) |
 | [`customer/browse-catalog.puml`](customer/browse-catalog.puml) | Browse Catalog | [`browse-catalog.vi.md`](../usecase-specification/customer/browse-catalog.vi.md) |
 | [`customer/search-and-filter-products.puml`](customer/search-and-filter-products.puml) | Search and Filter Products | [`search-and-filter-products.vi.md`](../usecase-specification/customer/search-and-filter-products.vi.md) |
 | [`customer/view-product-details.puml`](customer/view-product-details.puml) | View Product Details | [`view-product-details.vi.md`](../usecase-specification/customer/view-product-details.vi.md) |

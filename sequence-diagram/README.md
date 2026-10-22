@@ -1,7 +1,7 @@
 # Sequence Diagrams
 
 This folder contains one technical Mermaid sequence diagram per use case in
-[`usecase-specification/`](../usecase-specification/) (60 use cases), plus one supplemental VNPAY
+[`usecase-specification/`](../usecase-specification/) (62 use cases), plus one supplemental VNPAY
 integration diagram. Unlike the activity diagrams, these diagrams are not only business flows:
 they trace the planned request through the real backend layers.
 
@@ -35,6 +35,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 |---|---|---|
 | [`guest/browse-public-catalog.md`](guest/browse-public-catalog.md) | Catalog - Browse Public Catalog | `GET /api/v1/products and GET /api/v1/categories` (Confirmed) |
 | [`guest/login.md`](guest/login.md) | Auth - Guest Login | `POST /api/v1/auth/login` (Confirmed) |
+| [`guest/login-with-google.md`](guest/login-with-google.md) | Auth - Guest Login with Google | `POST /api/v1/auth/google` (Planned) |
 | [`guest/register-customer-account.md`](guest/register-customer-account.md) | Auth - Register Customer Account | `POST /api/v1/auth/register` (Confirmed) |
 | [`guest/search-and-filter-products.md`](guest/search-and-filter-products.md) | Catalog - Search and Filter Products | `GET /api/v1/products (query/filter parameters per catalog contract)` (Confirmed) |
 | [`guest/use-ai-product-search.md`](guest/use-ai-product-search.md) | AI - Search Products with AI Assistant | `POST /api/v1/ai/ask` (Planned) |
@@ -50,6 +51,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/checkout-order.md`](customer/checkout-order.md) | Order - Checkout Order | `POST /api/v1/orders` (Confirmed) |
 | [`customer/create-product-review.md`](customer/create-product-review.md) | Review - Create Product Review | `POST /api/v1/products/{productId}/reviews` (Confirmed) |
 | [`customer/login.md`](customer/login.md) | Auth - Customer Login | `POST /api/v1/auth/login` (Confirmed) |
+| [`customer/logout.md`](customer/logout.md) | Auth - Logout | `POST /api/v1/auth/logout` (Confirmed) |
 | [`customer/manage-cart.md`](customer/manage-cart.md) | Cart - Manage Cart | `GET /api/v1/cart; POST/PATCH/DELETE /api/v1/cart/items` (Confirmed) |
 | [`customer/pay-for-order-cod.md`](customer/pay-for-order-cod.md) | Payment - Pay for Order (COD) | `No customer COD endpoint is defined; delivery-result trigger is TBD` (TBD) |
 | [`customer/remove-cart-item.md`](customer/remove-cart-item.md) | Cart - Remove Cart Item | `DELETE /api/v1/cart/items/{id}` (Confirmed) |

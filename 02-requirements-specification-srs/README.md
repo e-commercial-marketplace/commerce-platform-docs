@@ -67,7 +67,7 @@ callbacks, and AI tool access.
 | ID | Requirement |
 |---|---|
 | FR-AUTH-01 | The system shall support customer, seller, and admin roles. |
-| FR-AUTH-02 | The system shall support register, login, and refresh operations. |
+| FR-AUTH-02 | The system shall support register, login, refresh, and logout operations. |
 | FR-AUTH-03 | The system shall use password hashing through Spring Security `PasswordEncoder`; plaintext passwords shall not be stored. |
 | FR-AUTH-04 | The system shall use JWT access and refresh flow. |
 | FR-AUTH-05 | The system shall apply seller approval states: `PENDING`, `APPROVED`, `REJECTED`, and `SUSPENDED`. Only `APPROVED` sellers may manage products. |
@@ -77,8 +77,10 @@ callbacks, and AI tool access.
 | FR-AUTH-09 | The system shall let a user who forgot their password request a one-time 6-digit code by email and set a new password with it. The request shall not reveal whether the email is registered. A code shall expire after 15 minutes, allow at most 5 wrong attempts, and be usable once. A successful reset shall revoke all of the user's refresh tokens. |
 | FR-AUTH-10 | The system shall send email through a provider configured by environment variables. An email failure shall not reveal to the client whether an account exists. |
 | FR-AUTH-11 | The system shall let a signed-in user view and update their own name, phone number, and address, and let an admin update them for any user. The phone number shall be a Vietnamese mobile number. |
+| FR-AUTH-12 | The system shall let a signed-in user (customer, seller, or admin) log out by revoking their own refresh token. A refresh token that is unknown, already revoked, or owned by another user shall be rejected with the same error. Logout does not revoke the access token, which expires on its own. |
+| FR-AUTH-13 | The system shall let a user sign in with a Google account by sending a Google ID token. The system shall verify the token's signature, issuer, audience, and expiry, shall require an email verified by Google, and shall never trust an email sent separately by the client. An account found by Google subject or by email is signed in and linked to Google; otherwise a `CUSTOMER` account is created. A disabled account shall be rejected, and the response shall be the same token pair as login. |
 
-FR-AUTH-08 to FR-AUTH-11 were added to Phase 1.
+FR-AUTH-08 to FR-AUTH-11 were added to Phase 1. FR-AUTH-12 describes the logout already implemented in Phase 1. FR-AUTH-13 is planned and not yet implemented.
 
 Planned endpoints:
 
@@ -86,6 +88,8 @@ Planned endpoints:
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+POST /api/v1/auth/google
 
 GET    /api/v1/users/me
 PATCH  /api/v1/users/me

@@ -67,7 +67,7 @@ thanh toán và quyền truy cập AI tool.
 | ID | Yêu cầu |
 |---|---|
 | FR-AUTH-01 | Hệ thống phải hỗ trợ các role customer, seller và admin. |
-| FR-AUTH-02 | Hệ thống phải hỗ trợ các thao tác register, login và refresh. |
+| FR-AUTH-02 | Hệ thống phải hỗ trợ các thao tác register, login, refresh và logout. |
 | FR-AUTH-03 | Hệ thống phải sử dụng băm mật khẩu (password hashing) qua Spring Security `PasswordEncoder`; không được lưu mật khẩu dạng plaintext. |
 | FR-AUTH-04 | Hệ thống phải sử dụng luồng JWT access và refresh. |
 | FR-AUTH-05 | Hệ thống phải áp dụng các trạng thái phê duyệt seller: `PENDING`, `APPROVED`, `REJECTED` và `SUSPENDED`. Chỉ seller `APPROVED` mới được quản lý sản phẩm. |
@@ -77,8 +77,10 @@ thanh toán và quyền truy cập AI tool.
 | FR-AUTH-09 | Hệ thống phải cho người dùng quên mật khẩu yêu cầu một mã 6 chữ số dùng một lần qua email và đặt mật khẩu mới bằng mã đó. Yêu cầu không được để lộ email đã đăng ký hay chưa. Mã hết hạn sau 15 phút, cho sai tối đa 5 lần và chỉ dùng được một lần. Đặt lại thành công phải thu hồi mọi refresh token của người dùng. |
 | FR-AUTH-10 | Hệ thống phải gửi email qua nhà cung cấp cấu hình bằng biến môi trường. Lỗi gửi email không được để lộ cho client biết tài khoản có tồn tại hay không. |
 | FR-AUTH-11 | Hệ thống phải cho người dùng đã đăng nhập xem và cập nhật tên, số điện thoại, địa chỉ của chính mình, và cho admin cập nhật các thông tin này của bất kỳ người dùng nào. Số điện thoại phải là số di động Việt Nam. |
+| FR-AUTH-12 | Hệ thống phải cho người dùng đã đăng nhập (customer, seller hoặc admin) đăng xuất bằng cách thu hồi refresh token của chính mình. Refresh token không tồn tại, đã bị thu hồi hoặc thuộc về người dùng khác phải bị từ chối với cùng một lỗi. Đăng xuất không thu hồi access token; access token tự hết hạn. |
+| FR-AUTH-13 | Hệ thống phải cho người dùng đăng nhập bằng tài khoản Google bằng cách gửi Google ID token. Hệ thống phải xác minh chữ ký, nơi phát hành, ứng dụng nhận và thời hạn của token, yêu cầu email đã được Google xác minh, và không bao giờ tin email do client gửi riêng. Tài khoản tìm thấy theo định danh Google hoặc theo email được đăng nhập và liên kết với Google; nếu chưa có thì tạo tài khoản `CUSTOMER`. Tài khoản bị vô hiệu hóa phải bị từ chối, và phản hồi là cùng cặp token như login. |
 
-FR-AUTH-08 đến FR-AUTH-11 là phần bổ sung vào Phase 1.
+FR-AUTH-08 đến FR-AUTH-11 là phần bổ sung vào Phase 1. FR-AUTH-12 mô tả logout đã được implement trong Phase 1. FR-AUTH-13 là theo kế hoạch và chưa được implement.
 
 Các endpoint theo kế hoạch:
 
@@ -86,6 +88,8 @@ Các endpoint theo kế hoạch:
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+POST /api/v1/auth/google
 
 GET    /api/v1/users/me
 PATCH  /api/v1/users/me

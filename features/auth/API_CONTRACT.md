@@ -127,6 +127,37 @@ Status: Confirmed — implemented in Phase 1 (`refresh_tokens` storage from migr
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired access token, or revoked refresh token |
 | `INTERNAL_ERROR` | 500 | Unexpected failure |
 
+### POST /api/v1/auth/google
+
+Status: Planned (SRS §5.1, FR-AUTH-13).
+
+- Actor/auth: public, no token required. The client first obtains a Google ID token from the Google
+  sign-in screen and sends only that token.
+- Maps to: FR-AUTH-13, FR-AUTH-04.
+- Business rule: the backend verifies the ID token (signature, issuer, audience from the configured
+  client IDs, expiry) and requires `email_verified = true`. It never trusts an email sent by the
+  client. The account is found by the Google subject, then by normalized email; an existing account
+  with the same email is linked to the Google subject, otherwise a `CUSTOMER` account is created. The
+  role is never taken from the request. A disabled account is rejected.
+- Request body (JSON):
+
+```json
+{
+  "idToken": "google-id-token"
+}
+```
+
+- Success: `200 OK`, `ApiResponse<AuthResponse>` with the same `data` shape as login. The status is
+  `200` for new and existing accounts alike, so the response does not reveal whether the account
+  already existed.
+- Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Missing `idToken` |
+| `AUTHENTICATION_REQUIRED` | 401 | Invalid, expired, or wrong-audience token; email not verified by Google; disabled account |
+| `INTERNAL_ERROR` | 500 | Unexpected failure |
+
 ## Password management (Phase 1 addition)
 
 The endpoints below were added to Phase 1 and are implemented. They share these rules:

@@ -54,6 +54,7 @@ The rules in `SecurityConfig` are checked from top to bottom and the first match
 | `GET /actuator/health`, `/actuator/info`, `/v3/api-docs/**`, `/swagger-ui/**` | Public |
 | `POST /api/v1/auth/register`, `POST /api/v1/auth/login` | Public |
 | `POST /api/v1/auth/refresh` | Public (it authenticates with the refresh token) |
+| `POST /api/v1/auth/google` | Public (it authenticates with the Google ID token; planned) |
 | `POST /api/v1/auth/logout` | Authenticated (needs the caller's access token) |
 | `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Public |
 | `POST /api/v1/ai/ask` | Public |

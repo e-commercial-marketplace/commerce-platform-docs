@@ -233,6 +233,22 @@ Content-Type: application/json
 Logout thu hồi refresh token đã cho. Sau logout, token bị thu hồi dùng lại sẽ trả về `401` với
 `AUTHENTICATION_REQUIRED`. Endpoint logout và enforcement thu hồi được implement trong Phase 1.
 
+```http
+POST /api/v1/auth/google
+Content-Type: application/json
+```
+
+```json
+{
+  "idToken": "google-id-token"
+}
+```
+
+Theo kế hoạch. Đăng nhập Google: client gửi Google ID token, backend xác minh rồi trả về cùng
+`ApiResponse<AuthResponse>` như login. Người dùng Google lần đầu được tạo tài khoản `CUSTOMER`; tài
+khoản đã có cùng email đã được Google xác minh sẽ được liên kết. Token không hợp lệ, email chưa xác
+minh hoặc tài khoản bị vô hiệu hóa trả về `401` với `AUTHENTICATION_REQUIRED`.
+
 ## 4. Catalog
 
 ### Liệt kê products

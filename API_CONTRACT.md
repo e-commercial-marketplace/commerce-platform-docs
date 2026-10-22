@@ -236,6 +236,22 @@ Logout revokes the given refresh token. After logout the revoked token returns `
 `AUTHENTICATION_REQUIRED` when reused. The logout endpoint and revocation enforcement are
 implemented in Phase 1.
 
+```http
+POST /api/v1/auth/google
+Content-Type: application/json
+```
+
+```json
+{
+  "idToken": "google-id-token"
+}
+```
+
+Planned. Google login: the client sends the Google ID token and the backend verifies it, then returns
+the same `ApiResponse<AuthResponse>` as login. A first-time Google user gets a `CUSTOMER` account; an
+existing account with the same Google-verified email is linked. An invalid token, an unverified email,
+or a disabled account returns `401` with `AUTHENTICATION_REQUIRED`.
+
 ## 4. Catalog
 
 ### List products

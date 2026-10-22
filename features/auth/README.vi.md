@@ -30,6 +30,7 @@ MVP mobile đầu tiên dùng đăng ký/đăng nhập/refresh của customer tr
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
+POST /api/v1/auth/google
 POST /api/v1/auth/logout
 POST /api/v1/auth/password/forgot
 POST /api/v1/auth/password/reset
@@ -39,7 +40,7 @@ POST /api/v1/auth/password/reset
 
 | Tác nhân | Thao tác cho phép | Ràng buộc |
 |---|---|---|
-| Client chưa xác thực | Đăng ký, đăng nhập, refresh | Các endpoint auth là công khai; quyền truy cập guest được giới hạn riêng ở tìm kiếm catalog công khai và luồng AI tìm kiếm sản phẩm công khai. Đăng ký chỉ chấp nhận `CUSTOMER` hoặc `SELLER`; `ADMIN` chỉ đến từ bootstrap. |
+| Client chưa xác thực | Đăng ký, đăng nhập, đăng nhập Google, refresh | Các endpoint auth là công khai; quyền truy cập guest được giới hạn riêng ở tìm kiếm catalog công khai và luồng AI tìm kiếm sản phẩm công khai. Đăng ký chỉ chấp nhận `CUSTOMER` hoặc `SELLER`; `ADMIN` chỉ đến từ bootstrap. |
 | User đã xác thực | Logout (thu hồi refresh token của chính mình) | Yêu cầu access token; refresh token bị thu hồi dùng lại sẽ bị từ chối. |
 | CUSTOMER | Dùng các tính năng dành cho customer sau khi đăng nhập | Định danh lấy từ token đã xác thực. |
 | SELLER | Dùng các tính năng dành cho seller sau khi đăng nhập | Quyền sở hữu và phê duyệt seller được kiểm tra riêng. |
