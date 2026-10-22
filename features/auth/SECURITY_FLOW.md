@@ -10,7 +10,7 @@ Security does three jobs. Every diagram below is a closer look at one of them.
 |---|---|---|
 | Issue a token | Exchange a password for an entry card | `AuthController` → `AuthServiceImpl` (register, login, refresh, logout) |
 | Check the token | A guard at the gate inspects the card | `JwtAuthenticationFilter` → `JwtServiceImpl` |
-| Apply the rules | A sign says which floor each person may enter | URL rules in `SecurityConfig`, plus `RestAuthenticationEntryPoint` and `RestAccessDeniedHandler` |
+| Apply the rules | A sign says which floor each person may enter | URL rules in `SecurityConfig`, plus `RestSecurityErrorHandler` |
 
 The next diagram shows the path of one request. The gate check happens first and never rejects the request by itself: a bad token only means the caller stays anonymous. The URL rules decide whether anonymous is acceptable for that URL.
 
@@ -23,8 +23,8 @@ flowchart TD
     Ctx --> Rules["AuthorizationFilter<br/>URL rules in SecurityConfig"]
     Anon --> Rules
     Rules -->|public URL or role allowed| Controller[Controller]
-    Rules -->|anonymous on a protected URL| E401["401 AUTHENTICATION_REQUIRED<br/>RestAuthenticationEntryPoint"]
-    Rules -->|authenticated but wrong role| E403["403 FORBIDDEN<br/>RestAccessDeniedHandler"]
+    Rules -->|anonymous on a protected URL| E401["401 AUTHENTICATION_REQUIRED<br/>RestSecurityErrorHandler"]
+    Rules -->|authenticated but wrong role| E403["403 FORBIDDEN<br/>RestSecurityErrorHandler"]
 ```
 
 How to read it:
@@ -185,10 +185,10 @@ All errors use the common `ApiResponse` envelope described in [API_CONTRACT.md](
 
 | Situation | HTTP | Code | Produced by |
 |---|---|---|---|
-| No identity on a protected URL | 401 | `AUTHENTICATION_REQUIRED` | `RestAuthenticationEntryPoint` |
+| No identity on a protected URL | 401 | `AUTHENTICATION_REQUIRED` | `RestSecurityErrorHandler` |
 | Wrong email or password, disabled account | 401 | `AUTHENTICATION_REQUIRED` | `AuthServiceImpl` |
 | Invalid, expired or revoked refresh token | 401 | `AUTHENTICATION_REQUIRED` | `RefreshTokenServiceImpl` |
-| Identity known but role not allowed | 403 | `FORBIDDEN` | `RestAccessDeniedHandler` |
+| Identity known but role not allowed | 403 | `FORBIDDEN` | `RestSecurityErrorHandler` |
 | Seller not `APPROVED`, or product owned by another seller | 403 | `FORBIDDEN` | `SellerProductServiceImpl` |
 | `@PreAuthorize` rejects the call | 403 | `FORBIDDEN` | `GlobalExceptionHandler` |
 | Malformed body or unknown role value | 400 | `VALIDATION_ERROR` | `GlobalExceptionHandler` |
@@ -201,7 +201,7 @@ All errors use the common `ApiResponse` envelope described in [API_CONTRACT.md](
 | Reads the Bearer token and stores the user | `JwtAuthenticationFilter` |
 | Creates and verifies access tokens | `JwtServiceImpl` |
 | Authenticated user (id and role, authorities) | `AuthUser` |
-| 401 and 403 JSON bodies | `RestAuthenticationEntryPoint`, `RestAccessDeniedHandler` |
+| 401 and 403 JSON bodies | `RestSecurityErrorHandler` (status and default message from `ErrorCode`) |
 | Register, login, refresh, logout | `AuthServiceImpl` |
 | Seller approval and product ownership checks | `SellerProductServiceImpl` |
 | Refresh token issue, rotation, revocation | `RefreshTokenServiceImpl` |

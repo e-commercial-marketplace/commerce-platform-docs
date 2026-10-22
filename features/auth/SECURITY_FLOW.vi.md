@@ -10,7 +10,7 @@ Bảo mật làm ba việc. Mỗi sơ đồ bên dưới là một góc nhìn k�
 |---|---|---|
 | Cấp token | Đổi mật khẩu lấy thẻ ra vào | `AuthController` → `AuthServiceImpl` (đăng ký, đăng nhập, refresh, logout) |
 | Kiểm tra token | Bảo vệ ở cổng soi thẻ | `JwtAuthenticationFilter` → `JwtServiceImpl` |
-| Áp dụng luật | Bảng chỉ dẫn mỗi người được vào tầng nào | Luật URL trong `SecurityConfig`, cùng `RestAuthenticationEntryPoint` và `RestAccessDeniedHandler` |
+| Áp dụng luật | Bảng chỉ dẫn mỗi người được vào tầng nào | Luật URL trong `SecurityConfig`, cùng `RestSecurityErrorHandler` |
 
 Sơ đồ tiếp theo cho thấy đường đi của một request. Bước kiểm tra ở cổng chạy trước và không tự từ chối request: token sai chỉ khiến người gọi vẫn là ẩn danh. Luật URL mới quyết định ẩn danh có được chấp nhận ở URL đó hay không.
 
@@ -23,8 +23,8 @@ flowchart TD
     Ctx --> Rules["AuthorizationFilter<br/>URL rules in SecurityConfig"]
     Anon --> Rules
     Rules -->|public URL or role allowed| Controller[Controller]
-    Rules -->|anonymous on a protected URL| E401["401 AUTHENTICATION_REQUIRED<br/>RestAuthenticationEntryPoint"]
-    Rules -->|authenticated but wrong role| E403["403 FORBIDDEN<br/>RestAccessDeniedHandler"]
+    Rules -->|anonymous on a protected URL| E401["401 AUTHENTICATION_REQUIRED<br/>RestSecurityErrorHandler"]
+    Rules -->|authenticated but wrong role| E403["403 FORBIDDEN<br/>RestSecurityErrorHandler"]
 ```
 
 Cách đọc:
@@ -185,10 +185,10 @@ Mọi lỗi dùng khung `ApiResponse` chung, mô tả trong [API_CONTRACT.md](..
 
 | Tình huống | HTTP | Mã | Do |
 |---|---|---|---|
-| Không có danh tính ở URL cần bảo vệ | 401 | `AUTHENTICATION_REQUIRED` | `RestAuthenticationEntryPoint` |
+| Không có danh tính ở URL cần bảo vệ | 401 | `AUTHENTICATION_REQUIRED` | `RestSecurityErrorHandler` |
 | Sai email hoặc mật khẩu, tài khoản bị khóa | 401 | `AUTHENTICATION_REQUIRED` | `AuthServiceImpl` |
 | Refresh token sai, hết hạn hoặc đã thu hồi | 401 | `AUTHENTICATION_REQUIRED` | `RefreshTokenServiceImpl` |
-| Biết danh tính nhưng role không được phép | 403 | `FORBIDDEN` | `RestAccessDeniedHandler` |
+| Biết danh tính nhưng role không được phép | 403 | `FORBIDDEN` | `RestSecurityErrorHandler` |
 | Seller chưa `APPROVED`, hoặc product thuộc seller khác | 403 | `FORBIDDEN` | `SellerProductServiceImpl` |
 | `@PreAuthorize` từ chối lời gọi | 403 | `FORBIDDEN` | `GlobalExceptionHandler` |
 | Body sai định dạng hoặc giá trị role không tồn tại | 400 | `VALIDATION_ERROR` | `GlobalExceptionHandler` |
@@ -201,7 +201,7 @@ Mọi lỗi dùng khung `ApiResponse` chung, mô tả trong [API_CONTRACT.md](..
 | Đọc Bearer token và lưu người dùng | `JwtAuthenticationFilter` |
 | Tạo và kiểm tra access token | `JwtServiceImpl` |
 | Người dùng đã xác thực (id, role, authorities) | `AuthUser` |
-| Body JSON của lỗi 401 và 403 | `RestAuthenticationEntryPoint`, `RestAccessDeniedHandler` |
+| Body JSON của lỗi 401 và 403 | `RestSecurityErrorHandler` (status và câu mặc định lấy từ `ErrorCode`) |
 | Đăng ký, đăng nhập, refresh, logout | `AuthServiceImpl` |
 | Kiểm tra seller đã duyệt và quyền sở hữu product | `SellerProductServiceImpl` |
 | Cấp, xoay vòng, thu hồi refresh token | `RefreshTokenServiceImpl` |
