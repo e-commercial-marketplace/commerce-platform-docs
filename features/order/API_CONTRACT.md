@@ -73,6 +73,7 @@ Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
   "items": [
     {
       "id": "order-item-uuid",
+      "orderId": "order-uuid",
       "productId": "product-uuid",
       "productName": "Headphone",
       "unitPrice": "59.00",
@@ -159,9 +160,12 @@ Errors:
 
 Maps to FR-ORD-09.
 
-### GET /api/v1/seller/order-items — Predicted
+### GET /api/v1/seller/order-items
 
-Query order items owned by the authenticated seller.
+Status: Confirmed — implemented in Phase 5.
+
+Query order items owned by the authenticated seller, newest order first. The seller must be
+`APPROVED` (checked in the database, like seller product management).
 Actor: `SELLER` (`Authorization: Bearer <access-token>` required).
 
 Query parameters (all optional): `status` (`PENDING | CONFIRMED | CANCELLED`),
@@ -194,11 +198,14 @@ Success: `200 OK`, `ApiResponse<PageResponse<OrderItemResponse>>`. `data` payloa
 ```
 
 Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`) when caller is
-not `SELLER`; `VALIDATION_ERROR` (`400`) for an unknown `status` value.
+not `SELLER` or not `APPROVED`; `VALIDATION_ERROR` (`400`) for an unknown `status` value
+or invalid `orderId`/`page`/`size`.
 
 Maps to FR-FUL-01, FR-FUL-03.
 
-### PATCH /api/v1/seller/order-items/{id}/confirm — Predicted
+### PATCH /api/v1/seller/order-items/{id}/confirm
+
+Status: Confirmed — implemented in Phase 5.
 
 Seller confirms one owned order item (`PENDING -> CONFIRMED`).
 Actor: `SELLER`.
@@ -211,13 +218,16 @@ Errors:
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
-| `FORBIDDEN` | `403` | Caller is not `SELLER`, or `orderItem.seller.id != authenticatedSeller.id`. |
-| `RESOURCE_NOT_FOUND` | `404` | Unknown item id (or not visible to caller). |
+| `FORBIDDEN` | `403` | Caller is not an `APPROVED` `SELLER`, or `orderItem.seller.id != authenticatedSeller.id`. |
+| `RESOURCE_NOT_FOUND` | `404` | Unknown item id. |
 | `VALIDATION_ERROR` | `400` | Item is not in `PENDING` (e.g. already `CONFIRMED`/`CANCELLED`). |
 
 Maps to FR-FUL-02, FR-FUL-03, FR-FUL-04.
 
-### PATCH /api/v1/seller/order-items/{id}/cancel — Predicted
+### PATCH /api/v1/seller/order-items/{id}/cancel
+
+Status: Confirmed — implemented in Phase 5 (shipment and prepayment checks arrive in Phase 7 and
+Phase 6).
 
 Seller cancels one owned order item before shipment assignment.
 Actor: `SELLER`.
@@ -230,10 +240,12 @@ Request body:
 }
 ```
 
-`cancelReason` is optional (`null` allowed).
+`cancelReason` is optional (`null` allowed, at most 1000 characters). The body itself may be omitted.
 
 Rules:
 
+- A line in `PENDING` or `CONFIRMED` can be cancelled; a `CANCELLED` line cannot (400).
+- Cancelling restores the line quantity to product stock exactly once.
 - Direct cancellation is allowed only before shipment assignment
   (FR-ORD-11). An item already mapped to a shipment must go through the atomic
   shipment-cancellation path, not this endpoint.
@@ -242,6 +254,10 @@ Rules:
 - Before payment completion the transaction recalculates `Order.totalAmount`
   and every still-`PENDING` payment `amount` from remaining non-cancelled
   snapshots; cancelled snapshots stay unchanged for history.
+- When every line of the order is cancelled, the order becomes `CANCELLED`, its total becomes
+  `0.00`, and its `PENDING` COD payment becomes `FAILED` (not collectible).
+- The order row is locked during cancellation so two sellers cancelling lines of the same order
+  cannot both recalculate from a stale total.
 
 Success: `200 OK`, `ApiResponse<OrderItemResponse>` (`status: "CANCELLED"`).
 
@@ -250,10 +266,10 @@ Errors:
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
-| `FORBIDDEN` | `403` | Not seller-owned. |
+| `FORBIDDEN` | `403` | Caller is not an `APPROVED` `SELLER`, or the line is not seller-owned. |
 | `RESOURCE_NOT_FOUND` | `404` | Unknown item id. |
-| `VALIDATION_ERROR` | `400` | Item not cancellable in its current `OrderItemStatus`. |
-| `CANNOT_CANCEL_AFTER_SHIPMENT` | `409` | Item already assigned/shipped via a shipment. |
-| `CANNOT_CANCEL_AFTER_PAYMENT` | `409` | Prepayment already completed and no refund policy applies. |
+| `VALIDATION_ERROR` | `400` | Item already `CANCELLED`, or `cancelReason` too long. |
+| `CANNOT_CANCEL_AFTER_SHIPMENT` | `409` | Item already assigned/shipped via a shipment (Phase 7). |
+| `CANNOT_CANCEL_AFTER_PAYMENT` | `409` | Prepayment already completed and no refund policy applies (Phase 6). |
 
 Maps to FR-ORD-11, FR-ORD-12, FR-FUL-02, FR-FUL-03, FR-FUL-04.

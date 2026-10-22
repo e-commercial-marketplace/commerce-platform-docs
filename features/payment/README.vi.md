@@ -87,7 +87,7 @@ classDiagram
 - COD bắt đầu ở trạng thái `PENDING`.
 - COD được đánh dấu `COMPLETED` bởi các service shipment/payment trong cùng transaction với lần chuyển shipment bắt buộc không bị hủy cuối cùng sang `DELIVERED`.
 - Nếu shipment của bất kỳ seller nào trở thành `FAILED` hoặc `RETURNED`, MVP không ghi nhận thu hộ COD, quyết toán từng phần hay hoàn tiền; trạng thái shipment vẫn là nguồn sự thật cho từng seller.
-- Trước khi hoàn tất thanh toán, hủy item hoặc shipment được phép cập nhật mọi `amount` thanh toán đang pending thành tổng phải trả của đơn được tính lại. Nếu mọi dòng đều bị hủy, đơn hàng bị hủy và lần thử COD pending không thể thu; nếu chỉ còn các dòng đã giao không bị hủy, service thanh toán đánh giá lại việc hoàn tất trong cùng transaction.
+- Trước khi hoàn tất thanh toán, hủy item hoặc shipment được phép cập nhật mọi `amount` thanh toán đang pending thành tổng phải trả của đơn được tính lại. Nếu mọi dòng đều bị hủy, đơn hàng bị hủy và lần thử COD pending không thể thu, được đánh dấu `FAILED`; nếu chỉ còn các dòng đã giao không bị hủy, service thanh toán đánh giá lại việc hoàn tất trong cùng transaction.
 - VNPAY bắt đầu ở `PENDING` và kết thúc ở `COMPLETED` hoặc `FAILED`.
 - Lần thử thất bại không xóa đơn hàng.
 - Retry tạo một `Payment` khác; không ghi đè bản ghi thất bại.

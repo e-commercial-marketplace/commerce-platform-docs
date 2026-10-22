@@ -96,7 +96,7 @@ classDiagram
   settlement, or refund; shipment statuses remain the source of truth for each seller.
 - Before payment completion, an allowed item or shipment cancellation updates every pending payment's
   `amount` to the recalculated order payable total. If all lines are cancelled, the order is cancelled
-  and the pending COD attempt is not collectible; if delivered non-cancelled lines are all that remain,
+  and the pending COD attempt is not collectible and is marked `FAILED`; if delivered non-cancelled lines are all that remain,
   the payment service reevaluates completion in the same transaction.
 - VNPAY starts as `PENDING` and ends as `COMPLETED` or `FAILED`.
 - A failed attempt does not destroy the order.
