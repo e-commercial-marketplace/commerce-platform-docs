@@ -489,7 +489,9 @@ ngay cả khi UI mobile ẩn một thao tác.
 
 ## 13. Thiết kế Kiểm thử
 
-Kiến trúc phải được kiểm chứng bằng:
+### 13.1 Thiết kế Kiểm thử Backend (Kế hoạch)
+
+Kiến trúc backend về sau phải được kiểm chứng bằng:
 
 - unit test;
 - integration test;
@@ -501,6 +503,34 @@ Kiến trúc phải được kiểm chứng bằng:
 
 Các test liên module quan trọng nhất bao phủ cách ly seller (seller isolation), snapshot giá order, thử lại payment,
 xử lý callback trùng lặp, đồng thời voucher, điều kiện review và cách ly dữ liệu AI.
+
+Tất cả nội dung trong tiểu mục này là **Kế hoạch**. Chúng mô tả ý định thiết kế và chưa được triển
+khai. Chưa có integration, idempotency, ownership hay performance test nào của backend tồn tại trong
+cột mốc hiện tại.
+
+### 13.2 Kiểm thử Frontend (Đã triển khai)
+
+Client React Native / Expo hiện có **45 automated test frontend** trong 8 suite, phân loại như sau:
+
+| Nhóm | Số lượng |
+|---|---|
+| Unit Test | 18 |
+| Component Test | 13 |
+| Hook/Context Test | 12 |
+| Screen/Rendering Test | 2 |
+| **Tổng** | **45** |
+
+Stack gồm Jest `~29.7.0` với preset `jest-expo` `~57.0.6` và `@testing-library/react-native` `12.8.1`.
+
+Kết quả đã kiểm chứng cho frontend commit `36e02a6` (merge qua `866897b`): 8 suite pass, 45 test
+pass, 0 failed, 0 skipped, 0 snapshots.
+
+Đây chỉ là unit, component, hook/context và screen-rendering test giới hạn. Chúng không kiểm chứng
+tích hợp backend thật, hành vi cart phía server, checkout, orders, payment, shipment, reviews,
+voucher, chat, AI hay notifications.
+
+Đặc tả test case đầy đủ, coverage và truy vết:
+[`04-testing/README.vi.md`](../04-testing/README.vi.md).
 
 ## 14. Quyết định Kiến trúc và Các loại trừ
 

@@ -490,7 +490,9 @@ even when the mobile UI hides an action.
 
 ## 13. Test Design
 
-The architecture must be verified with:
+### 13.1 Backend Test Design (Planned)
+
+The backend architecture must eventually be verified with:
 
 - unit tests;
 - integration tests;
@@ -502,6 +504,36 @@ The architecture must be verified with:
 
 The most important cross-module tests cover seller isolation, order price snapshots, payment retry,
 duplicate callback handling, voucher concurrency, review eligibility, and AI data isolation.
+
+All items in this subsection are **Planned**. They describe design intent and are not implemented
+yet. No backend integration, idempotency, ownership, or performance test exists in the current
+milestone.
+
+### 13.2 Frontend Testing (Implemented)
+
+The React Native / Expo client currently has **45 automated frontend tests** across 8 suites,
+classified as:
+
+| Category | Count |
+|---|---|
+| Unit Test | 18 |
+| Component Test | 13 |
+| Hook/Context Test | 12 |
+| Screen/Rendering Test | 2 |
+| **Total** | **45** |
+
+The stack is Jest `~29.7.0` with the `jest-expo` `~57.0.6` preset and
+`@testing-library/react-native` `12.8.1`.
+
+Verified result for frontend commit `36e02a6` (merged via `866897b`): 8 suites passed, 45 tests
+passed, 0 failed, 0 skipped, 0 snapshots.
+
+These are unit, component, hook/context, and limited screen-rendering tests only. They do not verify
+real backend integration, server-side cart behavior, checkout, orders, payment, shipment, reviews,
+voucher, chat, AI, or notifications.
+
+Full test case specification, coverage, and traceability:
+[`04-testing/README.md`](../04-testing/README.md).
 
 ## 14. Architecture Decisions and Exclusions
 

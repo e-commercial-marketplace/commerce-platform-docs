@@ -405,3 +405,8 @@ required when the feature belongs to the current frontend milestone.
 
 The minimum verification scenarios are listed in `PLAN.md` and are summarized in section 9.1 of
 [`01-project-overview-and-sdp/README.md`](../01-project-overview-and-sdp/README.md).
+
+Current frontend automated verification is documented in
+[`04-testing/README.md`](../04-testing/README.md). That document records the automated frontend tests
+that exist for the current milestone. It is **not** evidence that every requirement in this SRS has
+already passed acceptance testing; features that are not implemented remain unverified.
