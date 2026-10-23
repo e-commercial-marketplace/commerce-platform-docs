@@ -150,6 +150,7 @@ classDiagram
         PENDING
         PAID
         DELIVERED
+        COMPLETED
         CANCELLED
     }
 
@@ -229,7 +230,8 @@ classDiagram
 - `sellerStatus` chỉ áp dụng khi `User.role = SELLER`.
 - `OrderItemStatus` mô tả seller processing; `ShipmentStatus` mô tả delivery progress.
 - `OrderStatus` là order-level aggregate; các `FAILED` và `RETURNED` outcomes seller-specific thuộc
-  về `ShipmentStatus`.
+  về `ShipmentStatus`. `DELIVERED` nghĩa là mọi shipment cần thiết đã giao; `COMPLETED` nghĩa là
+  khách đã xác nhận nhận hàng, hoặc hệ thống tự xác nhận sau 3 ngày kể từ lần giao cuối.
 - `OrderItem.productName` và `OrderItem.unitPrice` bảo lưu checkout history.
 - Một shipment chứa order items từ đúng một seller.
 - Một shipment chứa order items từ đúng một order; `Shipment.order == OrderItem.order` cho

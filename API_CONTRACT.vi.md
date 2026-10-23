@@ -699,8 +699,8 @@ hiện trong Phase 10; cho đến lúc đó backend trả `AI_UNAVAILABLE` cho m
 ## 9. State rules backend bắt buộc
 
 ```text
-Prepayment order: PENDING -> PAID -> DELIVERED
-COD order:        PENDING -> DELIVERED
+Prepayment order: PENDING -> PAID -> DELIVERED -> COMPLETED
+COD order:        PENDING -> DELIVERED -> COMPLETED
 Prepayment order: PENDING -> CANCELLED after the prepayment deadline
 
 Shipment: PENDING -> PREPARING -> SHIPPED -> DELIVERED
@@ -708,6 +708,8 @@ Shipment: SHIPPED -> FAILED -> RETURNED
 Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 ```
 
+- `DELIVERED -> COMPLETED` khi khách xác nhận đã nhận hàng (`PATCH /api/v1/orders/{id}/received`), hoặc tự
+  động sau 3 ngày kể từ lần giao shipment cuối.
 - `FAILED` không khôi phục stock.
 - Chỉ transition `RETURNED` thành công mới khôi phục shipped quantity cho seller đó.
 - Một multi-seller order có thể có independent shipment outcomes.

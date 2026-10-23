@@ -11,7 +11,7 @@ zero-based pagination, `ApiResponse<T>` envelope, and shared error codes/HTTP
 mapping — are defined in `..\..\API_CONTRACT.md` (§2) and are not repeated here.
 Checkout/order shapes reuse `..\..\API_CONTRACT.md` (§6).
 
-Status model: `OrderStatus = PENDING | PAID | DELIVERED | CANCELLED`,
+Status model: `OrderStatus = PENDING | PAID | DELIVERED | COMPLETED | CANCELLED`,
 `OrderItemStatus = PENDING | CONFIRMED | CANCELLED`. `OrderItemStatus` tracks
 seller processing only; delivery progress belongs to `ShipmentStatus`.
 
@@ -168,6 +168,37 @@ Errors:
 | `RESOURCE_NOT_FOUND` | `404` | Unknown id or order owned by another customer. |
 
 Maps to FR-ORD-09.
+
+### PATCH /api/v1/orders/{id}/received
+
+Status: Confirmed — implemented in Phase 7.
+
+The customer confirms that the order was received, which closes the order
+(`DELIVERED -> COMPLETED`). Actor: `CUSTOMER` (owner of the order). No request
+body.
+
+Rules (FR-ORD-13):
+
+- Allowed only while the order is `DELIVERED` (every required shipment is
+  delivered). Any other status is rejected.
+- If the customer does not confirm, the system completes the order
+  automatically 3 days after its last shipment was delivered (a background job
+  checks periodically).
+- Confirming receipt changes no payment: COD was already recorded as collected
+  when the order became `DELIVERED`.
+
+Success: `200 OK`, `ApiResponse<OrderResponse>` with `status: "COMPLETED"`.
+
+Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
+| `FORBIDDEN` | `403` | Authenticated actor is not `CUSTOMER`. |
+| `RESOURCE_NOT_FOUND` | `404` | Unknown id or order owned by another customer. |
+| `VALIDATION_ERROR` | `400` | The order is not `DELIVERED`. |
+
+Maps to FR-ORD-13.
 
 ### GET /api/v1/seller/order-items
 

@@ -74,6 +74,7 @@ classDiagram
         PENDING
         PAID
         DELIVERED
+        COMPLETED
         CANCELLED
     }
 

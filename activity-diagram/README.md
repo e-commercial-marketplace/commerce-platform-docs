@@ -41,6 +41,7 @@ the implementation code.
 | [`customer/pay-for-order-cod.puml`](customer/pay-for-order-cod.puml) | Pay for Order (COD) | [`pay-for-order-cod.vi.md`](../usecase-specification/customer/pay-for-order-cod.vi.md) |
 | [`customer/pay-for-order-vnpay.puml`](customer/pay-for-order-vnpay.puml) | Pay for Order (VNPAY) | [`pay-for-order-vnpay.vi.md`](../usecase-specification/customer/pay-for-order-vnpay.vi.md) |
 | [`customer/view-my-orders.puml`](customer/view-my-orders.puml) | View My Orders | [`view-my-orders.vi.md`](../usecase-specification/customer/view-my-orders.vi.md) |
+| [`customer/confirm-order-received.puml`](customer/confirm-order-received.puml) | Confirm Order Received | [`confirm-order-received.vi.md`](../usecase-specification/customer/confirm-order-received.vi.md) |
 | [`customer/view-my-shipments.puml`](customer/view-my-shipments.puml) | View My Shipments | [`view-my-shipments.vi.md`](../usecase-specification/customer/view-my-shipments.vi.md) |
 | [`customer/create-product-review.puml`](customer/create-product-review.puml) | Create Product Review | [`create-product-review.vi.md`](../usecase-specification/customer/create-product-review.vi.md) |
 | [`customer/chat-with-seller.puml`](customer/chat-with-seller.puml) | Chat with Seller | [`chat-with-seller.vi.md`](../usecase-specification/customer/chat-with-seller.vi.md) |

@@ -150,6 +150,7 @@ classDiagram
         PENDING
         PAID
         DELIVERED
+        COMPLETED
         CANCELLED
     }
 
@@ -229,7 +230,8 @@ classDiagram
 - `sellerStatus` applies only when `User.role = SELLER`.
 - `OrderItemStatus` describes seller processing; `ShipmentStatus` describes delivery progress.
 - `OrderStatus` is an order-level aggregate; seller-specific `FAILED` and `RETURNED` outcomes belong
-  to `ShipmentStatus`.
+  to `ShipmentStatus`. `DELIVERED` means every required shipment is delivered; `COMPLETED` means the
+  customer confirmed receipt, or the system confirmed it 3 days after the last delivery.
 - `OrderItem.productName` and `OrderItem.unitPrice` preserve checkout history.
 - A shipment contains order items from exactly one seller.
 - A shipment contains order items from exactly one order; `Shipment.order == OrderItem.order` for

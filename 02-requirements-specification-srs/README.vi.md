@@ -170,6 +170,7 @@ DELETE /api/v1/cart/items/{id}
 | FR-ORD-10 | Hệ thống phải hủy order prepayment 24 giờ sau `Order.createdAt` khi payment chưa hoàn tất và hoàn lại stock khi checkout của nó đúng một lần; các order COD không có thời hạn prepayment. |
 | FR-ORD-11 | Việc hủy trực tiếp order-item chỉ được phép trước khi gán shipment. Một shipment `PENDING`/`PREPARING` đã gán có thể bị hủy nguyên tử (atomically), đánh dấu các dòng đã ánh xạ thành `CANCELLED` và giải phóng stock chưa giao đúng một lần; việc hủy sau `SHIPPED` hoặc muộn hơn bị từ chối. |
 | FR-ORD-12 | Trước khi hoàn tất payment, một lần hủy hợp lệ phải tính lại tổng phải trả của order và mọi số tiền payment đang pending từ các snapshot order-item còn lại; nếu tất cả các dòng đều bị hủy, order phải chuyển thành `CANCELLED`. |
+| FR-ORD-13 | Customer phải có thể xác nhận đã nhận hàng cho order `DELIVERED`, chuyển order sang `COMPLETED`. Nếu customer không xác nhận, hệ thống phải tự hoàn tất order sau 3 ngày kể từ lần giao shipment cuối. |
 
 Các endpoint theo kế hoạch:
 
@@ -177,6 +178,7 @@ Các endpoint theo kế hoạch:
 POST /api/v1/orders
 GET  /api/v1/orders
 GET  /api/v1/orders/{id}
+PATCH /api/v1/orders/{id}/received
 ```
 
 ### 5.5 Xử lý order của seller

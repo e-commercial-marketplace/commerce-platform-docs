@@ -1,7 +1,7 @@
 # Sơ đồ tuần tự
 
 Thư mục này chứa mỗi use case trong [`usecase-specification/`](../usecase-specification/) một
-sequence diagram kỹ thuật bằng Mermaid (63 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
+sequence diagram kỹ thuật bằng Mermaid (64 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
 Khác với activity diagram, các sơ đồ này không chỉ mô tả luồng nghiệp vụ mà thể hiện request đi
 qua các tầng backend thật.
 
@@ -47,6 +47,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/browse-catalog.md`](customer/browse-catalog.md) | Catalog - Browse Catalog | `GET /api/v1/products and GET /api/v1/categories` (Confirmed) |
 | [`customer/chat-with-seller.md`](customer/chat-with-seller.md) | Chat - Chat with Seller | `WebSocket /ws/chat (message frames are phased)` (Phased) |
 | [`customer/checkout-order.md`](customer/checkout-order.md) | Order - Checkout Order | `POST /api/v1/orders` (Confirmed) |
+| [`customer/confirm-order-received.md`](customer/confirm-order-received.md) | Order - Confirm Order Received | `PATCH /api/v1/orders/{id}/received` (Confirmed) |
 | [`customer/create-product-review.md`](customer/create-product-review.md) | Review - Create Product Review | `POST /api/v1/products/{productId}/reviews` (Confirmed) |
 | [`customer/login.md`](customer/login.md) | Auth - Customer Login | `POST /api/v1/auth/login` (Confirmed) |
 | [`customer/logout.md`](customer/logout.md) | Auth - Logout | `POST /api/v1/auth/logout` (Confirmed) |

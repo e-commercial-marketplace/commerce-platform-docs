@@ -710,8 +710,8 @@ then the backend answers `AI_UNAVAILABLE` for every AI request.
 ## 9. State rules required by the backend
 
 ```text
-Prepayment order: PENDING -> PAID -> DELIVERED
-COD order:        PENDING -> DELIVERED
+Prepayment order: PENDING -> PAID -> DELIVERED -> COMPLETED
+COD order:        PENDING -> DELIVERED -> COMPLETED
 Prepayment order: PENDING -> CANCELLED after the prepayment deadline
 
 Shipment: PENDING -> PREPARING -> SHIPPED -> DELIVERED
@@ -719,6 +719,8 @@ Shipment: SHIPPED -> FAILED -> RETURNED
 Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 ```
 
+- `DELIVERED -> COMPLETED` happens when the customer confirms receipt (`PATCH /api/v1/orders/{id}/received`),
+  or automatically 3 days after the last shipment was delivered.
 - `FAILED` does not restore stock.
 - Only a successful `RETURNED` transition restores the shipped quantity for that seller.
 - A multi-seller order may have independent shipment outcomes.

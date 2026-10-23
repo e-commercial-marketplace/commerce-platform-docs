@@ -32,6 +32,7 @@ management screens are deferred.
 POST  /api/v1/orders
 GET   /api/v1/orders
 GET   /api/v1/orders/{id}
+PATCH /api/v1/orders/{id}/received
 GET   /api/v1/seller/order-items
 PATCH /api/v1/seller/order-items/{id}/confirm
 PATCH /api/v1/seller/order-items/{id}/cancel
@@ -90,6 +91,7 @@ classDiagram
         PENDING
         PAID
         DELIVERED
+        COMPLETED
         CANCELLED
     }
 

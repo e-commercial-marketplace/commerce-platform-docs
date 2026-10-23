@@ -1,7 +1,7 @@
 # Sequence Diagrams
 
 This folder contains one technical Mermaid sequence diagram per use case in
-[`usecase-specification/`](../usecase-specification/) (63 use cases), plus one supplemental VNPAY
+[`usecase-specification/`](../usecase-specification/) (64 use cases), plus one supplemental VNPAY
 integration diagram. Unlike the activity diagrams, these diagrams are not only business flows:
 they trace the planned request through the real backend layers.
 
@@ -49,6 +49,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/browse-catalog.md`](customer/browse-catalog.md) | Catalog - Browse Catalog | `GET /api/v1/products and GET /api/v1/categories` (Confirmed) |
 | [`customer/chat-with-seller.md`](customer/chat-with-seller.md) | Chat - Chat with Seller | `WebSocket /ws/chat (message frames are phased)` (Phased) |
 | [`customer/checkout-order.md`](customer/checkout-order.md) | Order - Checkout Order | `POST /api/v1/orders` (Confirmed) |
+| [`customer/confirm-order-received.md`](customer/confirm-order-received.md) | Order - Confirm Order Received | `PATCH /api/v1/orders/{id}/received` (Confirmed) |
 | [`customer/create-product-review.md`](customer/create-product-review.md) | Review - Create Product Review | `POST /api/v1/products/{productId}/reviews` (Confirmed) |
 | [`customer/login.md`](customer/login.md) | Auth - Customer Login | `POST /api/v1/auth/login` (Confirmed) |
 | [`customer/logout.md`](customer/logout.md) | Auth - Logout | `POST /api/v1/auth/logout` (Confirmed) |

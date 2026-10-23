@@ -170,6 +170,7 @@ DELETE /api/v1/cart/items/{id}
 | FR-ORD-10 | The system shall cancel a prepayment order 24 hours after `Order.createdAt` when payment is incomplete and restore its checkout stock exactly once; COD orders have no prepayment deadline. |
 | FR-ORD-11 | Direct order-item cancellation is allowed only before shipment assignment. An assigned `PENDING`/`PREPARING` shipment may be cancelled atomically, marking its mapped lines `CANCELLED` and releasing unshipped stock exactly once; cancellation after `SHIPPED` or later is rejected. |
 | FR-ORD-12 | Before payment completion, a valid cancellation shall recalculate the order payable total and every pending payment amount from the remaining order-item snapshots; if all lines are cancelled, the order shall become `CANCELLED`. |
+| FR-ORD-13 | The customer shall be able to confirm receipt of a `DELIVERED` order, which moves it to `COMPLETED`. If the customer does not confirm, the system shall complete the order automatically 3 days after its last shipment was delivered. |
 
 Planned endpoints:
 
@@ -177,6 +178,7 @@ Planned endpoints:
 POST /api/v1/orders
 GET  /api/v1/orders
 GET  /api/v1/orders/{id}
+PATCH /api/v1/orders/{id}/received
 ```
 
 ### 5.5 Seller order processing
