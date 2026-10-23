@@ -187,6 +187,7 @@ GET  /api/v1/orders/{id}
 | FR-FUL-02 | Một seller phải có thể confirm hoặc cancel các order item của chính mình. |
 | FR-FUL-03 | Các thao tác của seller phải thực thi `orderItem.seller.id == authenticatedSeller.id`. |
 | FR-FUL-04 | Việc hủy của seller không được ảnh hưởng đến order item hoặc shipment của seller khác. |
+| FR-FUL-05 | Seller chỉ được confirm order item của order VNPAY sau khi order đã `PAID`. Các dòng của order VNPAY chưa thanh toán vẫn hiển thị nhưng không confirm được; order COD không bị ảnh hưởng. |
 
 Các endpoint theo kế hoạch:
 
@@ -207,12 +208,14 @@ PATCH /api/v1/seller/order-items/{id}/cancel
 | FR-PAY-05 | Các callback thanh toán phải có tính idempotent. |
 | FR-PAY-06 | Một lần thử VNPAY thất bại không được phá hủy order. Một lần thử lại phải tạo một bản ghi `Payment` khác. |
 | FR-PAY-07 | Các định danh transaction/tham chiếu VNPAY phải là duy nhất khi áp dụng được. |
+| FR-PAY-08 | Kết quả VNPAY đến qua IPN và qua Return URL phải được xử lý bởi cùng một hàm có kiểm chữ ký và idempotent, để payment được ghi nhận dù bên nào đến trước. Retry hoặc thay đổi tổng đơn phải đánh `FAILED` mọi lần thử VNPAY đang chờ trước khi cấp link thanh toán mới. |
 
 Các endpoint theo kế hoạch:
 
 ```text
 POST /api/v1/payments/vnpay/create
-POST /api/v1/payments/vnpay/callback
+GET  /api/v1/payments/vnpay/ipn
+GET  /api/v1/payments/vnpay/return
 ```
 
 ### 5.7 Shipment và giao hàng

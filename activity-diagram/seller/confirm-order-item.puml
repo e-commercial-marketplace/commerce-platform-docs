@@ -47,6 +47,14 @@ else (No)
 endif
 |System|
 :Check the information, the processing conditions, and the permission to perform;
+if (The order is paid by VNPAY and not yet paid?) then (Yes)
+  :Return the order-not-paid error;
+  |Seller|
+  :View the order-not-paid error;
+  stop
+else (No)
+endif
+|System|
 :Update the order item;
 :Display the result;
 |Seller|

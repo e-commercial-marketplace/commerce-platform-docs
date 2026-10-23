@@ -1,57 +1,41 @@
 # VNPAY Payment Integration — Sequence Diagram
 
-- **Source:** [Payment API contract](../../features/payment/API_CONTRACT.md), predicted `POST /api/v1/payments/vnpay/create` and `POST /api/v1/payments/vnpay/callback`.
-- **Scope:** supplemental integration flow; not one of the 60 use-case specifications.
+- **Source:** [Payment API contract](../../features/payment/API_CONTRACT.md) and [Order API contract](../../features/order/API_CONTRACT.md): `POST /api/v1/orders` (VNPAY), `POST /api/v1/payments/vnpay/create`, `GET /api/v1/payments/vnpay/ipn`, `GET /api/v1/payments/vnpay/return` — Confirmed.
+- **Scope:** supplemental integration flow covering checkout with VNPAY, both result channels, and the 24-hour expiry job; the customer use case is [customer/pay-for-order-vnpay.md](../customer/pay-for-order-vnpay.md).
 
-> **Target sequence:** payment service/controller/repository classes are planned placeholders. VNPAY endpoints and payload details remain Predicted in the API contract; provider secrets stay on the backend.
+> The hash secret stays on the backend. The IPN only reaches a public deployment (registered in the VNPAY merchant portal); in local development the Return URL records the result through the same handler.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Customer
     participant Client as React Native client
-    participant Security as Spring Security
-    participant Controller as PaymentController
-    participant Service as PaymentService
-    participant OrderService as OrderService
-    participant OrderRepo as OrderRepository
-    participant PaymentRepo as PaymentRepository
+    participant Backend as Backend (controllers + services)
     participant DB as PostgreSQL
-    participant VNPAY as External VNPAY
-    participant Handler as GlobalExceptionHandler
-    Customer->>Client: Choose online payment for an owned order
-    Client->>Security: POST /api/v1/payments/vnpay/create + customer JWT
-    Security->>Controller: Forward authenticated CUSTOMER principal
-    Controller->>Service: Create a VNPAY payment attempt
-    Service->>OrderService: Verify ownership and payable order state
-    OrderService->>OrderRepo: Load caller-owned order
-    OrderRepo->>DB: SELECT order and payment state
-    DB-->>OrderRepo: Order state
-    OrderRepo-->>OrderService: Owned payable order
-    OrderService-->>Service: Order payable
-    Service->>PaymentRepo: Persist a new PENDING attempt and unique transaction reference
-    PaymentRepo->>DB: INSERT payment attempt
-    DB-->>PaymentRepo: Persisted attempt
-    Service->>VNPAY: Send signed payment request (secret remains server-side)
-    VNPAY-->>Service: Return redirect URL/parameters
-    Service-->>Controller: Result DTO
-    Controller-->>Client: 200 OK ApiResponse<VnpayCreateResponse>
-    Client->>VNPAY: Redirect customer to payment URL
-    VNPAY->>Controller: POST /api/v1/payments/vnpay/callback
-    Controller->>Service: Process callback
-    Service->>Service: Validate signature, amount, transaction idempotency
-    alt Valid, new successful callback
-        Service->>PaymentRepo: Mark attempt COMPLETED
-        PaymentRepo->>DB: UPDATE payment and coordinate order state transactionally
-        DB-->>PaymentRepo: Updated payment/order state
-        PaymentRepo-->>Service: Completed state
-        Service-->>Controller: Result
-        Controller-->>VNPAY: 200 OK ApiResponse<PaymentResponse>
-    else Invalid signature, mismatch, or duplicate callback
-        Service-->>Controller: Callback result/error
-        Controller->>Handler: Normalize callback validation error when rejected
-        Handler-->>VNPAY: Contract-defined 4xx/200 response
+    participant VNPAY as VNPAY sandbox
+    participant Job as PrepaymentExpiryJob
+    Customer->>Client: Check out selected cart lines with VNPAY
+    Client->>Backend: POST /api/v1/orders {cartItemIds, shippingAddress, paymentMethod: VNPAY}
+    Backend->>DB: Decrease stock, INSERT order and items, INSERT payment (VNPAY, PENDING, vnp_TxnRef)
+    Backend->>Backend: Sign vnp_* parameters (HMAC-SHA512, link valid 15 minutes, never past the 24-hour deadline)
+    Backend-->>Client: 201 OrderResponse with paymentUrl
+    Client->>VNPAY: Open paymentUrl in the browser
+    Customer->>VNPAY: Pay with the test card
+    par Server-to-server
+        VNPAY->>Backend: GET /api/v1/payments/vnpay/ipn?vnp_...
+        Backend->>DB: Verify, lock order, record result once
+        Backend-->>VNPAY: 200 {"RspCode":"00","Message":"Confirm Success"} (02 if already recorded)
+    and Browser redirect
+        VNPAY->>Backend: GET /api/v1/payments/vnpay/return?vnp_...
+        Backend->>DB: Same handler; records the result if the IPN has not yet
+        Backend-->>Client: 302 to app-redirect-url?orderId=...&status=...
     end
-    VNPAY-->>Client: Redirect to the configured return URL (status source remains backend callback)
-    Client-->>Customer: Display current payment status
+    Client->>Backend: GET /api/v1/orders/{id}
+    Backend-->>Client: status PAID, paymentStatus COMPLETED (or FAILED, payable again)
+    Client-->>Customer: Display the result
+    loop Every 5 minutes
+        Job->>DB: Find PENDING VNPAY orders older than 24 hours without a COMPLETED payment
+        Job->>Backend: Cancel each order in its own transaction
+        Backend->>DB: Lock order, cancel remaining lines, restore stock once, pending payments FAILED, order CANCELLED
+    end
 ```

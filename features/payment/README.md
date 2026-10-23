@@ -7,9 +7,9 @@ idempotency.
 
 ## MVP boundary
 
-The first checkout slice implements COD. The `Payment` model and status rules remain compatible with
-VNPAY, but VNPAY request creation, callback validation, and retry UI are deferred until the COD flow
-is verified end to end.
+COD has been available since Phase 4. Phase 6 adds VNPAY against the VNPAY sandbox: checkout creates
+the first attempt and returns its payment link, results arrive through the IPN and the Return URL, and
+a retry endpoint issues a new attempt. COD completion depends on shipments and arrives in Phase 7.
 
 ## Responsibilities
 
@@ -28,7 +28,8 @@ is verified end to end.
 
 ```text
 POST /api/v1/payments/vnpay/create
-POST /api/v1/payments/vnpay/callback
+GET  /api/v1/payments/vnpay/ipn
+GET  /api/v1/payments/vnpay/return
 ```
 
 ## Permissions
@@ -101,6 +102,8 @@ classDiagram
 - VNPAY starts as `PENDING` and ends as `COMPLETED` or `FAILED`.
 - A failed attempt does not destroy the order.
 - Retry creates another `Payment`; it does not overwrite the failed record.
+- A retry or a change of the order total marks every pending VNPAY attempt `FAILED` first, so an old
+  payment link can no longer complete the order.
 - The 24-hour prepayment deadline is measured from `Order.createdAt`, not from each payment retry.
 - When the deadline expires without a completed prepayment, the order is cancelled and its checkout
   stock is restored exactly once. COD is exempt because it is collected on delivery.
@@ -114,7 +117,8 @@ remain auditable while a later retry creates another row.
 
 - `orders (1) -> payments (many)`: one order may have several payment attempts.
 - `payments.orderId -> orders.id` is the ownership boundary for customer payment operations.
-- `transactionId` is unique when a gateway transaction/reference exists; it is `NULL` before VNPAY returns one.
+- `transactionId` holds the merchant reference sent as `vnp_TxnRef`; it is unique and set when a VNPAY
+  attempt is created. COD attempts keep `NULL`.
 - Payment status does not replace the aggregate `orders.status`; the order service coordinates both states.
 
 ### Field meanings

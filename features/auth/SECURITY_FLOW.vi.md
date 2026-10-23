@@ -58,7 +58,9 @@ Các luật trong `SecurityConfig` được kiểm tra từ trên xuống và lu
 | `POST /api/v1/auth/logout` | Phải đăng nhập (cần access token của chính người gọi) |
 | `GET /api/v1/products`, `/products/*`, `/products/*/reviews`, `/categories`, `/sellers/*` | Công khai |
 | `POST /api/v1/ai/ask` | Công khai |
+| `GET /api/v1/payments/vnpay/ipn`, `/payments/vnpay/return` | Công khai (xác thực bằng chữ ký VNPAY) |
 | `/api/v1/cart/**` | Chỉ role `CUSTOMER`; chủ giỏ lấy từ token |
+| `/api/v1/payments/**` (còn lại) | Chỉ role `CUSTOMER`; chủ order lấy từ token |
 | `/api/v1/seller/**` | Chỉ role `SELLER` (trạng thái duyệt seller do service kiểm tra, xem bên dưới) |
 | `/api/v1/admin/**` | Chỉ role `ADMIN` |
 | Mọi request còn lại | Phải đăng nhập |

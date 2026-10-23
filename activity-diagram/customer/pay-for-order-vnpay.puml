@@ -1,0 +1,87 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Payment - Pay for Order (VNPAY)
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+The customer is authenticated and has a VNPAY
+order awaiting payment within 24 hours.
+
+Postcondition:
+On success the attempt is completed and the
+order is PAID. On failure the attempt is FAILED
+and the order stays payable.
+end note
+repeat
+  :Choose to pay the order with VNPAY;
+  |System|
+  :Check ownership, pending state and the 24-hour deadline;
+  if (The order is payable?) then (No)
+    :Return the order-not-payable error;
+    |Customer|
+    :View the order-not-payable error;
+    stop
+  else (Yes)
+  endif
+  |System|
+  if (The system fails while creating the attempt?) then (Yes)
+    :Return the system error;
+    |Customer|
+    :View the system error;
+    stop
+  else (No)
+  endif
+  |System|
+  :Mark the previous pending VNPAY attempt as failed;
+  :Create a new attempt and a signed payment link;
+  :Redirect the customer to the VNPAY payment page;
+  |Customer|
+  :Enter the card details and confirm on VNPAY;
+  |System|
+  :Receive the VNPAY result and check signature,
+  reference and amount;
+  if (The result is valid?) then (No)
+    :Keep the payment and order unchanged;
+    |Customer|
+    :View the unconfirmed-result notice;
+    stop
+  else (Yes)
+  endif
+  |System|
+  if (The attempt was already processed?) then (Yes)
+    :Keep the recorded state;
+  else (No)
+    if (VNPAY reports success?) then (Yes)
+      :Complete the attempt and mark the order as paid;
+    else (No)
+      :Mark the attempt as failed;
+    endif
+  endif
+  :Return the customer to the app with the result;
+  |Customer|
+  :View the payment result;
+repeat while (Payment failed and\npay again?) is (Yes) not (No)
+stop
+
+@enduml

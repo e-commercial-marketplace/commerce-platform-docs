@@ -488,7 +488,10 @@ Content-Type: application/json
 }
 ```
 
-`paymentMethod` là `COD` cho MVP đầu tiên. `VNPAY` được dành cho payment slice tiếp theo.
+`paymentMethod` là `COD` hoặc `VNPAY`. Với `VNPAY`, checkout tạo luôn lần thử VNPAY đầu tiên và trả
+`paymentUrl` đã ký để client mở và thanh toán; `paymentUrl` là `null` với COD và khi xem order. Order
+VNPAY không thanh toán trong 24 giờ sẽ bị hủy. Các endpoint thanh toán nằm ở
+`features/payment/API_CONTRACT.md`.
 
 Wire response đầy đủ là `ApiResponse<OrderResponse>`:
 
@@ -500,6 +503,7 @@ Wire response đầy đủ là `ApiResponse<OrderResponse>`:
     "status": "PENDING",
     "paymentStatus": "PENDING",
     "paymentMethod": "COD",
+    "paymentUrl": null,
     "createdAt": "2026-10-12T10:30:00Z",
     "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
     "shippingFee": "0.00",
@@ -729,13 +733,12 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
   `CANCELLED`, order trở thành `CANCELLED` và không COD collection nào được ghi nhận; nếu non-cancelled items
   còn lại và mọi required shipments của chúng đã `DELIVERED`, order/payment có thể complete trong
   cùng cancellation transaction; ngược lại order vẫn pending.
-- Payment callbacks, khi VNPAY được thêm vào, phải idempotent.
+- Kết quả VNPAY (IPN và Return URL) được kiểm chữ ký và idempotent theo `vnp_TxnRef`.
 
 ## 10. Hợp đồng hoãn lại
 
 Các interfaces sau cố ý chưa frozen cho MVP đầu tiên:
 
-- VNPAY request/callback payloads;
 - voucher validation và application;
 - quản lý seller product/order/shipment;
 - Admin operations;

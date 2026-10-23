@@ -39,6 +39,7 @@ the implementation code.
 | [`customer/manage-cart.puml`](customer/manage-cart.puml) | Manage Cart | [`manage-cart.vi.md`](../usecase-specification/customer/manage-cart.vi.md) |
 | [`customer/checkout-order.puml`](customer/checkout-order.puml) | Checkout Order | [`checkout-order.vi.md`](../usecase-specification/customer/checkout-order.vi.md) |
 | [`customer/pay-for-order-cod.puml`](customer/pay-for-order-cod.puml) | Pay for Order (COD) | [`pay-for-order-cod.vi.md`](../usecase-specification/customer/pay-for-order-cod.vi.md) |
+| [`customer/pay-for-order-vnpay.puml`](customer/pay-for-order-vnpay.puml) | Pay for Order (VNPAY) | [`pay-for-order-vnpay.vi.md`](../usecase-specification/customer/pay-for-order-vnpay.vi.md) |
 | [`customer/view-my-orders.puml`](customer/view-my-orders.puml) | View My Orders | [`view-my-orders.vi.md`](../usecase-specification/customer/view-my-orders.vi.md) |
 | [`customer/view-my-shipments.puml`](customer/view-my-shipments.puml) | View My Shipments | [`view-my-shipments.vi.md`](../usecase-specification/customer/view-my-shipments.vi.md) |
 | [`customer/create-product-review.puml`](customer/create-product-review.puml) | Create Product Review | [`create-product-review.vi.md`](../usecase-specification/customer/create-product-review.vi.md) |

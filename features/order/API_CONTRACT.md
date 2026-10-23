@@ -41,7 +41,7 @@ Request body:
 |---|---|
 | `cartItemIds` | Required, non-empty, no duplicates. Ids of cart lines in the caller's own cart; only these lines are bought. |
 | `shippingAddress` | Required, non-blank string, at most 1000 characters (address snapshot). The app may prefill it from the profile `address`. |
-| `paymentMethod` | Required. `COD` in MVP; `VNPAY` is rejected with `VALIDATION_ERROR` until the payment phase. |
+| `paymentMethod` | Required. `COD` or `VNPAY`. With `VNPAY`, checkout also creates the first `PENDING` VNPAY attempt and returns its `paymentUrl` (see `..\payment\API_CONTRACT.md`). |
 
 Voucher application is deferred to Phase 8 (Review + Voucher Admin): the request has no
 `voucherCode`, `discountAmount` is `"0.00"` and `voucherCode` is `null` in the response.
@@ -52,8 +52,8 @@ Behavior (transactional, FR-ORD-01 – FR-ORD-08):
 - Validate every selected product is active and sufficiently stocked.
 - Recalculate prices server-side; snapshot `productName`/`unitPrice` per item.
 - Decrease stock with a conditional update so concurrent checkouts cannot oversell; save
-  `discountAmount`/`shippingFee`/`totalAmount` snapshots; create one `PENDING` COD payment for
-  `totalAmount`; remove the purchased lines from the cart.
+  `discountAmount`/`shippingFee`/`totalAmount` snapshots; create one `PENDING` payment (COD, or
+  VNPAY with a signed payment link) for `totalAmount`; remove the purchased lines from the cart.
 - Any failure rolls back the whole checkout: no order, stock and cart unchanged.
 
 Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
@@ -64,6 +64,7 @@ Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
   "status": "PENDING",
   "paymentStatus": "PENDING",
   "paymentMethod": "COD",
+  "paymentUrl": null,
   "createdAt": "2026-10-12T10:30:00Z",
   "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
   "shippingFee": "0.00",
@@ -90,13 +91,18 @@ Money is a VND decimal string; `shippingFee` is `"0.00"` in the first slice;
 backend. One order may contain items from multiple sellers (seller attribution
 at `OrderItem` level).
 
+`paymentUrl` is the signed VNPAY payment link when `paymentMethod` is `VNPAY`
+and `null` for COD. `GET /api/v1/orders/{id}` always returns `null`; a new link
+comes from `POST /api/v1/payments/vnpay/create`. A VNPAY order not paid within
+24 hours of `createdAt` is cancelled automatically (FR-ORD-10).
+
 Errors (common envelope):
 
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid `CUSTOMER` token. |
 | `FORBIDDEN` | `403` | Authenticated actor is not `CUSTOMER`. |
-| `VALIDATION_ERROR` | `400` | Empty or duplicate `cartItemIds`, blank or too long address, unknown or unsupported `paymentMethod`. |
+| `VALIDATION_ERROR` | `400` | Empty or duplicate `cartItemIds`, blank or too long address, unknown `paymentMethod`. |
 | `CART_ITEM_NOT_FOUND` | `404` | A selected id is not in the caller's cart (another customer's line is reported the same way). |
 | `PRODUCT_INACTIVE` | `400` | A selected product is inactive/soft-deleted (same status as the cart endpoints). |
 | `INSUFFICIENT_STOCK` | `409` | A selected line exceeds current stock. |
@@ -213,6 +219,10 @@ Actor: `SELLER`.
 No request body. Success: `200 OK`, `ApiResponse<OrderItemResponse>` (same item
 shape as above, `status: "CONFIRMED"`).
 
+Rule (FR-FUL-05): a line of a VNPAY order can be confirmed only when the order is `PAID`. Before
+that the line stays visible in the seller list but confirming it is refused. COD orders can be
+confirmed right away.
+
 Errors:
 
 | Code | HTTP | When |
@@ -220,14 +230,14 @@ Errors:
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
 | `FORBIDDEN` | `403` | Caller is not an `APPROVED` `SELLER`, or `orderItem.seller.id != authenticatedSeller.id`. |
 | `RESOURCE_NOT_FOUND` | `404` | Unknown item id. |
-| `VALIDATION_ERROR` | `400` | Item is not in `PENDING` (e.g. already `CONFIRMED`/`CANCELLED`). |
+| `VALIDATION_ERROR` | `400` | Item is not in `PENDING` (e.g. already `CONFIRMED`/`CANCELLED`), or the order is paid by VNPAY and not yet `PAID`. |
 
-Maps to FR-FUL-02, FR-FUL-03, FR-FUL-04.
+Maps to FR-FUL-02, FR-FUL-03, FR-FUL-04, FR-FUL-05.
 
 ### PATCH /api/v1/seller/order-items/{id}/cancel
 
-Status: Confirmed — implemented in Phase 5 (shipment and prepayment checks arrive in Phase 7 and
-Phase 6).
+Status: Confirmed — implemented in Phase 5; the prepayment check is implemented in Phase 6 and the
+shipment check arrives in Phase 7.
 
 Seller cancels one owned order item before shipment assignment.
 Actor: `SELLER`.
@@ -251,11 +261,15 @@ Rules:
   shipment-cancellation path, not this endpoint.
 - Cancellation after `SHIPPED` or any later shipment state is rejected with
   `CANNOT_CANCEL_AFTER_SHIPMENT` (`409`).
+- A line of an order that is already `PAID` cannot be cancelled
+  (`CANNOT_CANCEL_AFTER_PAYMENT`, `409`) until a refund policy exists.
 - Before payment completion the transaction recalculates `Order.totalAmount`
-  and every still-`PENDING` payment `amount` from remaining non-cancelled
-  snapshots; cancelled snapshots stay unchanged for history.
+  and every still-`PENDING` COD payment `amount` from remaining non-cancelled
+  snapshots; cancelled snapshots stay unchanged for history. A `PENDING` VNPAY
+  attempt becomes `FAILED` instead, because its payment link carries the old
+  amount; the customer pays the new total through the retry endpoint.
 - When every line of the order is cancelled, the order becomes `CANCELLED`, its total becomes
-  `0.00`, and its `PENDING` COD payment becomes `FAILED` (not collectible).
+  `0.00`, and every `PENDING` payment becomes `FAILED` (not collectible).
 - The order row is locked during cancellation so two sellers cancelling lines of the same order
   cannot both recalculate from a stale total.
 
@@ -270,6 +284,6 @@ Errors:
 | `RESOURCE_NOT_FOUND` | `404` | Unknown item id. |
 | `VALIDATION_ERROR` | `400` | Item already `CANCELLED`, or `cancelReason` too long. |
 | `CANNOT_CANCEL_AFTER_SHIPMENT` | `409` | Item already assigned/shipped via a shipment (Phase 7). |
-| `CANNOT_CANCEL_AFTER_PAYMENT` | `409` | Prepayment already completed and no refund policy applies (Phase 6). |
+| `CANNOT_CANCEL_AFTER_PAYMENT` | `409` | The order is already `PAID`; no refund policy exists yet. |
 
 Maps to FR-ORD-11, FR-ORD-12, FR-FUL-02, FR-FUL-03, FR-FUL-04.

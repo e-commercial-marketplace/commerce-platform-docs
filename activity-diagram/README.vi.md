@@ -39,6 +39,7 @@ triển khai.
 | [`customer/manage-cart.puml`](customer/manage-cart.puml) | Quản lý giỏ hàng | [`manage-cart.vi.md`](../usecase-specification/customer/manage-cart.vi.md) |
 | [`customer/checkout-order.puml`](customer/checkout-order.puml) | Đặt hàng | [`checkout-order.vi.md`](../usecase-specification/customer/checkout-order.vi.md) |
 | [`customer/pay-for-order-cod.puml`](customer/pay-for-order-cod.puml) | Thanh toán khi nhận hàng (COD) | [`pay-for-order-cod.vi.md`](../usecase-specification/customer/pay-for-order-cod.vi.md) |
+| [`customer/pay-for-order-vnpay.puml`](customer/pay-for-order-vnpay.puml) | Thanh toán đơn hàng qua VNPAY | [`pay-for-order-vnpay.vi.md`](../usecase-specification/customer/pay-for-order-vnpay.vi.md) |
 | [`customer/view-my-orders.puml`](customer/view-my-orders.puml) | Xem đơn hàng của tôi | [`view-my-orders.vi.md`](../usecase-specification/customer/view-my-orders.vi.md) |
 | [`customer/view-my-shipments.puml`](customer/view-my-shipments.puml) | Xem các đợt giao hàng của tôi | [`view-my-shipments.vi.md`](../usecase-specification/customer/view-my-shipments.vi.md) |
 | [`customer/create-product-review.puml`](customer/create-product-review.puml) | Tạo đánh giá sản phẩm | [`create-product-review.vi.md`](../usecase-specification/customer/create-product-review.vi.md) |

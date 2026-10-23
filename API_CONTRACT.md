@@ -498,7 +498,10 @@ Content-Type: application/json
 }
 ```
 
-`paymentMethod` is `COD` for the first MVP. `VNPAY` is reserved for the next payment slice.
+`paymentMethod` is `COD` or `VNPAY`. With `VNPAY`, checkout also creates the first VNPAY attempt and
+returns its signed `paymentUrl`, which the client opens to pay; `paymentUrl` is `null` for COD and in
+order lookups. A VNPAY order not paid within 24 hours is cancelled. Payment endpoints are defined in
+`features/payment/API_CONTRACT.md`.
 
 The complete wire response is `ApiResponse<OrderResponse>`:
 
@@ -510,6 +513,7 @@ The complete wire response is `ApiResponse<OrderResponse>`:
     "status": "PENDING",
     "paymentStatus": "PENDING",
     "paymentMethod": "COD",
+    "paymentUrl": null,
     "createdAt": "2026-10-12T10:30:00Z",
     "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
     "shippingFee": "0.00",
@@ -740,13 +744,12 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
   `CANCELLED`, the order becomes `CANCELLED` and no COD collection is recorded; if non-cancelled items
   remain and all of their required shipments are already `DELIVERED`, the order/payment may complete in
   the same cancellation transaction; otherwise the order remains pending.
-- Payment callbacks, when VNPAY is added, must be idempotent.
+- VNPAY results (IPN and Return URL) are signature-checked and idempotent by `vnp_TxnRef`.
 
 ## 10. Deferred contract
 
 The following interfaces are deliberately not frozen for the first MVP:
 
-- VNPAY request/callback payloads;
 - voucher validation and application;
 - seller product/order/shipment management;
 - Admin operations;

@@ -6,7 +6,7 @@ Sở hữu các lần thanh toán cho đơn hàng, xử lý COD, xử lý reques
 
 ## Phạm vi MVP
 
-Lát cắt checkout đầu tiên triển khai COD. Mô hình `Payment` và các quy tắc trạng thái vẫn tương thích với VNPAY, nhưng tạo request VNPAY, kiểm tra callback và UI retry được hoãn lại cho đến khi luồng COD được kiểm chứng đầu cuối.
+COD có từ Phase 4. Phase 6 thêm VNPAY trên VNPAY sandbox: checkout tạo lần thử đầu tiên và trả link thanh toán, kết quả về qua IPN và Return URL, và một endpoint retry cấp lần thử mới. Hoàn tất COD phụ thuộc shipment nên làm ở Phase 7.
 
 ## Trách nhiệm
 
@@ -23,7 +23,8 @@ Lát cắt checkout đầu tiên triển khai COD. Mô hình `Payment` và các 
 
 ```text
 POST /api/v1/payments/vnpay/create
-POST /api/v1/payments/vnpay/callback
+GET  /api/v1/payments/vnpay/ipn
+GET  /api/v1/payments/vnpay/return
 ```
 
 ## Phân quyền
@@ -91,6 +92,7 @@ classDiagram
 - VNPAY bắt đầu ở `PENDING` và kết thúc ở `COMPLETED` hoặc `FAILED`.
 - Lần thử thất bại không xóa đơn hàng.
 - Retry tạo một `Payment` khác; không ghi đè bản ghi thất bại.
+- Retry hoặc tổng đơn thay đổi sẽ đánh `FAILED` mọi lần thử VNPAY đang chờ trước, nên link thanh toán cũ không thể hoàn tất đơn nữa.
 - Hạn trả trước 24 giờ được đo từ `Order.createdAt`, không đo từ mỗi lần retry thanh toán.
 - Khi hạn hết mà không có thanh toán trước nào hoàn tất, đơn hàng bị hủy và tồn kho checkout được hoàn đúng một lần. COD được miễn vì được thu hộ khi giao hàng.
 
@@ -102,7 +104,7 @@ Payment lưu các lần thử, không chỉ trạng thái thanh toán hiện t�
 
 - `orders (1) -> payments (many)`: một đơn hàng có thể có nhiều lần thanh toán.
 - `payments.orderId -> orders.id` là ranh giới sở hữu cho các thao tác thanh toán của customer.
-- `transactionId` là duy nhất khi tồn tại transaction/tham chiếu cổng thanh toán; là `NULL` trước khi VNPAY trả về.
+- `transactionId` giữ mã tham chiếu gửi đi dưới tên `vnp_TxnRef`; là duy nhất và được gán khi tạo lần thử VNPAY. Lần thử COD giữ `NULL`.
 - Trạng thái thanh toán không thay thế `orders.status` gộp; service order điều phối cả hai trạng thái.
 
 ### Ý nghĩa trường

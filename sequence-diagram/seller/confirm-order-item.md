@@ -27,6 +27,7 @@ sequenceDiagram
         DB-->>Repo: Domain row(s) or persistence result
         Repo-->>Service: Entity/result
         Note over Controller,Repo: Seller order-item endpoints are Predicted in the Order API contract.
+        Note over Service,Repo: A line of a VNPAY order is confirmed only when its order is PAID; otherwise the request is rejected with 400 VALIDATION_ERROR.
         Service-->>Controller: Use-case result
         Controller-->>Client: 200 OK response defined by the contract
         Client-->>Seller: Display the result

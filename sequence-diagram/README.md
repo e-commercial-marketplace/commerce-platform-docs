@@ -1,7 +1,7 @@
 # Sequence Diagrams
 
 This folder contains one technical Mermaid sequence diagram per use case in
-[`usecase-specification/`](../usecase-specification/) (62 use cases), plus one supplemental VNPAY
+[`usecase-specification/`](../usecase-specification/) (63 use cases), plus one supplemental VNPAY
 integration diagram. Unlike the activity diagrams, these diagrams are not only business flows:
 they trace the planned request through the real backend layers.
 
@@ -54,6 +54,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/logout.md`](customer/logout.md) | Auth - Logout | `POST /api/v1/auth/logout` (Confirmed) |
 | [`customer/manage-cart.md`](customer/manage-cart.md) | Cart - Manage Cart | `GET /api/v1/cart; POST/PATCH/DELETE /api/v1/cart/items` (Confirmed) |
 | [`customer/pay-for-order-cod.md`](customer/pay-for-order-cod.md) | Payment - Pay for Order (COD) | `No customer COD endpoint is defined; delivery-result trigger is TBD` (TBD) |
+| [`customer/pay-for-order-vnpay.md`](customer/pay-for-order-vnpay.md) | Payment - Pay for Order (VNPAY) | `POST /api/v1/payments/vnpay/create`, `GET /api/v1/payments/vnpay/ipn`, `GET /api/v1/payments/vnpay/return` (Confirmed) |
 | [`customer/remove-cart-item.md`](customer/remove-cart-item.md) | Cart - Remove Cart Item | `DELETE /api/v1/cart/items/{id}` (Confirmed) |
 | [`customer/search-and-filter-products.md`](customer/search-and-filter-products.md) | Catalog - Search and Filter Products | `GET /api/v1/products (query/filter parameters per catalog contract)` (Confirmed) |
 | [`customer/update-cart-item.md`](customer/update-cart-item.md) | Cart - Update Cart Item | `PATCH /api/v1/cart/items/{id}` (Confirmed) |
@@ -115,7 +116,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 
 | Diagram | Integration | API route (status) |
 |---|---|---|
-| [`integrations/vnpay-payment.md`](integrations/vnpay-payment.md) | VNPAY create + callback | `POST /api/v1/payments/vnpay/create`, `POST /api/v1/payments/vnpay/callback` (Predicted) |
+| [`integrations/vnpay-payment.md`](integrations/vnpay-payment.md) | VNPAY checkout, IPN, Return URL and 24-hour expiry | `POST /api/v1/orders`, `GET /api/v1/payments/vnpay/ipn`, `GET /api/v1/payments/vnpay/return` (Confirmed) |
 
 ## Related documents
 

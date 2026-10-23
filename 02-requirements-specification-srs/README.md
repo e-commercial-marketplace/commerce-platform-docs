@@ -187,6 +187,7 @@ GET  /api/v1/orders/{id}
 | FR-FUL-02 | A seller shall be able to confirm or cancel their own order items. |
 | FR-FUL-03 | Seller operations shall enforce `orderItem.seller.id == authenticatedSeller.id`. |
 | FR-FUL-04 | Seller cancellation shall not affect another seller's order item or shipment. |
+| FR-FUL-05 | A seller shall confirm an order item of a VNPAY order only after the order is `PAID`. Lines of an unpaid VNPAY order stay visible but cannot be confirmed; COD orders are not affected. |
 
 Planned endpoints:
 
@@ -207,12 +208,14 @@ PATCH /api/v1/seller/order-items/{id}/cancel
 | FR-PAY-05 | Payment callbacks shall be idempotent. |
 | FR-PAY-06 | A failed VNPAY attempt shall not destroy the order. A retry shall create another `Payment` record. |
 | FR-PAY-07 | VNPAY transaction/reference identifiers shall be unique where applicable. |
+| FR-PAY-08 | VNPAY results arriving through the IPN and through the Return URL shall be processed by the same signature-checked, idempotent handler, so a payment is recorded whichever arrives first. A retry or a change of the order total shall mark every pending VNPAY attempt `FAILED` before a new payment link is issued. |
 
 Planned endpoints:
 
 ```text
 POST /api/v1/payments/vnpay/create
-POST /api/v1/payments/vnpay/callback
+GET  /api/v1/payments/vnpay/ipn
+GET  /api/v1/payments/vnpay/return
 ```
 
 ### 5.7 Shipment and delivery
