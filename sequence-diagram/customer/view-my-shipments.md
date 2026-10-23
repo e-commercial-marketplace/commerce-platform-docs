@@ -1,7 +1,7 @@
 # Shipment - View My Shipments — Sequence Diagram
 
 - **Use-case spec:** [view-my-shipments.vi.md](../../usecase-specification/customer/view-my-shipments.vi.md)
-- **API route/status:** `GET /api/v1/orders/{orderId}/shipments` — Predicted
+- **API route/status:** `GET /api/v1/orders/{id}` (the `shipments` array of the order detail) — Confirmed
 - **Feature API contract:** [features/shipment/API_CONTRACT.md](../../features/shipment/API_CONTRACT.md)
 
 > **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
@@ -18,7 +18,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
     Customer->>Client: Start the view my shipments use case
-    Client->>Security: GET /api/v1/orders/{orderId}/shipments
+    Client->>Security: GET /api/v1/orders/{id}
     Security->>Controller: Forward public/authenticated request
     Controller->>Service: Execute view my shipments
     alt Main flow succeeds

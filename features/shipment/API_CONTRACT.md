@@ -2,8 +2,9 @@
 
 ## 1. Scope
 
-Covers seller shipment creation/management and customer shipment lookup. This
-file defines only shipment-scoped endpoints.
+Covers seller shipment creation/management and the carrier list managed by
+admin. Customers read shipments inside the order detail. This file defines only
+shipment-scoped endpoints.
 
 Common conventions — base path `/api/v1`, `ApiResponse<T>` envelope, UUID
 identifiers, ISO-8601 UTC timestamps, VND decimal strings, zero-based
@@ -11,20 +12,21 @@ pagination, and shared error codes/HTTP mapping — are defined in
 `..\..\API_CONTRACT.md` (§2) and are not repeated here. The nested shipment
 shape also appears in `..\..\API_CONTRACT.md` (§6 order detail).
 
-Model: `DeliveryMethod = PLATFORM_DELIVERY | SELF_DELIVERY`;
+Model: `DeliveryMethod = PLATFORM_DELIVERY | SELF_DELIVERY`. A
+`PLATFORM_DELIVERY` shipment names one carrier from the admin-managed list; a
+`SELF_DELIVERY` shipment (the seller delivers it, for example a nearby order)
+has no carrier. The seller decides; the system does not measure distance.
 `ShipmentStatus = PENDING | PREPARING | SHIPPED | DELIVERED | FAILED |
 RETURNED | CANCELLED`. One shipment belongs to exactly one order and one
 seller; all mapped items share that `orderId` and `sellerId`. MVP maps whole
 order-item lines only (no partial/split/replacement shipments); one order item
 belongs to at most one shipment.
 
-All endpoints below are `Predicted` (see `..\..\API_CONTRACT.md` §10 Deferred
-contract: seller shipment management and tracking UI are deferred from the
-first MVP).
+Status: Confirmed — implemented in Phase 7.
 
 ## 2. Endpoints
 
-### POST /api/v1/seller/shipments — Predicted
+### POST /api/v1/seller/shipments — Confirmed
 
 Create a shipment from the seller's own confirmed order items.
 Actor: `SELLER` (`Authorization: Bearer <access-token>` required).
@@ -34,7 +36,8 @@ Request body:
 ```json
 {
   "orderId": "order-uuid",
-  "deliveryMethod": "SELF_DELIVERY",
+  "deliveryMethod": "PLATFORM_DELIVERY",
+  "carrierId": "carrier-uuid",
   "orderItemIds": ["order-item-uuid-1", "order-item-uuid-2"]
 }
 ```
@@ -43,6 +46,7 @@ Request body:
 |---|---|
 | `orderId` | Required UUID of the parent order. |
 | `deliveryMethod` | Required: `PLATFORM_DELIVERY` or `SELF_DELIVERY`. |
+| `carrierId` | Required with `PLATFORM_DELIVERY` and must be an active carrier; must be absent or `null` with `SELF_DELIVERY`. |
 | `orderItemIds` | Required non-empty array of order-item UUIDs (whole lines only). |
 
 Behavior (FR-SHIP-01 – FR-SHIP-04, FR-SHIP-13):
@@ -52,6 +56,9 @@ Behavior (FR-SHIP-01 – FR-SHIP-04, FR-SHIP-13):
 - All items share the same seller and order (`shipment.orderId ==
   orderItem.orderId`); mixed-seller or cross-order groups are rejected.
 - An item already mapped to another shipment is rejected.
+- A seller has at most one shipment per order: if one already exists for this
+  order, the request is rejected.
+- `carrierId` follows the rule in the table above (FR-SHIP-01, FR-SHIP-14).
 - New shipment starts as `PENDING` with `trackingCode/shippedAt/deliveredAt =
   null`.
 
@@ -62,7 +69,8 @@ Success: `201 Created`, `ApiResponse<ShipmentResponse>`. `data` payload:
   "id": "shipment-uuid",
   "orderId": "order-uuid",
   "sellerId": "seller-uuid",
-  "deliveryMethod": "SELF_DELIVERY",
+  "deliveryMethod": "PLATFORM_DELIVERY",
+  "carrier": { "id": "carrier-uuid", "name": "GHN" },
   "status": "PENDING",
   "trackingCode": null,
   "shippingFee": "0.00",
@@ -75,7 +83,9 @@ Success: `201 Created`, `ApiResponse<ShipmentResponse>`. `data` payload:
 ```
 
 `quantity` echoes the mapped `OrderItem.quantity` (whole-line mapping);
-`shippingFee` is a VND decimal string (`"0.00"` in the first slice).
+`shippingFee` is a VND decimal string (`"0.00"` in the first slice). `carrier`
+is `null` for `SELF_DELIVERY`; a carrier that admin later deactivates still
+appears on the shipments that used it.
 
 Errors:
 
@@ -83,12 +93,12 @@ Errors:
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
 | `FORBIDDEN` | `403` | Caller not `SELLER`, or any item owned by another seller. |
-| `VALIDATION_ERROR` | `400` | Empty `orderItemIds`, mixed order/seller, item not `CONFIRMED`, or item already shipped. |
+| `VALIDATION_ERROR` | `400` | Empty `orderItemIds`, mixed order/seller, item not `CONFIRMED`, item already shipped, the seller already has a shipment for this order, or a missing, unknown, inactive or unexpected `carrierId`. |
 | `RESOURCE_NOT_FOUND` | `404` | Unknown order or order-item id. |
 
-Maps to FR-SHIP-01, FR-SHIP-02, FR-SHIP-03, FR-SHIP-04, FR-SHIP-13.
+Maps to FR-SHIP-01, FR-SHIP-02, FR-SHIP-03, FR-SHIP-04, FR-SHIP-13, FR-SHIP-14.
 
-### GET /api/v1/seller/shipments — Predicted
+### GET /api/v1/seller/shipments — Confirmed
 
 List shipments owned by the authenticated seller.
 Actor: `SELLER`.
@@ -104,7 +114,7 @@ not `SELLER`; `VALIDATION_ERROR` (`400`) for an unknown `status` value.
 
 Maps to FR-SHIP-02, FR-SHIP-09.
 
-### PATCH /api/v1/seller/shipments/{id}/status — Predicted
+### PATCH /api/v1/seller/shipments/{id}/status — Confirmed
 
 Advance one seller-owned shipment along the allowed state machine.
 Actor: `SELLER`.
@@ -160,47 +170,62 @@ Errors:
 Maps to FR-SHIP-05, FR-SHIP-06, FR-SHIP-07, FR-SHIP-09, FR-SHIP-10, FR-SHIP-11,
 FR-SHIP-12.
 
-### GET /api/v1/orders/{orderId}/shipments — Predicted
+### Customer view
 
-List shipments for one order owned by the authenticated customer.
-Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
+Customers read the shipments of their own order in `GET /api/v1/orders/{id}`
+(the `shipments` array of `OrderResponse`, see `..\order\API_CONTRACT.md`);
+there is no separate shipment endpoint. Mixed seller outcomes are reported per
+shipment; the client must not collapse them into a single order-level delivery
+status.
 
-- `{orderId}`: parent order UUID.
-- Returns only shipments of that order; a customer must not query another
-  customer's order (unknown or another customer's `orderId` yields `RESOURCE_NOT_FOUND`
-  `404`).
+Maps to FR-SHIP-08, FR-SHIP-09, FR-SHIP-10.
 
-Success: `200 OK`, `ApiResponse<List<ShipmentResponse>>`:
+## 3. Carriers
+
+Status: Confirmed — implemented in Phase 7. Admin manages the carriers that
+`PLATFORM_DELIVERY` shipments can use (FR-SHIP-14). A carrier is never deleted:
+deactivating it hides it from sellers but keeps it on the shipments that used
+it. Carrier names are unique, ignoring case.
+
+`CarrierResponse` `data` shape:
 
 ```json
 {
-  "success": true,
-  "data": [
-    {
-      "id": "shipment-uuid",
-      "orderId": "order-uuid",
-      "sellerId": "seller-uuid",
-      "deliveryMethod": "SELF_DELIVERY",
-      "status": "SHIPPED",
-      "trackingCode": "TRACK-001",
-      "shippingFee": "0.00",
-      "shippedAt": "2026-10-13T09:00:00Z",
-      "deliveredAt": null,
-      "items": [
-        { "orderItemId": "order-item-uuid", "quantity": 2 }
-      ]
-    }
-  ],
-  "error": null,
-  "timestamp": "2026-10-12T10:30:00Z",
-  "traceId": "request-trace-id"
+  "id": "carrier-uuid",
+  "name": "GHN",
+  "active": true
 }
 ```
 
- mixed seller outcomes are reported per shipment; the client must not collapse
-them into a single order-level delivery status.
+### GET /api/v1/admin/carriers
 
-Errors: `AUTHENTICATION_REQUIRED` (`401`); `RESOURCE_NOT_FOUND` (`404`) when
-the order is unknown or not owned by the caller.
+Actor: `ADMIN`. Returns every carrier, active or not, sorted by name:
+`200 OK`, `ApiResponse<List<CarrierResponse>>`.
 
-Maps to FR-SHIP-08, FR-SHIP-09, FR-SHIP-10.
+### POST /api/v1/admin/carriers
+
+Actor: `ADMIN`. Body `{ "name": "GHN" }` (required, non-blank, at most 100
+characters). Creates an active carrier: `201 Created`,
+`ApiResponse<CarrierResponse>`.
+
+### PATCH /api/v1/admin/carriers/{id}
+
+Actor: `ADMIN`. Body `{ "name": "Giao Hang Nhanh", "active": false }`; each
+field is optional (`null` keeps the current value), `name` must be non-blank
+when sent. `200 OK`, `ApiResponse<CarrierResponse>`.
+
+### GET /api/v1/seller/carriers
+
+Actor: approved `SELLER`. Returns only active carriers, sorted by name:
+`200 OK`, `ApiResponse<List<CarrierResponse>>`.
+
+Errors for the carrier endpoints:
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
+| `FORBIDDEN` | `403` | Wrong role, or a seller that is not `APPROVED`. |
+| `VALIDATION_ERROR` | `400` | Blank or too long `name`, or a name already used by another carrier. |
+| `RESOURCE_NOT_FOUND` | `404` | Unknown carrier id (`PATCH`). |
+
+Maps to FR-SHIP-14.

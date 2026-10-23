@@ -64,7 +64,7 @@
         <mxCell id="monitor" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Monitor Marketplace Operations" vertex="1">
           <mxGeometry height="60" width="280" x="1440" y="550" as="geometry" />
         </mxCell>
-        <mxCell id="delivery" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Configure Platform Delivery" vertex="1">
+        <mxCell id="delivery" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Manage Carriers" vertex="1">
           <mxGeometry height="60" width="280" x="1440" y="620" as="geometry" />
         </mxCell>
         <mxCell id="refund" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Approve Refund" vertex="1">

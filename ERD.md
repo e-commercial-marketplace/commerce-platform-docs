@@ -93,6 +93,7 @@ erDiagram
     SHIPMENT {
         UUID id PK
         DeliveryMethod deliveryMethod
+        UUID carrierId FK "nullable, required for PLATFORM_DELIVERY"
         ShipmentStatus status
         string trackingCode "nullable until SHIPPED"
         Decimal shippingFee
@@ -100,6 +101,13 @@ erDiagram
         DateTime deliveredAt "nullable until DELIVERED"
         UUID orderId FK
         UUID sellerId FK
+    }
+
+    CARRIER {
+        UUID id PK
+        string name "unique, ignoring case"
+        boolean active
+        DateTime createdAt
     }
 
     SHIPMENT_ORDER_ITEM {
@@ -165,6 +173,7 @@ erDiagram
     SHIPMENT ||--|{ SHIPMENT_ORDER_ITEM : maps
     ORDER_ITEM ||--o| SHIPMENT_ORDER_ITEM : assigned_to
     USER ||--o{ SHIPMENT : manages
+    CARRIER |o--o{ SHIPMENT : delivers
     USER ||--o{ REVIEW : writes
     PRODUCT ||--o{ REVIEW : receives
     USER ||--o{ CONVERSATION : customer

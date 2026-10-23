@@ -71,6 +71,7 @@ Success: `201 Created`, `ApiResponse<OrderResponse>`. `data` payload:
   "discountAmount": "0.00",
   "totalAmount": "118.00",
   "voucherCode": null,
+  "shipments": [],
   "items": [
     {
       "id": "order-item-uuid",
@@ -94,7 +95,9 @@ at `OrderItem` level).
 `paymentUrl` is the signed VNPAY payment link when `paymentMethod` is `VNPAY`
 and `null` for COD. `GET /api/v1/orders/{id}` always returns `null`; a new link
 comes from `POST /api/v1/payments/vnpay/create`. A VNPAY order not paid within
-24 hours of `createdAt` is cancelled automatically (FR-ORD-10).
+24 hours of `createdAt` is cancelled automatically (FR-ORD-10). `shipments`
+lists the order's shipments with the same shape as `ShipmentResponse` in
+`..\shipment\API_CONTRACT.md`; it is empty at checkout.
 
 Errors (common envelope):
 
@@ -237,7 +240,7 @@ Maps to FR-FUL-02, FR-FUL-03, FR-FUL-04, FR-FUL-05.
 ### PATCH /api/v1/seller/order-items/{id}/cancel
 
 Status: Confirmed — implemented in Phase 5; the prepayment check is implemented in Phase 6 and the
-shipment check arrives in Phase 7.
+shipment check is implemented in Phase 7.
 
 Seller cancels one owned order item before shipment assignment.
 Actor: `SELLER`.
@@ -283,7 +286,7 @@ Errors:
 | `FORBIDDEN` | `403` | Caller is not an `APPROVED` `SELLER`, or the line is not seller-owned. |
 | `RESOURCE_NOT_FOUND` | `404` | Unknown item id. |
 | `VALIDATION_ERROR` | `400` | Item already `CANCELLED`, or `cancelReason` too long. |
-| `CANNOT_CANCEL_AFTER_SHIPMENT` | `409` | Item already assigned/shipped via a shipment (Phase 7). |
+| `CANNOT_CANCEL_AFTER_SHIPMENT` | `409` | Item already assigned to a shipment; cancel the shipment instead. |
 | `CANNOT_CANCEL_AFTER_PAYMENT` | `409` | The order is already `PAID`; no refund policy exists yet. |
 
 Maps to FR-ORD-11, FR-ORD-12, FR-FUL-02, FR-FUL-03, FR-FUL-04.

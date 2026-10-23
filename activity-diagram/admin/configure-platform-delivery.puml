@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title Shipment - Configure Platform Delivery
+title Shipment - Manage Carriers
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -28,15 +28,15 @@ Precondition:
 Admin is authenticated.
 
 Postcondition:
-The new delivery configuration is stored
-in the system.
+The carrier list is updated. Sellers see
+only active carriers.
 end note
-:Open the platform delivery configuration function;
+:Open the carrier management function;
 |System|
-:Display the current delivery configuration and the allowed actions;
+:Display every carrier, active or not;
 |Admin|
 repeat
-  :Select the item to edit and enter the changes;
+  :Add a carrier, or rename, activate or deactivate one;
   :Submit or confirm the request;
   |System|
   :Check the information, processing conditions, and permission;
@@ -48,13 +48,13 @@ repeat
   else (No)
   endif
   |System|
-  if (The information is missing or invalid?) then (Yes)
+  if (The name is missing, too long or already used?) then (Yes)
     :Return the invalid-information notice and do not save the changes;
     |Admin|
     :View the notice;
   else (No)
     |System|
-    :Save the delivery configuration changes;
+    :Save the carrier;
     :Display the result;
     |Admin|
     :View the result;

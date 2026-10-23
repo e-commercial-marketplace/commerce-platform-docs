@@ -222,7 +222,7 @@ GET  /api/v1/payments/vnpay/return
 
 | ID | Requirement |
 |---|---|
-| FR-SHIP-01 | A seller shall choose `PLATFORM_DELIVERY` or `SELF_DELIVERY`. |
+| FR-SHIP-01 | A seller shall choose `PLATFORM_DELIVERY` or `SELF_DELIVERY`. A `PLATFORM_DELIVERY` shipment shall use one active carrier from the list managed by admin; a `SELF_DELIVERY` shipment has no carrier and is chosen at the seller's discretion. |
 | FR-SHIP-02 | A shipment shall contain order items from exactly one seller. |
 | FR-SHIP-03 | A shipment may group multiple order items from the same seller. |
 | FR-SHIP-04 | A shipment shall be created only from valid confirmed order items belonging to the same order and seller. |
@@ -235,6 +235,7 @@ GET  /api/v1/payments/vnpay/return
 | FR-SHIP-11 | A shipment marked `FAILED` shall not restore stock. |
 | FR-SHIP-12 | A shipment may be marked `RETURNED` only after the package reaches the seller warehouse; only then shall its shipped quantity be restored. |
 | FR-SHIP-13 | In the MVP, each order item may belong to at most one shipment and shipment mapping uses the complete order-item line; partial-line, split, and replacement shipments are deferred. |
+| FR-SHIP-14 | Admin shall add, rename, activate and deactivate carriers. Sellers shall see only active carriers. A carrier is never deleted; a deactivated carrier stays on the shipments that used it. |
 
 Planned endpoints:
 
@@ -242,7 +243,10 @@ Planned endpoints:
 POST  /api/v1/seller/shipments
 GET   /api/v1/seller/shipments
 PATCH /api/v1/seller/shipments/{id}/status
-GET   /api/v1/orders/{orderId}/shipments
+GET   /api/v1/seller/carriers
+GET   /api/v1/admin/carriers
+POST  /api/v1/admin/carriers
+PATCH /api/v1/admin/carriers/{id}
 ```
 
 ### 5.8 Vouchers

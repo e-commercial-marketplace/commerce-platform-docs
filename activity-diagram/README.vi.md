@@ -90,7 +90,7 @@ triển khai.
 | [`admin/view-vouchers.puml`](admin/view-vouchers.puml) | Xem mã giảm giá | [`view-vouchers.vi.md`](../usecase-specification/admin/view-vouchers.vi.md) |
 | [`admin/moderate-reviews-and-violations.puml`](admin/moderate-reviews-and-violations.puml) | Kiểm duyệt đánh giá và vi phạm | [`moderate-reviews-and-violations.vi.md`](../usecase-specification/admin/moderate-reviews-and-violations.vi.md) |
 | [`admin/approve-refund.puml`](admin/approve-refund.puml) | Duyệt hoàn tiền | [`approve-refund.vi.md`](../usecase-specification/admin/approve-refund.vi.md) |
-| [`admin/configure-platform-delivery.puml`](admin/configure-platform-delivery.puml) | Cấu hình giao hàng nền tảng | [`configure-platform-delivery.vi.md`](../usecase-specification/admin/configure-platform-delivery.vi.md) |
+| [`admin/configure-platform-delivery.puml`](admin/configure-platform-delivery.puml) | Quản lý đơn vị vận chuyển | [`configure-platform-delivery.vi.md`](../usecase-specification/admin/configure-platform-delivery.vi.md) |
 | [`admin/monitor-marketplace-operations.puml`](admin/monitor-marketplace-operations.puml) | Theo dõi hoạt động marketplace | [`monitor-marketplace-operations.vi.md`](../usecase-specification/admin/monitor-marketplace-operations.vi.md) |
 
 ## Cách render

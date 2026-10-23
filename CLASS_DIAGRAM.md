@@ -80,6 +80,12 @@ classDiagram
         int timesUsed
     }
 
+    class Carrier {
+        UUID id
+        String name
+        boolean active
+    }
+
     class Shipment {
         UUID id
         DeliveryMethod deliveryMethod
@@ -205,6 +211,7 @@ classDiagram
     Order "1" *-- "0..*" Shipment : shipments
     Shipment "0..1" --> "1..*" OrderItem : contains
     Shipment "0..*" --> "1" User : seller
+    Shipment "0..*" --> "0..1" Carrier : carrier
     User "1" --> "0..*" Review : writes
     Review "0..*" --> "1" Product : reviews
     User "1" --> "0..*" Conversation : customer

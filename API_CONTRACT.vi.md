@@ -562,7 +562,8 @@ không được trả về bên ngoài envelope `ApiResponse<OrderResponse>`:
   "id": "shipment-uuid",
   "orderId": "order-uuid",
   "sellerId": "seller-uuid",
-  "deliveryMethod": "SELF_DELIVERY",
+  "deliveryMethod": "PLATFORM_DELIVERY",
+  "carrier": { "id": "carrier-uuid", "name": "GHN" },
   "status": "SHIPPED",
   "trackingCode": "TRACK-001",
   "shippingFee": "0.00",
@@ -740,7 +741,6 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 Các interfaces sau cố ý chưa frozen cho MVP đầu tiên:
 
 - voucher validation và application;
-- quản lý seller product/order/shipment;
 - Admin operations;
 - human chat WebSocket messages;
 - product variants và variant stock;

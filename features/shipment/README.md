@@ -24,7 +24,10 @@ flow. Customer tracking and Seller shipment-management screens are deferred from
 POST  /api/v1/seller/shipments
 GET   /api/v1/seller/shipments
 PATCH /api/v1/seller/shipments/{id}/status
-GET   /api/v1/orders/{orderId}/shipments
+GET   /api/v1/seller/carriers
+GET   /api/v1/admin/carriers
+POST  /api/v1/admin/carriers
+PATCH /api/v1/admin/carriers/{id}
 ```
 
 ## Permissions
@@ -33,7 +36,7 @@ GET   /api/v1/orders/{orderId}/shipments
 |---|---|---|
 | SELLER | Create and manage owned shipments | All items must belong to the authenticated seller. |
 | CUSTOMER | View shipments for their own order | Must not query another customer's shipment data. |
-| ADMIN | Configure platform delivery and monitor operations | Admin is not modeled as the physical shipper. |
+| ADMIN | Manage carriers (add, rename, activate, deactivate) and monitor operations | Admin is not modeled as the physical shipper. |
 
 ## Focused class diagram
 

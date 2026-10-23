@@ -61,7 +61,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/use-ai-product-search.md`](customer/use-ai-product-search.md) | AI - Search Products with AI Assistant | `POST /api/v1/ai/ask` (Planned) |
 | [`customer/view-cart.md`](customer/view-cart.md) | Cart - View Cart | `GET /api/v1/cart` (Confirmed) |
 | [`customer/view-my-orders.md`](customer/view-my-orders.md) | Order - View My Orders | `GET /api/v1/orders and GET /api/v1/orders/{id}` (Confirmed) |
-| [`customer/view-my-shipments.md`](customer/view-my-shipments.md) | Shipment - View My Shipments | `GET /api/v1/orders/{orderId}/shipments` (Predicted) |
+| [`customer/view-my-shipments.md`](customer/view-my-shipments.md) | Shipment - View My Shipments | `GET /api/v1/orders/{id}` (Confirmed) |
 | [`customer/view-product-details.md`](customer/view-product-details.md) | Catalog - View Product Details | `GET /api/v1/products/{id}` (Confirmed) |
 
 ### Seller
@@ -92,7 +92,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 |---|---|---|
 | [`admin/approve-or-suspend-seller.md`](admin/approve-or-suspend-seller.md) | User - Approve or Suspend Seller | `PATCH /api/v1/admin/sellers/{id}/approve or /suspend` (Confirmed) |
 | [`admin/approve-refund.md`](admin/approve-refund.md) | Payment - Approve Refund | `No refund endpoint is defined; route TBD` (TBD) |
-| [`admin/configure-platform-delivery.md`](admin/configure-platform-delivery.md) | Shipment - Configure Platform Delivery | `No endpoint is defined; route TBD` (TBD) |
+| [`admin/configure-platform-delivery.md`](admin/configure-platform-delivery.md) | Shipment - Manage Carriers | `GET`/`POST /api/v1/admin/carriers`, `PATCH /api/v1/admin/carriers/{id}` (Confirmed) |
 | [`admin/create-category.md`](admin/create-category.md) | Category - Create Category | `POST /api/v1/admin/categories` (Predicted) |
 | [`admin/create-user.md`](admin/create-user.md) | User - Create User | `POST /api/v1/admin/users` (Confirmed) |
 | [`admin/create-voucher.md`](admin/create-voucher.md) | Voucher - Create Voucher | `POST /api/v1/admin/vouchers` (Predicted) |

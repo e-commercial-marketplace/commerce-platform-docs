@@ -337,7 +337,8 @@ Các nhóm REST theo kế hoạch là:
 /api/v1/vouchers
 /api/v1/payments/vnpay
 /api/v1/seller/shipments
-/api/v1/orders/{orderId}/shipments
+/api/v1/seller/carriers
+/api/v1/admin/carriers
 /api/v1/products/{productId}/reviews
 /api/v1/conversations
 /api/v1/ai

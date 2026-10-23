@@ -222,7 +222,7 @@ GET  /api/v1/payments/vnpay/return
 
 | ID | Yêu cầu |
 |---|---|
-| FR-SHIP-01 | Một seller phải chọn `PLATFORM_DELIVERY` hoặc `SELF_DELIVERY`. |
+| FR-SHIP-01 | Một seller phải chọn `PLATFORM_DELIVERY` hoặc `SELF_DELIVERY`. Shipment `PLATFORM_DELIVERY` phải dùng một đơn vị vận chuyển đang hoạt động trong danh sách do admin quản lý; shipment `SELF_DELIVERY` không có đơn vị vận chuyển và do seller tự quyết. |
 | FR-SHIP-02 | Một shipment phải chứa các order item từ đúng một seller. |
 | FR-SHIP-03 | Một shipment có thể nhóm nhiều order item từ cùng một seller. |
 | FR-SHIP-04 | Một shipment chỉ được tạo từ các order item đã confirm, hợp lệ, thuộc cùng một order và seller. |
@@ -235,6 +235,7 @@ GET  /api/v1/payments/vnpay/return
 | FR-SHIP-11 | Một shipment bị đánh dấu `FAILED` không được hoàn lại stock. |
 | FR-SHIP-12 | Một shipment chỉ có thể bị đánh dấu `RETURNED` sau khi kiện hàng đến kho của seller; chỉ khi đó số lượng đã giao của nó mới được hoàn lại. |
 | FR-SHIP-13 | Trong MVP, mỗi order item có thể thuộc về tối đa một shipment và ánh xạ shipment sử dụng toàn bộ dòng order-item; các shipment từng phần dòng (partial-line), tách (split) và thay thế (replacement) bị hoãn lại. |
+| FR-SHIP-14 | Admin phải thêm, đổi tên, bật và tắt đơn vị vận chuyển. Seller chỉ thấy đơn vị đang hoạt động. Đơn vị không bao giờ bị xoá; đơn vị đã tắt vẫn giữ trên các shipment đã dùng nó. |
 
 Các endpoint theo kế hoạch:
 
@@ -242,7 +243,10 @@ Các endpoint theo kế hoạch:
 POST  /api/v1/seller/shipments
 GET   /api/v1/seller/shipments
 PATCH /api/v1/seller/shipments/{id}/status
-GET   /api/v1/orders/{orderId}/shipments
+GET   /api/v1/seller/carriers
+GET   /api/v1/admin/carriers
+POST  /api/v1/admin/carriers
+PATCH /api/v1/admin/carriers/{id}
 ```
 
 ### 5.8 Voucher

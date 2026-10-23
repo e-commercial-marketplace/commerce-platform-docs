@@ -23,7 +23,10 @@ Chuyển trạng thái shipment và quy tắc hoàn tồn kho vẫn là yêu c�
 POST  /api/v1/seller/shipments
 GET   /api/v1/seller/shipments
 PATCH /api/v1/seller/shipments/{id}/status
-GET   /api/v1/orders/{orderId}/shipments
+GET   /api/v1/seller/carriers
+GET   /api/v1/admin/carriers
+POST  /api/v1/admin/carriers
+PATCH /api/v1/admin/carriers/{id}
 ```
 
 ## Phân quyền
@@ -32,7 +35,7 @@ GET   /api/v1/orders/{orderId}/shipments
 |---|---|---|
 | SELLER | Tạo và quản lý shipment thuộc sở hữu | Mọi item phải thuộc về seller đã xác thực. |
 | CUSTOMER | Xem shipment cho đơn hàng của mình | Không được truy vấn dữ liệu shipment của customer khác. |
-| ADMIN | Cấu hình giao hàng nền tảng và giám sát vận hành | Admin không được mô hình hóa là người giao hàng vật lý. |
+| ADMIN | Quản lý đơn vị vận chuyển (thêm, đổi tên, bật, tắt) và giám sát vận hành | Admin không được mô hình hóa là người giao hàng vật lý. |
 
 ## Sơ đồ lớp trọng tâm
 

@@ -90,7 +90,7 @@ the implementation code.
 | [`admin/view-vouchers.puml`](admin/view-vouchers.puml) | View Vouchers | [`view-vouchers.vi.md`](../usecase-specification/admin/view-vouchers.vi.md) |
 | [`admin/moderate-reviews-and-violations.puml`](admin/moderate-reviews-and-violations.puml) | Moderate Reviews and Violations | [`moderate-reviews-and-violations.vi.md`](../usecase-specification/admin/moderate-reviews-and-violations.vi.md) |
 | [`admin/approve-refund.puml`](admin/approve-refund.puml) | Approve Refund | [`approve-refund.vi.md`](../usecase-specification/admin/approve-refund.vi.md) |
-| [`admin/configure-platform-delivery.puml`](admin/configure-platform-delivery.puml) | Configure Platform Delivery | [`configure-platform-delivery.vi.md`](../usecase-specification/admin/configure-platform-delivery.vi.md) |
+| [`admin/configure-platform-delivery.puml`](admin/configure-platform-delivery.puml) | Manage Carriers | [`configure-platform-delivery.vi.md`](../usecase-specification/admin/configure-platform-delivery.vi.md) |
 | [`admin/monitor-marketplace-operations.puml`](admin/monitor-marketplace-operations.puml) | Monitor Marketplace Operations | [`monitor-marketplace-operations.vi.md`](../usecase-specification/admin/monitor-marketplace-operations.vi.md) |
 
 ## Rendering

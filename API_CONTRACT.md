@@ -574,7 +574,8 @@ top-level response and must not be returned without the `ApiResponse<OrderRespon
   "id": "shipment-uuid",
   "orderId": "order-uuid",
   "sellerId": "seller-uuid",
-  "deliveryMethod": "SELF_DELIVERY",
+  "deliveryMethod": "PLATFORM_DELIVERY",
+  "carrier": { "id": "carrier-uuid", "name": "GHN" },
   "status": "SHIPPED",
   "trackingCode": "TRACK-001",
   "shippingFee": "0.00",
@@ -751,7 +752,6 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 The following interfaces are deliberately not frozen for the first MVP:
 
 - voucher validation and application;
-- seller product/order/shipment management;
 - Admin operations;
 - human chat WebSocket messages;
 - product variants and variant stock;
