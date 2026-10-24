@@ -2,7 +2,7 @@
 
 Scope: public product/category browsing plus seller product management and admin category management. All responses use the `ApiResponse<T>` envelope and common error codes defined in [..\..\API_CONTRACT.md](..\..\API_CONTRACT.md) (§2 conventions, §4 catalog).
 
-Conventions: base path `/api/v1`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants. Product responses include `active`; the public endpoints only ever return `active: true`.
+Conventions: base path `/api/v1`; money as decimal string in `VND`; `price > 0`, `stock >= 0`; `active = false` means soft-deleted/unlisted and hidden from public reads. Product fields follow the catalog feature model: `products{id, name, description, imageUrl, price, stock, ratingAverage, reviewCount, active, categoryId, sellerId}`. MVP supports one `imageUrl` and no variants. An active product must have a non-blank `imageUrl`; a hidden product (`active = false`) may have none. Product responses include `active`; the public endpoints only ever return `active: true`.
 
 ## Public catalog (Confirmed)
 
@@ -187,7 +187,7 @@ Status: Confirmed (SRS §5.2).
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
 | `FORBIDDEN` | 403 | Not a seller, or seller not `APPROVED` |
-| `VALIDATION_ERROR` | 400 | `price <= 0`, `stock < 0`, missing name/category, unknown `categoryId` |
+| `VALIDATION_ERROR` | 400 | `price <= 0`, `stock < 0`, missing name/category, unknown `categoryId`, or an active product (the default) without a non-blank `imageUrl` |
 
 ### PATCH /api/v1/seller/products/{id}
 
@@ -216,7 +216,7 @@ Status: Confirmed (SRS §5.2).
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
 | `FORBIDDEN` | 403 | Not an approved seller, or product owned by another seller |
 | `RESOURCE_NOT_FOUND` | 404 | No product with `id` |
-| `VALIDATION_ERROR` | 400 | Invalid field values or unknown `categoryId` |
+| `VALIDATION_ERROR` | 400 | Invalid field values, unknown `categoryId`, or a change that would leave an active product without a non-blank `imageUrl` (for example `active: true` on a product with no image, or a blank `imageUrl` on an active product) |
 
 ### DELETE /api/v1/seller/products/{id}
 
