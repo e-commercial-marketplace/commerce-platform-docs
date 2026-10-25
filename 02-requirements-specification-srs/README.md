@@ -372,6 +372,7 @@ The referenced class diagram additionally defines the following model constraint
 | NFR-DATA-01 | Money shall use `BigDecimal`. |
 | NFR-DATA-02 | Consistency-sensitive flows shall use PostgreSQL transactions. |
 | NFR-DATA-03 | Database changes shall be managed by Flyway. |
+| NFR-DATA-04 | Redis shall only cache data whose source of truth is PostgreSQL; the cart shall stay correct and complete when Redis is unavailable or loses its data. |
 | NFR-API-01 | API errors shall use a consistent response contract. |
 | NFR-API-02 | Product search and pagination shall receive performance checks during hardening. |
 | NFR-API-03 | Production responses shall not expose internal exception details or framework binding messages; unexpected failures shall use `INTERNAL_ERROR`. |

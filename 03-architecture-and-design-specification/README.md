@@ -71,6 +71,7 @@ React Native (Expo)
 | React Native (Expo) | Presentation, navigation, client state, REST/WebSocket consumption |
 | Spring Boot monolith | API, business rules, authorization, transactions, payment, shipment, chat, and AI orchestration |
 | PostgreSQL | Primary marketplace persistence |
+| Redis (optional) | Read cache for cart lines, the category list and seller shop pages; never the only copy of any data |
 | pgvector | Embedding/vector storage for RAG |
 | VNPAY | External online payment provider |
 | LLM provider | External model provider accessed only by Spring AI backend |
@@ -83,6 +84,7 @@ React Native (Expo)
 | Backend API | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
 | Backend mapping | MapStruct 1.6.3 with Lombok binding for entity/DTO mapping | Current backend dependency |
 | Backend persistence | Spring Data JPA/Hibernate, PostgreSQL 16, Flyway | Current scaffold |
+| Backend cache | Spring Data Redis (Lettuce); Render Key Value in deployment | Optional; read cache (§5.4) |
 | Backend security | Spring Security and JJWT 0.12.6 | Current dependency; flow is phased |
 | Backend realtime | Spring WebSocket | Dependency present; human chat is phased |
 | Mobile runtime | React Native with Expo | Scaffold; version TBD |
@@ -167,6 +169,46 @@ feature that needs the rule calls that service.
 
 This is the target architecture, not a claim about completed code: the current backend scaffold does
 not yet contain the controller/service/repository layers.
+
+### 5.4 Read cache (Redis)
+
+#### Cart lines
+
+PostgreSQL `cart_items` is the source of truth for carts. Redis only keeps a copy of each customer's cart
+lines so `GET /cart` can skip that query; losing Redis never loses a cart.
+
+- Key `cart:<userId>` is a Redis Hash: field = cart item id, value = product id, quantity and
+  `createdAt`. Product name, price, stock and status are always read from PostgreSQL, so a seller's
+  price change shows at once.
+- Read (cache-aside): on a hit the lines come from Redis; on a miss they are read from PostgreSQL and
+  written to Redis with a 30-minute time to live.
+- Write: adding, updating or removing a cart item and checkout change PostgreSQL in their transaction as
+  before, then delete `cart:<userId>` after the transaction commits. A rolled-back transaction leaves the
+  cache untouched.
+- Checkout always reads the selected cart lines from PostgreSQL, never from the cache.
+- Accepted risk: a read that misses the cache while another request changes the cart can put the older
+  lines back into Redis. The cart can then look stale for at most 30 minutes, until the next change or
+  the time to live ends.
+
+#### Category list and seller shop pages
+
+Spring Cache stores two public read results in Redis as JSON:
+
+| Cache | Endpoint | Key | Time to live | Cleared after commit by |
+|---|---|---|---|---|
+| `categories` | `GET /categories` | `all` | 1 hour | admin create, rename or delete of a category |
+| `sellerShops` | `GET /sellers/{id}` | seller id | 10 minutes | that seller creating, updating or hiding a product; the seller changing their name; an admin updating, approving or suspending that seller |
+
+- Cached values are written and cleared only after the transaction commits, so a rolled-back change
+  never clears or fills the cache.
+- "Not found" answers are not cached: a seller who is approved later appears at once.
+- The product list and product detail are not cached: stock and prices change too often.
+
+#### Common rules
+
+- All caches are off unless `APP_CACHE_ENABLED=true`. When Redis fails, the backend logs a warning and
+  reads PostgreSQL; the API does not fail. Redis is left out of `/actuator/health`.
+- Responses are the same with or without the cache.
 
 ## 6. Domain Model Design
 

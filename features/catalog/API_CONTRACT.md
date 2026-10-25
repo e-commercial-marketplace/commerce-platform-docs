@@ -87,6 +87,7 @@ Status: Confirmed (root §4, SRS §5.2).
 ```
 
 - Errors: none specific besides `INTERNAL_ERROR` (500).
+- Caching: the backend may serve this list from a Redis cache (architecture §5.4); an admin change is visible on the next request.
 
 ### GET /api/v1/sellers/{id}
 
@@ -107,6 +108,8 @@ Status: Confirmed (FR-CAT-07).
 ```
 
 `productCount` is the number of the seller's listed (`active = true`) products. No email or other private user field is exposed.
+
+Caching: the backend may serve this page from a Redis cache (architecture §5.4); a change by the seller or an admin is visible on the next request.
 
 - Errors:
 

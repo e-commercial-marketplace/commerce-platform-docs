@@ -17,6 +17,8 @@ Cart response rules:
 - Items are ordered by `createdAt` descending (most recently added first). Adding a product that is
   already in the cart increments its quantity and keeps its original `createdAt` and position.
 - An empty cart returns `"items": []` and `"subtotal": "0.00"`.
+- The backend may serve cart lines from a Redis cache (architecture §5.4). Responses are the same with
+  or without it; a change is visible on the next `GET /cart`.
 
 ## Endpoints (Confirmed)
 

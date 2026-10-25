@@ -71,6 +71,7 @@ React Native (Expo)
 | React Native (Expo) | Trình bày, điều hướng, trạng thái client, tiêu thụ REST/WebSocket |
 | Spring Boot monolith | API, business rule, phân quyền, transaction, payment, shipment, chat và điều phối AI |
 | PostgreSQL | Persistence chính của marketplace |
+| Redis (tuỳ chọn) | Cache đọc cho dòng giỏ hàng, danh sách category và trang shop của seller; không bao giờ là bản duy nhất của dữ liệu nào |
 | pgvector | Lưu trữ embedding/vector cho RAG |
 | VNPAY | Provider thanh toán trực tuyến ngoài |
 | LLM provider | Provider model ngoài chỉ được truy cập bởi backend Spring AI |
@@ -83,6 +84,7 @@ React Native (Expo)
 | API backend | Spring Web MVC, Validation, Springdoc OpenAPI 2.7.0, Actuator | Current scaffold |
 | Mapping backend | MapStruct 1.6.3 với Lombok binding để ánh xạ entity/DTO | Current backend dependency |
 | Persistence backend | Spring Data JPA/Hibernate, PostgreSQL 16, Flyway | Current scaffold |
+| Cache backend | Spring Data Redis (Lettuce); Render Key Value khi deploy | Tuỳ chọn; cache đọc (§5.4) |
 | Bảo mật backend | Spring Security and JJWT 0.12.6 | Current dependency; flow is phased |
 | Realtime backend | Spring WebSocket | Dependency present; human chat is phased |
 | Runtime mobile | React Native with Expo | Scaffold; version TBD |
@@ -166,6 +168,44 @@ luật đó thì gọi service ấy.
 
 Đây là kiến trúc mục tiêu, không khẳng định code đã hoàn thiện: backend scaffold hiện chưa có các
 layer controller/service/repository.
+
+### 5.4 Cache đọc (Redis)
+
+#### Dòng giỏ hàng
+
+Bảng `cart_items` của PostgreSQL là nguồn sự thật của giỏ hàng. Redis chỉ giữ bản sao các dòng giỏ của
+từng customer để `GET /cart` bỏ qua câu query đó; mất Redis không bao giờ làm mất giỏ.
+
+- Key `cart:<userId>` là một Redis Hash: field = id dòng giỏ, value = id product, số lượng và
+  `createdAt`. Tên, giá, tồn kho và trạng thái product luôn đọc từ PostgreSQL, nên seller đổi giá thì giỏ
+  thấy ngay.
+- Đọc (cache-aside): trúng cache thì lấy dòng từ Redis; trượt thì đọc PostgreSQL rồi ghi vào Redis với
+  thời gian sống 30 phút.
+- Ghi: thêm, sửa, xoá dòng giỏ và checkout vẫn đổi PostgreSQL trong transaction như cũ, rồi xoá
+  `cart:<userId>` sau khi transaction commit. Transaction bị rollback thì cache giữ nguyên.
+- Checkout luôn đọc các dòng giỏ được chọn từ PostgreSQL, không bao giờ từ cache.
+- Rủi ro chấp nhận: một lần đọc trượt cache đúng lúc request khác sửa giỏ có thể ghi lại dòng cũ vào
+  Redis. Khi đó giỏ có thể hiển thị cũ tối đa 30 phút, tới lần sửa tiếp theo hoặc khi hết thời gian sống.
+
+#### Danh sách category và trang shop của seller
+
+Spring Cache lưu hai kết quả đọc công khai vào Redis dưới dạng JSON:
+
+| Cache | Endpoint | Key | Thời gian sống | Bị xoá sau commit khi |
+|---|---|---|---|---|
+| `categories` | `GET /categories` | `all` | 1 giờ | admin tạo, đổi tên hoặc xoá category |
+| `sellerShops` | `GET /sellers/{id}` | id seller | 10 phút | seller đó tạo, sửa hoặc ẩn product; seller đổi tên; admin sửa, duyệt hoặc khoá seller đó |
+
+- Giá trị cache chỉ được ghi và xoá sau khi transaction commit, nên thay đổi bị rollback không bao giờ
+  xoá hay ghi cache.
+- Kết quả "không tìm thấy" không được cache: seller được duyệt sau đó hiện ra ngay.
+- Danh sách và chi tiết product không được cache: tồn kho và giá đổi quá thường xuyên.
+
+#### Luật chung
+
+- Mọi cache đều tắt trừ khi `APP_CACHE_ENABLED=true`. Redis lỗi thì backend ghi log cảnh báo và đọc
+  PostgreSQL; API không lỗi. Redis không nằm trong `/actuator/health`.
+- Response giống nhau dù có hay không có cache.
 
 ## 6. Thiết kế Mô hình Miền
 

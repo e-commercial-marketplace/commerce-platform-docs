@@ -372,6 +372,7 @@ Class diagram tham chiếu còn định nghĩa thêm các ràng buộc mô hình
 | NFR-DATA-01 | Tiền tệ phải dùng `BigDecimal`. |
 | NFR-DATA-02 | Các luồng nhạy cảm về tính nhất quán phải dùng PostgreSQL transaction. |
 | NFR-DATA-03 | Các thay đổi cơ sở dữ liệu phải được quản lý bởi Flyway. |
+| NFR-DATA-04 | Redis chỉ được cache dữ liệu có nguồn sự thật là PostgreSQL; giỏ hàng phải đúng và đủ khi Redis không khả dụng hoặc mất dữ liệu. |
 | NFR-API-01 | Lỗi API phải sử dụng hợp đồng response nhất quán. |
 | NFR-API-02 | Tìm kiếm sản phẩm và phân trang phải được kiểm tra hiệu năng trong giai đoạn củng cố (hardening). |
 | NFR-API-03 | Response production không được lộ chi tiết ngoại lệ nội bộ hoặc message binding của framework; các lỗi không mong đợi phải dùng `INTERNAL_ERROR`. |
