@@ -160,6 +160,11 @@ service. Repositories own persistence access through Spring Data JPA. Provider c
 VNPAY or the LLM provider) are feature-specific and appear only in the corresponding sequence
 diagrams.
 
+Entities hold data only: fields with their JPA mappings, Lombok accessors and a builder, and
+`@PrePersist`/`@PreUpdate` callbacks that set `createdAt`/`updatedAt`. They contain no factory, state
+transition or business-rule methods. A rule lives in the service of the feature that owns the data; another
+feature that needs the rule calls that service.
+
 This is the target architecture, not a claim about completed code: the current backend scaffold does
 not yet contain the controller/service/repository layers.
 

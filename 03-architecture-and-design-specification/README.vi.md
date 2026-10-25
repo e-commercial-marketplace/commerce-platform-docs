@@ -159,6 +159,11 @@ phối use case và sở hữu business rules, có thể gọi feature khác th�
 Repository phụ trách persistence qua Spring Data JPA. Provider calls (ví dụ VNPAY hoặc LLM provider)
 chỉ xuất hiện trong sequence diagram của feature tương ứng.
 
+Entity chỉ chứa dữ liệu: field kèm mapping JPA, getter/setter và builder của Lombok, cùng callback
+`@PrePersist`/`@PreUpdate` gán `createdAt`/`updatedAt`. Entity không có method tạo đối tượng, chuyển trạng
+thái hay kiểm tra nghiệp vụ. Luật nghiệp vụ nằm ở service của feature sở hữu dữ liệu; feature khác cần
+luật đó thì gọi service ấy.
+
 Đây là kiến trúc mục tiêu, không khẳng định code đã hoàn thiện: backend scaffold hiện chưa có các
 layer controller/service/repository.
 
