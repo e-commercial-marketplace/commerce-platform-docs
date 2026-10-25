@@ -1,7 +1,7 @@
 # Voucher - Delete or Expire Voucher — Sequence Diagram
 
 - **Use-case spec:** [delete-or-expire-voucher.vi.md](../../usecase-specification/admin/delete-or-expire-voucher.vi.md)
-- **API route/status:** `DELETE /api/v1/admin/vouchers/{id} (expires the voucher)` — Predicted
+- **API route/status:** `DELETE /api/v1/admin/vouchers/{code} (expires the voucher)` — Confirmed
 - **Feature API contract:** [features/voucher/API_CONTRACT.md](../../features/voucher/API_CONTRACT.md)
 
 > **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
@@ -18,7 +18,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
     Admin->>Client: Start the delete or expire voucher use case
-    Client->>Security: DELETE /api/v1/admin/vouchers/{id} (expires the voucher)
+    Client->>Security: DELETE /api/v1/admin/vouchers/{code} (expires the voucher)
     Security->>Controller: Forward public/authenticated request
     Controller->>Service: Execute delete or expire voucher
     alt Main flow succeeds

@@ -491,7 +491,8 @@ Content-Type: application/json
 `paymentMethod` là `COD` hoặc `VNPAY`. Với `VNPAY`, checkout tạo luôn lần thử VNPAY đầu tiên và trả
 `paymentUrl` đã ký để client mở và thanh toán; `paymentUrl` là `null` với COD và khi xem order. Order
 VNPAY không thanh toán trong 24 giờ sẽ bị hủy. Các endpoint thanh toán nằm ở
-`features/payment/API_CONTRACT.md`.
+`features/payment/API_CONTRACT.md`. Trường tuỳ chọn `voucherCode` áp một voucher của nền tảng lúc checkout
+(`features/voucher/API_CONTRACT.md`).
 
 Wire response đầy đủ là `ApiResponse<OrderResponse>`:
 
@@ -586,8 +587,8 @@ seller với `shipment.sellerId`.
 
 ## 7. Reviews
 
-Reviews publicly readable. Chỉ authenticated customer đã purchased và received product
-mới được tạo một review cho product đó.
+Reviews publicly readable. Chỉ authenticated customer có order `COMPLETED` (đã xác nhận nhận hàng)
+chứa product đó mới được tạo một review cho product đó.
 
 ```http
 GET /api/v1/products/{productId}/reviews?page=0&size=20
@@ -742,7 +743,6 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 
 Các interfaces sau cố ý chưa frozen cho MVP đầu tiên:
 
-- voucher validation và application;
 - Admin operations;
 - human chat WebSocket messages;
 - product variants và variant stock;

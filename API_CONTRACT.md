@@ -501,7 +501,8 @@ Content-Type: application/json
 `paymentMethod` is `COD` or `VNPAY`. With `VNPAY`, checkout also creates the first VNPAY attempt and
 returns its signed `paymentUrl`, which the client opens to pay; `paymentUrl` is `null` for COD and in
 order lookups. A VNPAY order not paid within 24 hours is cancelled. Payment endpoints are defined in
-`features/payment/API_CONTRACT.md`.
+`features/payment/API_CONTRACT.md`. The optional `voucherCode` applies one platform voucher at checkout
+(`features/voucher/API_CONTRACT.md`).
 
 The complete wire response is `ApiResponse<OrderResponse>`:
 
@@ -598,8 +599,8 @@ same seller as `shipment.sellerId`.
 
 ## 7. Reviews
 
-Reviews are publicly readable. Only an authenticated customer who purchased and received the product
-may create one review for that product.
+Reviews are publicly readable. Only an authenticated customer with a `COMPLETED` order (receipt
+confirmed) containing the product may create one review for that product.
 
 ```http
 GET /api/v1/products/{productId}/reviews?page=0&size=20
@@ -753,7 +754,6 @@ Shipment: PENDING/PREPARING -> CANCELLED (before payment completion)
 
 The following interfaces are deliberately not frozen for the first MVP:
 
-- voucher validation and application;
 - Admin operations;
 - human chat WebSocket messages;
 - product variants and variant stock;

@@ -259,19 +259,23 @@ PATCH /api/v1/admin/carriers/{id}
 | FR-VCH-02 | The system shall validate voucher validity and usage. |
 | FR-VCH-03 | The system shall reject expired or exhausted vouchers. |
 | FR-VCH-04 | Voucher consumption shall use an atomic conditional update or equivalent optimistic-locking strategy so concurrent requests cannot exceed `usageLimit`. |
+| FR-VCH-05 | A voucher shall be applied at checkout. Its discount shall be the voucher percentage of the subtotal of the order's non-cancelled lines and shall be recalculated when a line is cancelled. A consumed use shall not be given back when the order is cancelled. |
 
 Planned endpoints:
 
 ```text
-POST /api/v1/orders/{id}/voucher
-GET  /api/v1/vouchers/{code}/validate
+GET   /api/v1/vouchers/{code}/validate
+GET   /api/v1/admin/vouchers
+POST  /api/v1/admin/vouchers
+PATCH /api/v1/admin/vouchers/{code}
+DELETE /api/v1/admin/vouchers/{code}
 ```
 
 ### 5.9 Reviews
 
 | ID | Requirement |
 |---|---|
-| FR-REV-01 | Only a customer who purchased and received a product shall be eligible to review it. |
+| FR-REV-01 | Only a customer who purchased and received a product shall be eligible to review it: the customer needs a `COMPLETED` order (receipt confirmed) with a non-cancelled line of that product. |
 | FR-REV-02 | A customer shall have at most one review per product. |
 | FR-REV-03 | A review rating shall be within the range 1 to 5. |
 

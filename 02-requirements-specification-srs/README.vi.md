@@ -259,19 +259,23 @@ PATCH /api/v1/admin/carriers/{id}
 | FR-VCH-02 | Hệ thống phải validate hiệu lực và mức sử dụng voucher. |
 | FR-VCH-03 | Hệ thống phải từ chối voucher hết hạn hoặc đã dùng hết. |
 | FR-VCH-04 | Việc tiêu thụ voucher phải sử dụng update điều kiện nguyên tử (atomic conditional update) hoặc chiến lược optimistic-locking tương đương để các request đồng thời không vượt quá `usageLimit`. |
+| FR-VCH-05 | Voucher phải được áp lúc checkout. Giảm giá bằng phần trăm của voucher trên tổng các dòng chưa hủy của order và phải được tính lại khi một dòng bị hủy. Lượt dùng đã tiêu không được hoàn lại khi order bị hủy. |
 
 Các endpoint theo kế hoạch:
 
 ```text
-POST /api/v1/orders/{id}/voucher
-GET  /api/v1/vouchers/{code}/validate
+GET   /api/v1/vouchers/{code}/validate
+GET   /api/v1/admin/vouchers
+POST  /api/v1/admin/vouchers
+PATCH /api/v1/admin/vouchers/{code}
+DELETE /api/v1/admin/vouchers/{code}
 ```
 
 ### 5.9 Review
 
 | ID | Yêu cầu |
 |---|---|
-| FR-REV-01 | Chỉ customer đã mua và nhận product mới đủ điều kiện review nó. |
+| FR-REV-01 | Chỉ customer đã mua và nhận product mới đủ điều kiện review nó: customer cần một order `COMPLETED` (đã xác nhận nhận hàng) có dòng chưa hủy của product đó. |
 | FR-REV-02 | Một customer có tối đa một review cho mỗi product. |
 | FR-REV-03 | Rating của review phải nằm trong khoảng 1 đến 5. |
 

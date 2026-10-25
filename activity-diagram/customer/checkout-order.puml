@@ -39,7 +39,7 @@ repeat
   |System|
   :Display the products and the delivery-address form;
   |Customer|
-  :Enter the delivery address and select COD;
+  :Enter the delivery address, the payment method and an optional voucher code;
   :Submit the order request;
   |System|
   if (Processing the request fails?) then (Yes)
@@ -50,7 +50,7 @@ repeat
   else (No)
   endif
   |System|
-  :Check the products, the remaining quantities, and the delivery address;
+  :Check the products, the remaining quantities, the delivery address and the voucher;
   if (Cart empty or stock insufficient?) then (Yes)
     :Return the order-cannot-be-placed notice;
     |Customer|

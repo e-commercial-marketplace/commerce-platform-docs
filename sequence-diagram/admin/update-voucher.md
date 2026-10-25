@@ -1,7 +1,7 @@
 # Voucher - Update Voucher — Sequence Diagram
 
 - **Use-case spec:** [update-voucher.vi.md](../../usecase-specification/admin/update-voucher.vi.md)
-- **API route/status:** `PATCH /api/v1/admin/vouchers/{id}` — Predicted
+- **API route/status:** `PATCH /api/v1/admin/vouchers/{code}` — Confirmed
 - **Feature API contract:** [features/voucher/API_CONTRACT.md](../../features/voucher/API_CONTRACT.md)
 
 > **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
@@ -18,7 +18,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
     Admin->>Client: Start the update voucher use case
-    Client->>Security: PATCH /api/v1/admin/vouchers/{id}
+    Client->>Security: PATCH /api/v1/admin/vouchers/{code}
     Security->>Controller: Forward public/authenticated request
     Controller->>Service: Execute update voucher
     alt Main flow succeeds

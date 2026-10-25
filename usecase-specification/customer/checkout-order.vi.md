@@ -11,7 +11,7 @@
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
 <tr><td>1. Mở giỏ hàng và chọn đặt hàng.</td><td></td></tr>
 <tr><td></td><td>2. Hiển thị sản phẩm và phần nhập địa chỉ giao hàng.</td></tr>
-<tr><td>3. Nhập địa chỉ giao hàng và chọn COD.</td><td></td></tr>
+<tr><td>3. Nhập địa chỉ giao hàng, chọn phương thức thanh toán và nhập mã voucher (nếu có).</td><td></td></tr>
 <tr><td>4. Gửi yêu cầu đặt hàng.</td><td></td></tr>
 <tr><td></td><td>5. Kiểm tra sản phẩm, số lượng còn lại và địa chỉ giao hàng.</td></tr>
 <tr><td></td><td>6. Tạo đơn hàng và lưu thông tin sản phẩm tại thời điểm đặt.</td></tr>
@@ -22,6 +22,9 @@
 <tr><td colspan="2"><b>Thay thế 1: Giỏ hàng trống hoặc sản phẩm không còn đủ số lượng tại bước 5.</b></td></tr>
 <tr><td></td><td>5.1.1. Thông báo không thể đặt hàng và không tạo đơn hàng.</td></tr>
 <tr><td>5.1.2. Cập nhật giỏ hàng rồi quay lại bước 1.</td><td></td></tr>
+<tr><td colspan="2"><b>Thay thế 2: Mã voucher không tồn tại, đã hết hạn hoặc đã hết lượt dùng tại bước 5.</b></td></tr>
+<tr><td></td><td>5.2.1. Thông báo voucher không dùng được và không tạo đơn hàng.</td></tr>
+<tr><td>5.2.2. Bỏ hoặc đổi mã voucher rồi quay lại bước 3.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng ngoại lệ:</b></td></tr>
 <tr><td colspan="2"><b>Ngoại lệ 1: Hệ thống gặp sự cố khi xử lý yêu cầu tại bước 4.</b></td></tr>
 <tr><td></td><td>4.1.1. Thông báo không thể hoàn tất yêu cầu do lỗi hệ thống và kết thúc lần xử lý này.</td></tr>

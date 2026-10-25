@@ -11,14 +11,14 @@
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
 <tr><td>1. Mở chức năng đánh giá sản phẩm.</td><td></td></tr>
 <tr><td></td><td>2. Hiển thị sản phẩm đủ điều kiện đánh giá.</td></tr>
-<tr><td>3. Chọn sản phẩm đã mua và nhận, nhập điểm và bình luận.</td><td></td></tr>
+<tr><td>3. Chọn sản phẩm thuộc một đơn hàng đã hoàn tất (đã xác nhận nhận hàng), nhập điểm và bình luận.</td><td></td></tr>
 <tr><td>4. Gửi đánh giá.</td><td></td></tr>
 <tr><td></td><td>5. Kiểm tra điều kiện đánh giá và điểm từ 1 đến 5.</td></tr>
 <tr><td></td><td>6. Lưu đánh giá.</td></tr>
 <tr><td></td><td>7. Hiển thị kết quả.</td></tr>
 <tr><td>8. Xem kết quả.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>
-<tr><td colspan="2"><b>Thay thế 1: Chưa nhận sản phẩm, đã đánh giá hoặc điểm ngoài khoảng 1 đến 5 tại bước 5.</b></td></tr>
+<tr><td colspan="2"><b>Thay thế 1: Chưa có đơn hàng hoàn tất chứa sản phẩm, đã đánh giá, điểm ngoài khoảng 1 đến 5 hoặc bình luận trống tại bước 5.</b></td></tr>
 <tr><td></td><td>5.1.1. Thông báo chưa thể tạo đánh giá.</td></tr>
 <tr><td>5.1.2. Sửa thông tin hoặc chọn sản phẩm đủ điều kiện rồi quay lại bước 3.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng ngoại lệ:</b></td></tr>

@@ -20,8 +20,11 @@ slice. Keep the validation and concurrency rules documented here for the later i
 ## Planned API
 
 ```text
-POST /api/v1/orders/{id}/voucher
-GET  /api/v1/vouchers/{code}/validate
+GET   /api/v1/vouchers/{code}/validate
+GET   /api/v1/admin/vouchers
+POST  /api/v1/admin/vouchers
+PATCH /api/v1/admin/vouchers/{code}
+DELETE /api/v1/admin/vouchers/{code}
 ```
 
 ## Permissions

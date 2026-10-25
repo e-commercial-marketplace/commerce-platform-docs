@@ -36,7 +36,7 @@ end note
 :Display the products eligible for review;
 |Customer|
 repeat
-  :Select a purchased and received product, and enter the rating and comment;
+  :Select a product from a completed order, and enter the rating and comment;
   :Submit the review;
   |System|
   if (Processing the request fails?) then (Yes)
@@ -47,7 +47,7 @@ repeat
   else (No)
   endif
   |System|
-  :Check the review eligibility and the rating from 1 to 5;
+  :Check a COMPLETED order contains the product, no review exists, and the rating is 1 to 5;
   if (Review request is invalid?) then (Yes)
     :Return the review-cannot-be-created notice;
     |Customer|

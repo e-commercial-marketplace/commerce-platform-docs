@@ -33,7 +33,8 @@ Request body:
 {
   "cartItemIds": ["cart-item-uuid-1", "cart-item-uuid-2"],
   "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
-  "paymentMethod": "COD"
+  "paymentMethod": "COD",
+  "voucherCode": "SALE10"
 }
 ```
 
@@ -42,9 +43,11 @@ Request body:
 | `cartItemIds` | Required, non-empty, no duplicates. Ids of cart lines in the caller's own cart; only these lines are bought. |
 | `shippingAddress` | Required, non-blank string, at most 1000 characters (address snapshot). The app may prefill it from the profile `address`. |
 | `paymentMethod` | Required. `COD` or `VNPAY`. With `VNPAY`, checkout also creates the first `PENDING` VNPAY attempt and returns its `paymentUrl` (see `..\payment\API_CONTRACT.md`). |
+| `voucherCode` | Optional, at most 64 characters, case-insensitive. Applies one platform voucher (see `..\voucher\API_CONTRACT.md`): consumes one use atomically and sets `discountAmount` to `discountPercent` % of the subtotal. |
 
-Voucher application is deferred to Phase 8 (Review + Voucher Admin): the request has no
-`voucherCode`, `discountAmount` is `"0.00"` and `voucherCode` is `null` in the response.
+Without `voucherCode`, `discountAmount` is `"0.00"` and `voucherCode` is `null` in the response. With it,
+the discount is recalculated on the remaining lines whenever a line is cancelled later; the voucher use
+is not given back (implemented in Phase 8).
 
 Behavior (transactional, FR-ORD-01 – FR-ORD-08):
 
@@ -109,6 +112,9 @@ Errors (common envelope):
 | `CART_ITEM_NOT_FOUND` | `404` | A selected id is not in the caller's cart (another customer's line is reported the same way). |
 | `PRODUCT_INACTIVE` | `400` | A selected product is inactive/soft-deleted (same status as the cart endpoints). |
 | `INSUFFICIENT_STOCK` | `409` | A selected line exceeds current stock. |
+| `RESOURCE_NOT_FOUND` | `404` | Unknown `voucherCode`. |
+| `VOUCHER_EXPIRED` | `409` | The voucher is outside its validity window. |
+| `VOUCHER_EXHAUSTED` | `409` | The voucher has no use left. |
 
 Maps to FR-ORD-01, FR-ORD-02, FR-ORD-03, FR-ORD-04, FR-ORD-06, FR-ORD-07,
 FR-ORD-08 (FR-ORD-05 voucher: Phase 8).

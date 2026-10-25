@@ -2,150 +2,41 @@
 
 ## 1. Scope
 
-Covers customer voucher validation/application and platform voucher
-administration. This file defines only voucher-scoped endpoints.
+Covers platform voucher administration and the customer validity check. A
+voucher is applied at checkout through the optional `voucherCode` field of
+`POST /api/v1/orders` (see `..\order\API_CONTRACT.md`); there is no separate
+"apply voucher" endpoint.
 
-Common conventions — base path `/api/v1`, `ApiResponse<T>` envelope, UUID
-identifiers, ISO-8601 UTC timestamps, money as VND decimal strings, zero-based
-pagination, and shared error codes/HTTP mapping — are defined in
-`..\..\API_CONTRACT.md` (§2) and are not repeated here.
+Common conventions — base path `/api/v1`, `ApiResponse<T>` envelope, ISO-8601
+UTC timestamps, money as VND decimal strings, zero-based pagination, and shared
+error codes/HTTP mapping — are defined in `..\..\API_CONTRACT.md` (§2) and are
+not repeated here.
 
 Model: `Voucher(code, description, discountPercent, validFrom, validTo,
-usageLimit, timesUsed)`. `orders.voucherCode` is optional; at most one voucher
-per order. Consumption must be atomic (conditional update / optimistic locking)
-so concurrent final uses cannot exceed `usageLimit`.
+usageLimit, timesUsed)`. `code` is the key: there is no separate id.
 
-All endpoints below are `Predicted` (see `..\..\API_CONTRACT.md` §10 Deferred
-contract: voucher validation/application and Admin operations are deferred from
-the first MVP).
+Status: Confirmed — implemented in Phase 8.
 
-## 2. Customer endpoints
+## 2. Voucher rules
 
-### GET /api/v1/vouchers/{code}/validate — Predicted
+- `code` is trimmed and stored upper-case; it may contain only letters, digits,
+  `-` and `_`, at most 64 characters, and cannot change after creation. Lookups
+  ignore case (`sale10` finds `SALE10`).
+- A voucher is usable when `validFrom <= now < validTo` and
+  `timesUsed < usageLimit`.
+- An order uses at most one voucher (FR-VCH-01). The discount is
+  `discountPercent` % of the subtotal of the order's non-cancelled lines,
+  rounded to 2 decimals (half up). When a line is cancelled later, the discount
+  is recalculated the same way on the remaining lines, so the total never goes
+  negative.
+- Using a voucher at checkout consumes one use with an atomic conditional
+  update, so concurrent checkouts cannot exceed `usageLimit` (FR-VCH-04). A use
+  is not given back when the order is later cancelled.
 
-Validate a voucher code without applying it.
-Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
-
-- `{code}`: voucher business code (e.g. `SALE10`).
-- Read-only: does not increment `timesUsed` or attach the voucher to any order.
-
-Success: `200 OK`, `ApiResponse<VoucherValidityResponse>`. `data` payload:
-
-```json
-{
-  "code": "SALE10",
-  "description": "10% off platform campaign",
-  "discountPercent": 10,
-  "validFrom": "2026-10-01T00:00:00Z",
-  "validTo": "2026-11-01T00:00:00Z",
-  "usageLimit": 100,
-  "timesUsed": 42,
-  "valid": true,
-  "reason": null
-}
-```
-
-`validFrom`/`validTo` are ISO-8601 UTC; the window is
-`validFrom <= now < validTo`.
-
-Errors (common envelope):
-
-| Code | HTTP | When |
-|---|---|---|
-| `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid `CUSTOMER` token. |
-| `RESOURCE_NOT_FOUND` | `404` | Unknown `code`. |
-| `VOUCHER_EXPIRED` | `409` | Outside `[validFrom, validTo)`. |
-| `VOUCHER_EXHAUSTED` | `409` | `timesUsed >= usageLimit`. |
-
-Maps to FR-VCH-02, FR-VCH-03.
-
-### POST /api/v1/orders/{id}/voucher — Predicted
-
-Apply one voucher to the customer's own order.
-Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
-
-Request body:
+`VoucherResponse` `data` shape (admin endpoints and the validity check):
 
 ```json
 {
-  "code": "SALE10"
-}
-```
-
-Behavior (FR-VCH-01 – FR-VCH-04):
-
-- Order must exist, belong to the caller, and be in a mutable pre-payment state.
-- At most one voucher per order: if the order already has a `voucherCode`,
-  reject with `VOUCHER_ALREADY_APPLIED`.
-- Validate expiry (`validFrom <= now < validTo`) and exhaustion
-  (`timesUsed < usageLimit`).
-- Consume atomically inside the order transaction, e.g.
-  `UPDATE vouchers SET times_used = times_used + 1 WHERE code = ? AND
-  valid_from <= CURRENT_TIMESTAMP AND valid_to > CURRENT_TIMESTAMP AND
-  times_used < usage_limit`; success requires exactly one row updated,
-  otherwise reject. Recompute `discountAmount`/`totalAmount` snapshots from the
-  order-item snapshots (never reread current product prices).
-
-Success: `200 OK`, `ApiResponse<OrderResponse>` (order shape per the order contract,
-with `voucherCode` and updated snapshots):
-
-```json
-{
-  "id": "order-uuid",
-  "status": "PENDING",
-  "paymentStatus": "PENDING",
-  "paymentMethod": "COD",
-  "createdAt": "2026-10-12T10:30:00Z",
-  "shippingAddress": "123 Nguyen Trai, District 1, Ho Chi Minh City",
-  "shippingFee": "0.00",
-  "discountAmount": "11.80",
-  "totalAmount": "106.20",
-  "voucherCode": "SALE10",
-  "items": [
-    {
-      "id": "order-item-uuid",
-      "productId": "product-uuid",
-      "productName": "Headphone",
-      "unitPrice": "59.00",
-      "quantity": 2,
-      "status": "PENDING",
-      "sellerId": "seller-uuid"
-    }
-  ]
-}
-```
-
-Money is a VND decimal string.
-
-Errors:
-
-| Code | HTTP | When |
-|---|---|---|
-| `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
-| `RESOURCE_NOT_FOUND` | `404` | Unknown order id, another customer's order, or unknown voucher `code`. |
-| `VALIDATION_ERROR` | `400` | Missing `code`, or order no longer voucher-mutable. |
-| `VOUCHER_ALREADY_APPLIED` | `409` | Order already has a voucher. |
-| `VOUCHER_EXPIRED` | `409` | Voucher outside validity window / atomic update affected 0 rows due to expiry. |
-| `VOUCHER_EXHAUSTED` | `409` | `usageLimit` reached / atomic update affected 0 rows due to exhaustion. |
-
-Maps to FR-VCH-01, FR-VCH-02, FR-VCH-03, FR-VCH-04.
-
-## 3. Admin endpoints — Predicted
-
-Prefix: `/api/v1/admin/vouchers`. Actor: `ADMIN`
-(`Authorization: Bearer <access-token>` required) for all four endpoints.
-`FORBIDDEN` (`403`) when the caller is not `ADMIN`.
-
-### GET /api/v1/admin/vouchers — Predicted
-
-List platform vouchers (paginated). Query: `page` (default `0`), `size`
-(default `20`).
-
-Success: `200 OK`, `ApiResponse<PageResponse<VoucherResponse>>`. Item `data` shape:
-
-```json
-{
-  "id": "voucher-uuid",
   "code": "SALE10",
   "description": "10% off platform campaign",
   "discountPercent": 10,
@@ -156,11 +47,39 @@ Success: `200 OK`, `ApiResponse<PageResponse<VoucherResponse>>`. Item `data` sha
 }
 ```
 
-Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`).
+## 3. Customer endpoint
 
-### POST /api/v1/admin/vouchers — Predicted
+### GET /api/v1/vouchers/{code}/validate
 
-Create a platform voucher.
+Check that a voucher can be used now, without consuming it. The app calls this
+to show the discount before checkout.
+Actor: `CUSTOMER` (`Authorization: Bearer <access-token>` required).
+
+Success: `200 OK`, `ApiResponse<VoucherResponse>`.
+
+Errors (common envelope):
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | `401` | Missing/invalid token. |
+| `FORBIDDEN` | `403` | Caller is not `CUSTOMER`. |
+| `RESOURCE_NOT_FOUND` | `404` | Unknown `code`. |
+| `VOUCHER_EXPIRED` | `409` | Outside `[validFrom, validTo)`. |
+| `VOUCHER_EXHAUSTED` | `409` | `timesUsed >= usageLimit`. |
+
+Maps to FR-VCH-02, FR-VCH-03.
+
+## 4. Admin endpoints
+
+Prefix: `/api/v1/admin/vouchers`. Actor: `ADMIN` for all four endpoints;
+`FORBIDDEN` (`403`) for any other role.
+
+### GET /api/v1/admin/vouchers
+
+List vouchers, newest `validFrom` first. Query: `page` (default `0`), `size`
+(default `20`). Success: `200 OK`, `ApiResponse<PageResponse<VoucherResponse>>`.
+
+### POST /api/v1/admin/vouchers
 
 Request body:
 
@@ -175,19 +94,17 @@ Request body:
 }
 ```
 
-Rules: `code` unique/non-blank; `discountPercent` in `1..100`;
-`validFrom < validTo`; `usageLimit >= 1`. `timesUsed` starts at `0`.
+Rules: `code` as in §2 and unique ignoring case; `discountPercent` in
+`1..100`; `validFrom < validTo`; `usageLimit >= 1`. `timesUsed` starts at `0`.
 
-Success: `201 Created`, `ApiResponse<VoucherResponse>` (shape above).
+Success: `201 Created`, `ApiResponse<VoucherResponse>`.
 
-Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
-`VALIDATION_ERROR` (`400`) for constraint violations or duplicate `code`.
+Errors: `VALIDATION_ERROR` (`400`) for a rule violation or a duplicate `code`.
 
-### PATCH /api/v1/admin/vouchers/{id} — Predicted
+### PATCH /api/v1/admin/vouchers/{code}
 
-Update a platform voucher (`{id}`: voucher UUID).
-
-Request body (all fields optional; only present fields change):
+Update a voucher. All fields optional; only present fields change; `code`
+cannot change.
 
 ```json
 {
@@ -199,25 +116,27 @@ Request body (all fields optional; only present fields change):
 }
 ```
 
-`code` is immutable after creation. Reducing `usageLimit` below current
-`timesUsed` is rejected. Shortening `validTo` to the past effectively expires
-the voucher.
+The result must still satisfy `validFrom < validTo`, and `usageLimit` cannot go
+below the current `timesUsed`. Once the voucher has been used (`timesUsed > 0`),
+`discountPercent` cannot change: orders that already used it recalculate their
+discount with the voucher's percentage when a line is cancelled, so changing it
+would change their totals.
 
 Success: `200 OK`, `ApiResponse<VoucherResponse>`.
 
-Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
-`RESOURCE_NOT_FOUND` (`404`) for unknown `{id}`; `VALIDATION_ERROR` (`400`)
-for constraint violations.
+Errors: `RESOURCE_NOT_FOUND` (`404`) for an unknown `code`;
+`VALIDATION_ERROR` (`400`) for a rule violation, including a new
+`discountPercent` on a voucher that has already been used.
 
-### DELETE /api/v1/admin/vouchers/{id} — Predicted
+### DELETE /api/v1/admin/vouchers/{code}
 
-Expire a platform voucher (`{id}`: voucher UUID). This is an expiry operation,
-not a physical delete: it sets `validTo = now` so in-flight validation and the
-atomic consumption guard reject further uses, while history (`timesUsed`,
-applied orders) is preserved.
+Expire a voucher. Not a physical delete: it sets `validTo = now`, so validation
+and checkout reject further uses while history (`timesUsed`, orders that used
+it) is kept. For a voucher that has not started yet, `validFrom` also moves to
+just before `now` so that `validFrom < validTo` still holds.
 
-Success: `200 OK`, `ApiResponse<VoucherResponse>` reflecting the expired
-`validTo`.
+Success: `200 OK`, `ApiResponse<VoucherResponse>` with the new dates.
 
-Errors: `AUTHENTICATION_REQUIRED` (`401`); `FORBIDDEN` (`403`);
-`RESOURCE_NOT_FOUND` (`404`) for unknown `{id}`.
+Errors: `RESOURCE_NOT_FOUND` (`404`) for an unknown `code`.
+
+Maps to FR-VCH-02, FR-VCH-03.

@@ -30,12 +30,15 @@ Feature source: `features/review/README.md`. No field outside that README is int
 
 ### POST /api/v1/products/{productId}/reviews
 
+Status: Confirmed — implemented in Phase 8.
+
 Create one review for a product.
 
 - Actor/Auth: `CUSTOMER` only. Requires `Authorization: Bearer <access-token>`.
 - Eligibility (all required):
-  - caller purchased the product (`FR-REV-01`);
-  - the purchased product was received/delivered;
+  - the caller has an order in `COMPLETED` status (receipt confirmed, see
+    `PATCH /api/v1/orders/{id}/received`) that contains a non-cancelled line of
+    this product (`FR-REV-01`);
   - no existing review for unique `(user, product)` (`FR-REV-02`).
 - The review author (`userId`) is resolved from the authentication principal. The client must not
   supply `userId`.
@@ -58,7 +61,7 @@ Request body (raw JSON):
 | Field | Type | Rule |
 |---|---|---|
 | `rating` | integer | Required, `1..5` (`FR-REV-03`) |
-| `comment` | string | Customer feedback text |
+| `comment` | string | Required, not blank, at most 2000 characters |
 
 Success: `201 Created` with `ApiResponse<ReviewResponse>`. The `data` object is:
 
@@ -82,7 +85,7 @@ Errors (common envelope in [`..\..\API_CONTRACT.md`](../../API_CONTRACT.md)):
 | `REVIEW_NOT_ELIGIBLE` | `403 Forbidden` | Customer did not purchase and receive the product |
 | `REVIEW_ALREADY_EXISTS` | `409 Conflict` | Unique `(user, product)` already has a review |
 | `RESOURCE_NOT_FOUND` | `404 Not Found` | Product does not exist or is not visible |
-| `VALIDATION_ERROR` | `400 Bad Request` | `rating` outside `1..5` or malformed body |
+| `VALIDATION_ERROR` | `400 Bad Request` | `rating` outside `1..5`, blank or too long `comment`, or malformed body |
 
 Maps to: `FR-REV-01`, `FR-REV-02`, `FR-REV-03`.
 
@@ -90,9 +93,13 @@ Maps to: `FR-REV-01`, `FR-REV-02`, `FR-REV-03`.
 
 ### GET /api/v1/products/{productId}/reviews
 
-List public reviews for a product.
+Status: Confirmed — implemented in Phase 8.
+
+List public reviews for a product, newest first.
 
 - Actor/Auth: public. No token required.
+- An unknown or hidden (`active = false`) product returns `RESOURCE_NOT_FOUND` (`404`).
+- Creating a review updates the product's `ratingAverage` and `reviewCount`.
 - Only public review fields are exposed (same `ReviewResponse` shape as creation).
 
 Query parameters (all optional):
