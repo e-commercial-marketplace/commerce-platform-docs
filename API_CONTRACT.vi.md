@@ -106,6 +106,7 @@ VOUCHER_EXHAUSTED
 VOUCHER_ALREADY_APPLIED
 PAYMENT_FAILED
 AI_UNAVAILABLE
+RATE_LIMITED
 INTERNAL_ERROR
 ```
 
@@ -121,6 +122,7 @@ INTERNAL_ERROR
 | `403 Forbidden` | Actor đã authenticated thiếu role hoặc ownership bắt buộc |
 | `404 Not Found` | Resource không tồn tại hoặc không visible với caller |
 | `409 Conflict` | Business conflict như insufficient stock, duplicate review hoặc order không còn payable |
+| `429 Too Many Requests` | Hỏi AI quá nhiều câu trong một phút (`RATE_LIMITED`) |
 | `500 Internal Server Error` | Lỗi server không mong đợi được ánh xạ thành `INTERNAL_ERROR` |
 
 ## 3. Authentication
@@ -675,7 +677,8 @@ Content-Type: application/json
         "sellerId": "seller-uuid"
       }
     ],
-    "sessionId": null
+    "sessionId": null,
+    "answeredBy": "AI"
   },
   "error": null,
   "timestamp": "2026-10-12T10:30:00Z",
@@ -692,10 +695,10 @@ Guest requests có thể stateless. AI không được nhận provider API keys,
 write-capability tools. Vì MVP currency là `VND`, foreign-currency input phải được clarified hoặc
 rejected; backend không được silently convert nó khi chưa có explicit exchange-rate policy.
 
-Tính năng AI không bao giờ được làm crash app. Khi provider chưa được cấu hình hoặc gọi provider
-thất bại, backend trả về `503` với `AI_UNAVAILABLE` và client hiển thị trạng thái "không khả dụng".
-Endpoint AI public bị giới hạn mức sử dụng (rate-limited) để chống lạm dụng. Đấu nối provider thực
-hiện trong Phase 10; cho đến lúc đó backend trả `AI_UNAVAILABLE` cho mọi AI request.
+Tính năng AI không bao giờ được làm crash app. Khi provider chưa được cấu hình, gọi provider thất
+bại, hoặc người gọi đã hỏi quá 20 câu trong phút hiện tại, backend trả lời không cần LLM (tìm product
+theo luật, câu trả lời có sẵn, hoặc câu gợi ý) và đặt `answeredBy` là `RULES`. Hỏi quá 60 câu trong một
+phút thì trả `429 RATE_LIMITED`. Chi tiết: `features/ai/API_CONTRACT.md`.
 
 ## 9. State rules backend bắt buộc
 

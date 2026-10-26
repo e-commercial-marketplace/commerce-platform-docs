@@ -9,20 +9,23 @@ Sở hữu trợ lý Spring AI, ánh xạ tìm kiếm sản phẩm bằng ngôn 
 Lát cắt AI đầu tiên trả lời câu hỏi về marketplace mà không yêu cầu đăng nhập: ánh xạ yêu cầu ngôn
 ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thành tìm kiếm sản phẩm công khai có giới
 hạn (qua Tool Calling tới catalog service) hoặc kiến thức chính sách/FAQ qua RAG. Yêu cầu của guest
-có thể phi trạng thái (stateless). Các phiên lưu trữ (persisted sessions), tool đơn hàng và vận
-chuyển, tool voucher và phân tích doanh thu cho seller được hoãn lại.
+phi trạng thái (stateless).
 
-LLM provider được chọn là **DeepSeek**, cấu hình trên backend qua biến môi trường (API tương thích
-OpenAI qua Spring AI). Secret của provider không bao giờ rời backend. Tính năng AI không bao giờ
-được làm crash app: khi provider chưa được cấu hình hoặc gọi provider thất bại, backend trả về
-`AI_UNAVAILABLE` (HTTP 503) và client hiển thị trạng thái "không khả dụng". Endpoint AI public bị
-giới hạn mức sử dụng (rate-limited).
+Đợt hiện tại: `ChatClient`, tool chỉ đọc `searchProducts`, phiên lưu trữ của khách hàng kèm chat memory
+(20 tin gần nhất) và bộ trả lời bằng luật. Hoãn lại: RAG, tool đơn hàng/vận chuyển/voucher và phân tích
+doanh thu cho seller.
+
+LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_API_KEY` và `AI_MODEL` (client OpenAI của Spring AI); dùng OpenAI, DeepSeek, Groq hay OpenRouter chỉ cần
+đổi các biến đó. Secret của provider không bao giờ rời backend. Tính năng AI không bao giờ được làm crash
+app: khi provider chưa cấu hình, gọi lỗi, hoặc người gọi đã hỏi quá 20 câu trong phút hiện tại, backend
+trả lời không cần LLM và đánh dấu `answeredBy = RULES`. Hỏi quá 60 câu trong một phút thì trả
+`429 RATE_LIMITED`.
 
 ## Trách nhiệm
 
 - Cung cấp `POST /api/v1/ai/ask` dưới dạng endpoint public (không yêu cầu đăng nhập cho dữ liệu công khai).
-- Cấu hình `ChatClient` với provider DeepSeek từ cấu hình môi trường.
-- Trả về lỗi `AI_UNAVAILABLE` có kiểm soát khi provider thiếu hoặc lỗi.
+- Cấu hình `ChatClient` từ cấu hình môi trường (`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`).
+- Trả lời bằng luật khi provider thiếu, lỗi hoặc vượt hạn mức.
 - Lưu trữ lịch sử `AiChatSession` và `AiMessage` cho khách hàng đã xác thực.
 - Trước hết công khai các tool tìm kiếm sản phẩm công khai; sau đó bổ sung các tool đơn hàng, vận chuyển, theo dõi và voucher thuộc sở hữu của khách hàng.
 - Phân giải khách hàng đã xác thực từ Spring Security context cho dữ liệu được bảo vệ; guest chỉ
@@ -140,6 +143,12 @@ Mô hình AI lưu trữ chỉ lưu hội thoại của khách hàng. Yêu cầu 
 | `ai_messages` | `confidence` | Metadata confidence tùy chọn cho câu trả lời đã ánh xạ; không phải quyết định ủy quyền. |
 | `ai_messages` | `createdAt` | Thời điểm lượt hội thoại được lưu trữ. |
 | `ai_messages` | `sessionId` | Bản ghi `ai_chat_sessions` cha. |
+
+### Chat memory
+
+`AiChatMemory` cài interface `ChatMemory` của Spring AI trên bảng `ai_messages`, dùng id session làm
+conversation id. Nó chỉ thêm dòng (toàn bộ lịch sử vẫn còn cho `GET /ai/sessions/{id}/messages`) và đưa
+cho model 20 tin `USER`/`ASSISTANT` gần nhất. Guest không có memory.
 
 Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; pgvector và AI
 document/vector tables được hoãn đến khi hoàn tất thiết kế RAG schema.

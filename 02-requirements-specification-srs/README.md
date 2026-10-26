@@ -396,7 +396,7 @@ validation, unique transaction/reference identifiers, and idempotent completion.
 
 ### 8.3 LLM provider
 
-The selected DeepSeek provider (OpenAI-compatible API) shall be configured on the backend. The mobile client
+The LLM shall be an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL`, set on the backend only; changing provider shall need no code change. The mobile client
 shall never call the provider directly.
 
 ### 8.4 Database and vector store

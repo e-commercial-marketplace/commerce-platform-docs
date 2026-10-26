@@ -61,10 +61,10 @@ flowchart LR
 - A shipment belongs to one order and one seller. MVP mapping uses whole order-item lines, with each
   order item assigned to at most one shipment; `shipment.orderId` must equal `orderItem.orderId`.
 - Spring AI is an internal feature, not a separate service.
-- The selected LLM provider is DeepSeek, called through Spring AI on the backend.
+- The LLM is an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL`, called through Spring AI on the backend.
 - AI starts with read-only tools and must not bypass normal authorization.
-- React Native never calls the LLM provider directly. AI must degrade gracefully with
-  `AI_UNAVAILABLE` when the provider is not configured or failing.
+- React Native never calls the LLM provider directly. When the provider is not configured, failing or
+  over its per-minute budget, AI answers with rule-based search and canned answers (`answeredBy = RULES`).
 
 ## 3. Client-to-backend flow
 
@@ -139,6 +139,6 @@ Guest requests are limited to public product search; seller and admin AI access 
 - PostgreSQL stores primary marketplace data.
 - pgvector stores embeddings for the RAG phase.
 - VNPAY handles online payment interaction.
-- The selected DeepSeek provider (OpenAI-compatible API) supplies model responses through Spring AI.
+- The LLM (an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL`) supplies model responses through Spring AI.
 - Provider secrets remain on the backend.
 - Production error responses use safe `INTERNAL_ERROR` messages without framework binding details.

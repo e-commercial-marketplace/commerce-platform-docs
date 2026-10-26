@@ -9,21 +9,23 @@ memory, RAG, and AI chat persistence inside the same Spring Boot monolith.
 
 The first AI slice answers marketplace questions without requiring login: it maps a guest or
 authenticated customer's natural-language request to a constrained public product search (via Tool
-Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests may be
-stateless. Persisted sessions, order and shipment tools, voucher tools, and seller revenue analysis
-are deferred.
+Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests are stateless.
 
-The selected LLM provider is **DeepSeek**, configured on the backend via environment variables
-(OpenAI-compatible API through Spring AI). Provider secrets never leave the backend. The AI feature
-must never crash the app: when the provider is not configured or the provider call fails, the
-backend returns `AI_UNAVAILABLE` (HTTP 503) and the client shows a "not available" state. The public
-AI endpoint is rate-limited.
+Current slice: `ChatClient`, the read-only `searchProducts` tool, persisted customer sessions with chat
+memory (last 20 messages), and the rule-based fallback. Deferred: RAG, order/shipment/voucher tools,
+and seller revenue analysis.
+
+The LLM is an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL` (Spring AI OpenAI client); OpenAI, DeepSeek, Groq or OpenRouter work by
+changing those variables only. Provider secrets never leave the backend. The AI feature must never
+crash the app: when the provider is not configured, the call fails, or the caller is over 20
+questions in the current minute, the backend answers without the LLM and marks the response
+`answeredBy = RULES`. More than 60 questions in a minute return `429 RATE_LIMITED`.
 
 ## Responsibilities
 
 - Provide `POST /api/v1/ai/ask` as a public endpoint (no login required for public data).
-- Configure `ChatClient` with the DeepSeek provider from environment configuration.
-- Return a controlled `AI_UNAVAILABLE` error when the provider is missing or failing.
+- Configure `ChatClient` from environment configuration (`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`).
+- Answer with the rule-based fallback when the provider is missing, failing or over budget.
 - Persist `AiChatSession` and `AiMessage` history for authenticated customers.
 - Expose public product-search tools first; add customer-owned order, shipment, tracking, and voucher
   tools later.
@@ -145,6 +147,12 @@ and stateless, so they should not create a customer-owned session.
 | `ai_messages` | `confidence` | Optional confidence metadata for the mapped answer; it is not an authorization decision. |
 | `ai_messages` | `createdAt` | Time at which the turn was persisted. |
 | `ai_messages` | `sessionId` | Parent `ai_chat_sessions` record. |
+
+### Chat memory
+
+`AiChatMemory` implements Spring AI `ChatMemory` on top of `ai_messages`, with the session id as the
+conversation id. It only appends rows (full history stays for `GET /ai/sessions/{id}/messages`) and
+gives the model the last 20 `USER`/`ASSISTANT` messages. Guests get no memory.
 
 AI session/message fields are created by V13. V11 remains a historical placeholder; pgvector and AI
 document/vector tables are deferred until the RAG schema is finalized.

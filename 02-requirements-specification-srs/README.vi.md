@@ -396,7 +396,7 @@ Tích hợp VNPAY phải hỗ trợ tạo request, chuyển hướng (redirect),
 
 ### 8.3 LLM provider
 
-DeepSeek provider đã chọn (API tương thích OpenAI) phải được cấu hình trên backend. Client mobile
+LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_API_KEY` và `AI_MODEL`, chỉ đặt trên backend; đổi provider không cần sửa code. Client mobile
 không bao giờ được gọi trực tiếp provider.
 
 ### 8.4 Cơ sở dữ liệu và vector store

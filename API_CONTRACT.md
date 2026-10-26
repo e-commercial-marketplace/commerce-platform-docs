@@ -106,6 +106,7 @@ VOUCHER_EXHAUSTED
 VOUCHER_ALREADY_APPLIED
 PAYMENT_FAILED
 AI_UNAVAILABLE
+RATE_LIMITED
 INTERNAL_ERROR
 ```
 
@@ -121,6 +122,7 @@ HTTP mapping for the first MVP:
 | `403 Forbidden` | Authenticated actor lacks the required role or ownership |
 | `404 Not Found` | Resource does not exist or is not visible to the caller |
 | `409 Conflict` | Business conflict such as insufficient stock, duplicate review, or an order that is no longer payable |
+| `429 Too Many Requests` | Too many AI questions in one minute (`RATE_LIMITED`) |
 | `500 Internal Server Error` | Unexpected server failure mapped to `INTERNAL_ERROR` |
 
 ## 3. Authentication
@@ -686,7 +688,8 @@ Content-Type: application/json
         "sellerId": "seller-uuid"
       }
     ],
-    "sessionId": null
+    "sessionId": null,
+    "answeredBy": "AI"
   },
   "error": null,
   "timestamp": "2026-10-12T10:30:00Z",
@@ -703,10 +706,10 @@ Guest requests may be stateless. The AI must not receive provider API keys, arbi
 write-capability tools. Because the MVP currency is `VND`, foreign-currency input must be clarified or
 rejected; the backend must not silently convert it without an explicit exchange-rate policy.
 
-The AI feature must never crash the app. When the provider is not configured or the provider call
-fails, the backend returns `503` with `AI_UNAVAILABLE` and the client shows a "not available" state.
-The public AI endpoint is rate-limited to prevent abuse. Provider wiring lands in Phase 10; until
-then the backend answers `AI_UNAVAILABLE` for every AI request.
+The AI feature must never crash the app. When the provider is not configured, the provider call
+fails, or the caller passed 20 questions in the current minute, the backend answers without the LLM
+(rule-based product search, canned answers, or a hint) and sets `answeredBy` to `RULES`. More than 60
+questions in one minute return `429 RATE_LIMITED`. Details: `features/ai/API_CONTRACT.md`.
 
 ## 9. State rules required by the backend
 

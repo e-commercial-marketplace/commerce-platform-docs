@@ -5,7 +5,7 @@
 This contract covers the `ai` feature boundary: natural-language product search, read-only tool
 calling, and persisted AI chat history for authenticated customers.
 
-Planned surface:
+Surface (Confirmed):
 
 ```text
 POST /api/v1/ai/ask
@@ -39,8 +39,14 @@ Map a natural-language request to a constrained catalog query and return a groun
 
 - Actor/Auth: public for catalog search; no token required for guest product search. When a token
   is present it must be a `CUSTOMER` token and protected (customer) scope applies.
-- Guest requests may be stateless (`sessionId` is `null`). Persisted sessions/messages belong to
-  authenticated customers only (`FR-AI-10`).
+- Guest requests are stateless: `sessionId` must be `null` and nothing is stored. Persisted
+  sessions/messages belong to authenticated customers only (`FR-AI-10`).
+- Customer with `sessionId = null`: the backend creates a new session and returns its id. Customer with a
+  `sessionId`: it must be one of the caller's sessions; the model then remembers the last 20 user and
+  assistant messages of that session (chat memory). Every turn is stored in `ai_messages`; system
+  prompts are not stored.
+- Product data comes from a read-only `searchProducts` tool that calls the catalog service (top 5 listed
+  products). `query` and `products` in the response come from that call, not from the model's text.
 - Flow: natural-language request → constrained `ProductSearchQuery` → field/sort/page validation
   → catalog service search → grounded natural-language answer (`FR-AI-06`). The AI must not invent
   availability, price, or stock outside the catalog-service result.
@@ -58,8 +64,8 @@ Request body (raw JSON):
 
 | Field | Type | Rule |
 |---|---|---|
-| `message` | string | Required natural-language request |
-| `sessionId` | UUID string or `null` | Optional persisted session; `null` for stateless guest request |
+| `message` | string | Required, not blank, at most 1000 characters |
+| `sessionId` | UUID string or `null` | Customer: `null` starts a new session, otherwise one of the caller's sessions. Guest: must be `null` |
 
 Success: `200 OK` with `ApiResponse<AiProductSearchResponse>`. The `data` object is:
 
@@ -82,23 +88,53 @@ Success: `200 OK` with `ApiResponse<AiProductSearchResponse>`. The `data` object
       "sellerId": "seller-uuid"
     }
   ],
-  "sessionId": null
+  "sessionId": null,
+  "answeredBy": "AI"
 }
 ```
+
+| Field | Meaning |
+|---|---|
+| `answer` | Natural-language answer, grounded in `products` |
+| `query` | The search actually run: `text`, `minPrice`, `maxPrice`, `minRating`, `sort` (each may be `null`); `null` when no search was needed |
+| `products` | At most 5 listed products with the fields shown above; `[]` when there was no search |
+| `sessionId` | The customer's session (new or given); `null` for guests |
+| `answeredBy` | `AI` when the LLM answered; `RULES` when the backend answered without the LLM |
 
 The answer must describe the returned list; the backend remains the source of truth for the actual
 count and product data. The AI must not receive provider API keys, arbitrary user IDs, or
 write-capability tools.
 
+Answering without the LLM (`answeredBy = RULES`):
+
+- Used when the provider is not configured (`AI_API_KEY` empty), when the provider call fails, or when
+  the caller asks more than 20 questions in the current minute. The request still returns `200 OK`.
+- Steps: (1) read price limits (`dưới 5 triệu`, `500k`, `từ 1tr đến 3tr`, `2.500.000 đ`), a minimum
+  rating (`từ 4 sao`), a sort (`rẻ nhất`, `đắt nhất`, `đánh giá cao`) and a category name or part of
+  one (`tai nghe` for `Tai nghe & Loa`) from the message; the rest is the search text. (2) A message
+  with an FAQ keyword (greeting, ordering, payment, delivery, cancellation, voucher, review) and none of
+  those filters gets a fixed answer that only restates rules already in this contract. (3) Otherwise
+  search the catalog: the whole text, then pairs of adjacent words (single words are not tried: a
+  Vietnamese syllable alone matches unrelated products); with products, a templated answer about them,
+  without products a "nothing found" answer. (4) Nothing to search: a hint on how to ask.
+- A foreign currency (`$`, `USD`) gets an answer that only VND is supported; nothing is converted.
+- For customers, rule-based turns are stored in the session like AI turns.
+
+Rate limit: counted per customer (user id) or per guest (client IP) in a one-minute window, kept in the
+backend's memory. Questions 1 to 20 may use the LLM, 21 to 60 are answered by rules, from 61 on the
+request is rejected.
+
 Errors:
 
 | Code | HTTP | When |
 |---|---|---|
-| `VALIDATION_ERROR` | `400 Bad Request` | Missing/empty `message` or malformed body |
-| `FORBIDDEN` | `403 Forbidden` | Authenticated non-`CUSTOMER` actor requests protected scope |
-| `INTERNAL_ERROR` | `500 Internal Server Error` | Unexpected provider/model failure (no secrets or stack traces leaked) |
+| `VALIDATION_ERROR` | `400 Bad Request` | Missing/empty `message`, longer than 1000 characters, or malformed body |
+| `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | A guest sends a `sessionId` |
+| `FORBIDDEN` | `403 Forbidden` | The token belongs to a `SELLER` or `ADMIN` |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | `sessionId` does not exist or belongs to another customer |
+| `RATE_LIMITED` | `429 Too Many Requests` | More than 60 questions in the current minute |
 
-Maps to: `FR-AI-01`, `FR-AI-02`, `FR-AI-03`, `FR-AI-04`, `FR-AI-06`, `NFR-AI-01`.
+Maps to: `FR-AI-01`, `FR-AI-02`, `FR-AI-03`, `FR-AI-04`, `FR-AI-06`, `FR-AI-10`, `NFR-AI-01`.
 
 ---
 
@@ -110,8 +146,8 @@ List persisted AI sessions owned by the caller.
 - Ownership: returns only sessions where `ai_chat_sessions.userId == principal.id`. The owner ID
   is never accepted from the request body. `SELLER`/`ADMIN` have no AI access in the current scope.
 
-Success: `200 OK` with `ApiResponse<List<AiChatSessionResponse>>`. Each `data` element uses only
-feature README fields:
+Success: `200 OK` with `ApiResponse<List<AiChatSessionResponse>>`, newest session first. Each `data`
+element uses only feature README fields:
 
 ```json
 {
@@ -143,9 +179,8 @@ Maps to: `FR-AI-10`, `NFR-AI-01`.
 Load persisted turns for one caller-owned AI session.
 
 - Actor/Auth: `CUSTOMER` only. Requires `Authorization: Bearer <access-token>`.
-- Ownership: session `{id}` must satisfy `ai_chat_sessions.userId == principal.id`; otherwise the
-  request is rejected with `FORBIDDEN` (or `RESOURCE_NOT_FOUND` when the session must not be
-  disclosed).
+- Ownership: session `{id}` must satisfy `ai_chat_sessions.userId == principal.id`. A session of
+  another customer returns `RESOURCE_NOT_FOUND`, the same as a missing one, so ids are not disclosed.
 
 Path parameters:
 
@@ -153,8 +188,8 @@ Path parameters:
 |---|---|---|
 | `id` | UUID string | AI session identifier |
 
-Success: `200 OK` with `ApiResponse<List<AiMessageResponse>>`. Each `data` element uses only feature
-README fields:
+Success: `200 OK` with `ApiResponse<List<AiMessageResponse>>`, oldest message first. Each `data`
+element uses only feature README fields:
 
 ```json
 {
@@ -181,7 +216,7 @@ Errors:
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
-| `FORBIDDEN` | `403 Forbidden` | Caller does not own the session, or actor is not `CUSTOMER` |
-| `RESOURCE_NOT_FOUND` | `404 Not Found` | Session does not exist (or is not visible to the caller) |
+| `FORBIDDEN` | `403 Forbidden` | Actor is not `CUSTOMER` |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | Session does not exist or belongs to another customer |
 
 Maps to: `FR-AI-10`, `NFR-AI-01`.

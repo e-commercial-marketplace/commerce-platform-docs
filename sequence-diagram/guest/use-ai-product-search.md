@@ -1,10 +1,8 @@
 # AI - Search Products with AI Assistant — Sequence Diagram
 
 - **Use-case spec:** [use-ai-product-search.vi.md](../../usecase-specification/guest/use-ai-product-search.vi.md)
-- **API route/status:** `POST /api/v1/ai/ask` — Planned
+- **API route/status:** `POST /api/v1/ai/ask` — Confirmed
 - **Feature API contract:** [features/ai/API_CONTRACT.md](../../features/ai/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
@@ -14,38 +12,45 @@ sequenceDiagram
     participant Security as Spring Security
     participant Controller as AiController
     participant Service as AiService
+    participant Limiter as AiRateLimiter
     participant ChatClient as Spring AI ChatClient
-    participant LLM as External DeepSeek provider
-    participant CatalogService as CatalogService
-    participant ProductRepo as ProductRepository
+    participant LLM as OpenAI-compatible provider
+    participant Tool as ProductSearchTools
+    participant Rules as RuleBasedAnswerer
+    participant Catalog as ProductService
     participant DB as PostgreSQL
-    participant Handler as GlobalExceptionHandler
-    Guest->>Client: Ask a question about public products
-    Client->>Security: POST /api/v1/ai/ask (public guest request)
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: ask(message, optional sessionId)
-    Service->>ChatClient: Convert the question to a constrained product query
-    ChatClient->>LLM: Extract structured search criteria
-    LLM-->>ChatClient: ProductSearchQuery
-    ChatClient-->>Service: Validated search criteria
-    Service->>CatalogService: Search public catalog with constrained criteria
-    CatalogService->>ProductRepo: Find active, publicly visible products
-    ProductRepo->>DB: SELECT matching catalog rows
-    DB-->>ProductRepo: Product results
-    ProductRepo-->>CatalogService: Product DTO source data
-    CatalogService-->>Service: Grounding data
-    Service->>ChatClient: Generate an answer grounded only in returned products
-    ChatClient->>LLM: Compose grounded natural-language answer
-    LLM-->>ChatClient: Answer text
-    ChatClient-->>Service: Grounded answer
-    Note over Service,DB: Guest search is stateless, it must not create a customer-owned AI session.
-    Service-->>Controller: Result DTO
-    Controller-->>Client: 200 OK ApiResponse<AiProductSearchResponse>
-    Client-->>Guest: Display grounded results and answer
-    opt Provider/model failure
-        Service-->>Controller: Exception
-        Controller->>Handler: Normalize error without leaking secrets
-        Handler-->>Client: Safe error response per AI contract
-        Client-->>Guest: Show unavailable/error notice
+    Guest->>Client: Ask a question about products
+    Client->>Security: POST /api/v1/ai/ask (no token, sessionId = null)
+    Security->>Controller: Public request
+    Controller->>Service: ask(guest, message, null)
+    alt Guest sent a sessionId
+        Service-->>Client: 401 AUTHENTICATION_REQUIRED
     end
+    Service->>Limiter: Count this question for ip:<client IP>
+    alt More than 60 questions this minute
+        Limiter-->>Service: BLOCKED
+        Service-->>Client: 429 RATE_LIMITED
+    end
+    Limiter-->>Service: AI (1-20) or RULES (21-60)
+    alt Level AI and provider configured
+        Service->>ChatClient: Prompt with system rules and the tool, no memory
+        ChatClient->>LLM: System prompt, question, tool definition
+        LLM-->>ChatClient: Call searchProducts(text, prices, rating, sort)
+        ChatClient->>Tool: searchProducts(...)
+        Tool->>Catalog: search (top 5 listed products)
+        Catalog->>DB: SELECT products
+        Tool-->>ChatClient: Product results (also kept for the response)
+        ChatClient->>LLM: Tool results
+        LLM-->>ChatClient: Answer grounded in the results
+        ChatClient-->>Service: Answer, answeredBy = AI
+    else Level RULES, provider missing, or provider call failed
+        Service->>Rules: answer(message)
+        Rules->>Catalog: search with filters parsed from the message
+        Catalog->>DB: SELECT products
+        Rules-->>Service: Templated, canned or hint answer
+    end
+    Note over Service: Nothing is stored for guests
+    Service-->>Controller: AiProductSearchResponse (sessionId = null)
+    Controller-->>Client: 200 OK
+    Client-->>Guest: Show the answer and product cards
 ```
