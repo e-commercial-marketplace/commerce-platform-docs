@@ -663,8 +663,11 @@ Content-Type: application/json
     "answer": "I found 1 headphone under 2,500,000 VND with a rating of at least 4 stars.",
     "query": {
       "text": "black headphone",
+      "category": null,
+      "minPrice": null,
       "maxPrice": "2500000.00",
-      "minRating": "4"
+      "minRating": "4",
+      "sort": null
     },
     "products": [
       {
@@ -672,6 +675,7 @@ Content-Type: application/json
         "name": "Black Wireless Headphone",
         "imageUrl": "https://example.com/black-headphone.jpg",
         "price": "89.00",
+        "stock": 12,
         "ratingAverage": "4.60",
         "reviewCount": 42,
         "sellerId": "seller-uuid"

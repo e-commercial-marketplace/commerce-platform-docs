@@ -35,7 +35,12 @@ sequenceDiagram
     alt Level AI and provider configured
         Service->>ChatClient: Prompt with system rules and the tool, no memory
         ChatClient->>LLM: System prompt, question, tool definition
-        LLM-->>ChatClient: Call searchProducts(text, prices, rating, sort)
+        opt Broad request
+            LLM-->>ChatClient: Call listCategories()
+            ChatClient->>Tool: listCategories()
+            Tool-->>ChatClient: Category names
+        end
+        LLM-->>ChatClient: Call searchProducts(text, category, prices, rating, sort)
         ChatClient->>Tool: searchProducts(...)
         Tool->>Catalog: search (top 5 listed products)
         Catalog->>DB: SELECT products
@@ -43,7 +48,7 @@ sequenceDiagram
         ChatClient->>LLM: Tool results
         LLM-->>ChatClient: Answer grounded in the results
         ChatClient-->>Service: Answer, answeredBy = AI
-    else Level RULES, provider missing, or provider call failed
+    else Level RULES, provider missing, cooling down after 429, or provider call failed
         Service->>Rules: answer(message)
         Rules->>Catalog: search with filters parsed from the message
         Catalog->>DB: SELECT products

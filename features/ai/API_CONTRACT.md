@@ -42,11 +42,14 @@ Map a natural-language request to a constrained catalog query and return a groun
 - Guest requests are stateless: `sessionId` must be `null` and nothing is stored. Persisted
   sessions/messages belong to authenticated customers only (`FR-AI-10`).
 - Customer with `sessionId = null`: the backend creates a new session and returns its id. Customer with a
-  `sessionId`: it must be one of the caller's sessions; the model then remembers the last 20 user and
+  `sessionId`: it must be one of the caller's sessions; the model then remembers the last 10 user and
   assistant messages of that session (chat memory). Every turn is stored in `ai_messages`; system
   prompts are not stored.
-- Product data comes from a read-only `searchProducts` tool that calls the catalog service (top 5 listed
-  products). `query` and `products` in the response come from that call, not from the model's text.
+- The model has two read-only tools that call the catalog services: `listCategories` (names of the
+  categories that have at least one listed product; empty categories are not advertised) and `searchProducts` (text, category name, price range, minimum rating, sort; top 5 listed
+  products). `query` and `products` in the response come from the last `searchProducts` call, not from
+  the model's text. A broad request ("I want to buy something", "what do you sell?") is answered with
+  categories or top products from these tools, not only with a question back.
 - Flow: natural-language request → constrained `ProductSearchQuery` → field/sort/page validation
   → catalog service search → grounded natural-language answer (`FR-AI-06`). The AI must not invent
   availability, price, or stock outside the catalog-service result.
@@ -74,8 +77,11 @@ Success: `200 OK` with `ApiResponse<AiProductSearchResponse>`. The `data` object
   "answer": "I found 1 headphone under 2,500,000 VND with a rating of at least 4 stars.",
   "query": {
     "text": "black headphone",
+    "category": null,
+    "minPrice": null,
     "maxPrice": "2500000.00",
-    "minRating": "4"
+    "minRating": "4",
+    "sort": null
   },
   "products": [
     {
@@ -83,6 +89,7 @@ Success: `200 OK` with `ApiResponse<AiProductSearchResponse>`. The `data` object
       "name": "Black Wireless Headphone",
       "imageUrl": "https://example.com/black-headphone.jpg",
       "price": "89.00",
+      "stock": 12,
       "ratingAverage": "4.60",
       "reviewCount": 42,
       "sellerId": "seller-uuid"
@@ -96,8 +103,8 @@ Success: `200 OK` with `ApiResponse<AiProductSearchResponse>`. The `data` object
 | Field | Meaning |
 |---|---|
 | `answer` | Natural-language answer, grounded in `products` |
-| `query` | The search actually run: `text`, `minPrice`, `maxPrice`, `minRating`, `sort` (each may be `null`); `null` when no search was needed |
-| `products` | At most 5 listed products with the fields shown above; `[]` when there was no search |
+| `query` | The search actually run: `text`, `category` (category name), `minPrice`, `maxPrice`, `minRating`, `sort` (each may be `null`); `null` when no search was needed |
+| `products` | At most 5 listed products with the fields shown above; `[]` when there was no search. `stock` is the units in stock now, so "is it available?" is answered from data (`0` means sold out) |
 | `sessionId` | The customer's session (new or given); `null` for guests |
 | `answeredBy` | `AI` when the LLM answered; `RULES` when the backend answered without the LLM |
 
@@ -107,16 +114,23 @@ write-capability tools.
 
 Answering without the LLM (`answeredBy = RULES`):
 
-- Used when the provider is not configured (`AI_API_KEY` empty), when the provider call fails, or when
-  the caller asks more than 20 questions in the current minute. The request still returns `200 OK`.
-- Steps: (1) read price limits (`dưới 5 triệu`, `500k`, `từ 1tr đến 3tr`, `2.500.000 đ`), a minimum
+- Used when the provider is not configured (`AI_API_KEY` empty), when the provider call fails, when the
+  provider recently answered `429` (the backend skips it for the wait the provider asked for, 30 seconds
+  when it gave none, at most 60), or when the caller asks more than 20 questions in the current minute.
+  The request still returns `200 OK`.
+- Conversation first: a request to browse ("cửa hàng có gì", "bán gì", "liệt kê sản phẩm", "muốn mua")
+  gets the category names and the top products; a complaint ("tệ", "dở", "kém") gets a short apology and
+  example questions; a reference to an earlier answer ("cái đầu tiên", "cái đó", "còn hàng không") says that quick
+  mode does not remember earlier messages and asks for the product name.
+- Steps: (1) read price limits (`dưới 5 triệu`, `500k`, `từ 1tr đến 3tr`, `2.500.000 đ`; a range may share one unit, so `10 - 20 triệu` is 10 to 20 million), a minimum
   rating (`từ 4 sao`), a sort (`rẻ nhất`, `đắt nhất`, `đánh giá cao`) and a category name or part of
   one (`tai nghe` for `Tai nghe & Loa`) from the message; the rest is the search text. (2) A message
   with an FAQ keyword (greeting, ordering, payment, delivery, cancellation, voucher, review) and none of
   those filters gets a fixed answer that only restates rules already in this contract. (3) Otherwise
   search the catalog: the whole text, then pairs of adjacent words (single words are not tried: a
-  Vietnamese syllable alone matches unrelated products); with products, a templated answer about them,
-  without products a "nothing found" answer. (4) Nothing to search: a hint on how to ask.
+  Vietnamese syllable alone matches unrelated products); with products, a templated answer about them.
+  Without products: a "nothing found" answer naming the filters when the message had filters, otherwise
+  the hint below. (4) Nothing to search: a hint on how to ask.
 - A foreign currency (`$`, `USD`) gets an answer that only VND is supported; nothing is converted.
 - For customers, rule-based turns are stored in the session like AI turns.
 

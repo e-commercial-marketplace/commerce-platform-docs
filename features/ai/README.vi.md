@@ -11,8 +11,8 @@ ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thà
 hạn (qua Tool Calling tới catalog service) hoặc kiến thức chính sách/FAQ qua RAG. Yêu cầu của guest
 phi trạng thái (stateless).
 
-Đợt hiện tại: `ChatClient`, tool chỉ đọc `searchProducts`, phiên lưu trữ của khách hàng kèm chat memory
-(20 tin gần nhất) và bộ trả lời bằng luật. Hoãn lại: RAG, tool đơn hàng/vận chuyển/voucher và phân tích
+Đợt hiện tại: `ChatClient`, hai tool chỉ đọc `listCategories` và `searchProducts`, phiên lưu trữ của khách hàng kèm chat memory
+(10 tin gần nhất) và bộ trả lời bằng luật. Hoãn lại: RAG, tool đơn hàng/vận chuyển/voucher và phân tích
 doanh thu cho seller.
 
 LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_API_KEY` và `AI_MODEL` (client OpenAI của Spring AI); dùng OpenAI, DeepSeek, Groq hay OpenRouter chỉ cần
@@ -148,7 +148,7 @@ Mô hình AI lưu trữ chỉ lưu hội thoại của khách hàng. Yêu cầu 
 
 `AiChatMemory` cài interface `ChatMemory` của Spring AI trên bảng `ai_messages`, dùng id session làm
 conversation id. Nó chỉ thêm dòng (toàn bộ lịch sử vẫn còn cho `GET /ai/sessions/{id}/messages`) và đưa
-cho model 20 tin `USER`/`ASSISTANT` gần nhất. Guest không có memory.
+cho model 10 tin `USER`/`ASSISTANT` gần nhất (ít để đỡ tốn token của provider). Guest không có memory.
 
 Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; pgvector và AI
 document/vector tables được hoãn đến khi hoàn tất thiết kế RAG schema.

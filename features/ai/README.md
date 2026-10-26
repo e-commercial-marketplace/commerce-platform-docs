@@ -11,8 +11,8 @@ The first AI slice answers marketplace questions without requiring login: it map
 authenticated customer's natural-language request to a constrained public product search (via Tool
 Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests are stateless.
 
-Current slice: `ChatClient`, the read-only `searchProducts` tool, persisted customer sessions with chat
-memory (last 20 messages), and the rule-based fallback. Deferred: RAG, order/shipment/voucher tools,
+Current slice: `ChatClient`, the read-only `listCategories` and `searchProducts` tools, persisted customer sessions with chat
+memory (last 10 messages), and the rule-based fallback. Deferred: RAG, order/shipment/voucher tools,
 and seller revenue analysis.
 
 The LLM is an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL` (Spring AI OpenAI client); OpenAI, DeepSeek, Groq or OpenRouter work by
@@ -152,7 +152,7 @@ and stateless, so they should not create a customer-owned session.
 
 `AiChatMemory` implements Spring AI `ChatMemory` on top of `ai_messages`, with the session id as the
 conversation id. It only appends rows (full history stays for `GET /ai/sessions/{id}/messages`) and
-gives the model the last 20 `USER`/`ASSISTANT` messages. Guests get no memory.
+gives the model the last 10 `USER`/`ASSISTANT` messages (kept short to save provider tokens). Guests get no memory.
 
 AI session/message fields are created by V13. V11 remains a historical placeholder; pgvector and AI
 document/vector tables are deferred until the RAG schema is finalized.
