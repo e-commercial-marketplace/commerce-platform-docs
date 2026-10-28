@@ -13,13 +13,18 @@ Owns customer/seller conversations, persisted messages, real-time updates, and m
 - Apply retry and idempotency handling for messages.
 - Allow a conversation to reference a product or order.
 
-## Planned API
+## API
 
 ```text
-WS  /ws/chat
-GET /api/v1/conversations
-GET /api/v1/conversations/{id}/messages
+WS    /ws/chat
+GET   /api/v1/conversations
+POST  /api/v1/conversations
+GET   /api/v1/conversations/{id}/messages
+POST  /api/v1/conversations/{id}/messages
+PATCH /api/v1/conversations/{id}/read
 ```
+
+Details: [`API_CONTRACT.md`](API_CONTRACT.md).
 
 ## Permissions
 
@@ -73,9 +78,25 @@ classDiagram
 
 ## Important rules
 
-- The MVP conversation rule is unique `(customer, seller)`.
+- The MVP conversation rule is unique `(customer, seller)`; opening a conversation is get-or-create.
+- A customer opens a conversation with an `APPROVED` seller; a seller opens one with a customer. An
+  optional `orderId` must belong to that customer.
+- Non-participants receive `404 RESOURCE_NOT_FOUND`, so conversation ids are not disclosed.
+- Messages are sent over REST with a required `Idempotency-Key` header; resending the same key returns
+  the stored message instead of creating a duplicate (`FR-CHAT-04`).
 - Human chat and AI chat are separate concepts.
-- Message retries need an idempotency strategy.
+
+## Real-time updates
+
+- `WS /ws/chat` is a push-only channel. The handshake carries `Authorization: Bearer <access-token>` and
+  only `CUSTOMER` and `SELLER` may connect. The client sends nothing; the server pushes JSON events after
+  the database transaction commits:
+  - `MESSAGE_CREATED` with the new message, to both participants' open connections;
+  - `MESSAGES_READ` with `conversationId` and `readerId`, to the other participant.
+- REST and the database stay the source of truth: a client that was offline reloads history with
+  `GET /conversations/{id}/messages`.
+- Shortcut: open connections are kept in memory, which fits a single backend instance. Several instances
+  would need a shared broker (for example Redis pub/sub).
 
 ## Data model
 
@@ -107,6 +128,7 @@ session/message model.
 | `messages` | `createdAt` | Message creation time used for ordering. |
 | `messages` | `conversationId` | Parent conversation. |
 | `messages` | `senderId` | User who sent the message. |
+| `messages` | `clientMessageId` | The sender's `Idempotency-Key`; unique per sender. |
 
-The historical V9 migration is a placeholder. V13 creates the conversation/message tables; message
-idempotency behavior remains to be finalized with the WebSocket persistence implementation.
+The historical V9 migration is a placeholder. V13 creates the conversation/message tables; V19 adds
+`messages.client_message_id` with a unique `(sender_id, client_message_id)` constraint.

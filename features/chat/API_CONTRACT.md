@@ -5,23 +5,19 @@
 This contract covers the `chat` (human chat) feature boundary: customer/seller conversations,
 persisted messages, real-time updates, and history loading.
 
-Planned/confirmed surface:
+Surface:
 
 ```text
-WS  /ws/chat
-GET /api/v1/conversations
-GET /api/v1/conversations/{id}/messages
+WS    /ws/chat
+GET   /api/v1/conversations
+POST  /api/v1/conversations
+GET   /api/v1/conversations/{id}/messages
+POST  /api/v1/conversations/{id}/messages
+PATCH /api/v1/conversations/{id}/read
 ```
 
-Predicted surface (not yet frozen; included for forward compatibility):
-
-```text
-POST /api/v1/conversations                     (Predicted)
-POST /api/v1/conversations/{id}/messages       (Predicted)
-```
-
-Human chat is deferred from the first mobile milestone and the first MVP wire contract (see SRS
-§2.1 and root §10); the WebSocket message payload shape is phased. Human chat is separate from AI
+Human chat is deferred from the first mobile milestone (see SRS §2.1); the backend implements the
+surface above. Messages are sent over REST and pushed over the WebSocket. Human chat is separate from AI
 chat: different persistence model (`Conversation`/`Message` vs `AiChatSession`/`AiMessage`)
 (`FR-CHAT-05`).
 
@@ -36,15 +32,31 @@ Feature source: `features/chat/README.md`. No field outside that README is intro
 
 ### WS /ws/chat
 
-Real-time channel for human-chat updates.
+Push-only real-time channel for human-chat updates (plain WebSocket, no STOMP).
 
-- Actor/Auth: `CUSTOMER` or `SELLER`. JWT handshake required; the server resolves the participant
-  identity from the authenticated principal and never trusts a client-supplied role or user ID.
-- Purpose: realtime delivery of new `Message` events plus read-state updates (`FR-CHAT-03`).
-- Persistence and history remain REST-owned (`FR-CHAT-02`); the socket is a transport, not the
-  source of truth.
-- Phased: connection setup, subscribe paths, heartbeat/reconnect, and exact STOMP/sub-protocol
-  frames are not frozen in this contract.
+- Handshake: `GET /ws/chat` (no `/api/v1` prefix) with `Authorization: Bearer <access-token>`. Only
+  `CUSTOMER` and `SELLER` may connect; a missing or invalid token is rejected with `401`, another role
+  with `403`. The server takes the user from the token and never trusts a client-supplied ID.
+- The client sends nothing; text frames from the client are ignored. Sending happens through
+  `POST /api/v1/conversations/{id}/messages`.
+- Events are JSON text frames, sent only after the database transaction commits (`FR-CHAT-03`):
+
+```json
+{ "type": "MESSAGE_CREATED", "message": { "id": "message-uuid", "conversationId": "conversation-uuid", "senderId": "user-uuid", "content": "Is this headphone still in stock?", "imageUrl": null, "isRead": false, "createdAt": "2026-10-12T10:31:00Z" } }
+```
+
+```json
+{ "type": "MESSAGES_READ", "conversationId": "conversation-uuid", "readerId": "user-uuid" }
+```
+
+| Event | Sent to | When |
+|---|---|---|
+| `MESSAGE_CREATED` | Both participants (every open connection, so the sender's other devices update too) | A new message is stored (not on an idempotent resend) |
+| `MESSAGES_READ` | The other participant | `PATCH /conversations/{id}/read` marked at least one message read |
+
+- Persistence and history remain REST-owned (`FR-CHAT-02`); the socket is a transport, not the source
+  of truth. A client that reconnects reloads history over REST. Reconnect logic belongs to the client.
+- Open connections are kept in memory: this fits one backend instance.
 
 Maps to: `FR-CHAT-01`, `FR-CHAT-03`, `FR-CHAT-05`.
 
@@ -58,6 +70,8 @@ List conversations owned by the caller.
 - Ownership: returns only rows where the caller is a participant — `customerId == principal.id`
   for `CUSTOMER`, `sellerId == principal.id` for `SELLER`. A caller must not see another
   customer's or another seller's conversation.
+- Order: most recent `lastMessageAt` first; conversations without messages follow, newest
+  `createdAt` first.
 - `ADMIN` monitoring, if ever exposed, is not participant impersonation and is not part of this
   endpoint.
 
@@ -103,7 +117,8 @@ Load persisted message history for one conversation (offline history loading).
 
 - Actor/Auth: `CUSTOMER` or `SELLER`. Requires `Authorization: Bearer <access-token>`.
 - Ownership: caller must be a participant of conversation `{id}`. Non-participants receive
-  `FORBIDDEN` (or `RESOURCE_NOT_FOUND` when the conversation must not be disclosed).
+  `RESOURCE_NOT_FOUND`, so conversation ids are not disclosed.
+- Order: newest message first; the next page holds older messages.
 
 Path parameters:
 
@@ -148,20 +163,18 @@ Errors:
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
-| `FORBIDDEN` | `403 Forbidden` | Caller is not a participant of the conversation |
-| `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist (or is not visible) |
+| `FORBIDDEN` | `403 Forbidden` | Authenticated actor is neither `CUSTOMER` nor `SELLER` |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist or the caller is not a participant |
 | `VALIDATION_ERROR` | `400 Bad Request` | Invalid `page`/`size` |
 
 Maps to: `FR-CHAT-01`, `FR-CHAT-02`, `FR-CHAT-05`.
 
 ---
 
-### POST /api/v1/conversations — Predicted
+### POST /api/v1/conversations
 
 Get-or-create a conversation for a customer/seller pair.
 
-- Status: **Predicted** — not in the SRS planned interface list; included because the domain rule
-  `unique (customer, seller)` requires a creation path.
 - Actor/Auth: `CUSTOMER` or `SELLER`. Requires `Authorization: Bearer <access-token>`.
 - Semantics: idempotent get-or-create on unique `(customer, seller)`. Repeating the same pair
   returns the existing conversation rather than creating a duplicate.
@@ -180,9 +193,13 @@ Request body (raw JSON):
 
 | Field | Rule |
 |---|---|
-| `sellerId` / `customerId` | Counterpart participant ID (which one is required depends on caller role); the caller side is taken from the token |
-| `productId` | Optional product context, else `null` |
-| `orderId` | Optional order context, else `null` |
+| `sellerId` | Required when the caller is a `CUSTOMER`: an `APPROVED` seller |
+| `customerId` | Required when the caller is a `SELLER`: a `CUSTOMER` user |
+| `productId` | Optional product context, else `null`; must exist |
+| `orderId` | Optional order context, else `null`; must belong to the customer of the pair |
+
+The context fields are stored only when the conversation is created; an existing conversation keeps
+its original context.
 
 Success: `200 OK` (existing conversation) or `201 Created` (new conversation) with
 `ApiResponse<ConversationResponse>` (same shape as `GET /api/v1/conversations` element).
@@ -193,24 +210,26 @@ Errors:
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
 | `FORBIDDEN` | `403 Forbidden` | Actor is neither `CUSTOMER` nor `SELLER` |
-| `RESOURCE_NOT_FOUND` | `404 Not Found` | Counterpart user / referenced product / order not visible |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | Counterpart is not an approved seller / not a customer, or the product / order is not visible |
 | `VALIDATION_ERROR` | `400 Bad Request` | Missing counterpart ID or malformed context |
 
-Maps to: `FR-CHAT-01` (Predicted creation path).
+Maps to: `FR-CHAT-01`.
 
 ---
 
-### POST /api/v1/conversations/{id}/messages — Predicted
+### POST /api/v1/conversations/{id}/messages
 
-REST fallback for sending a message (used when the WebSocket is unavailable; retry path).
+Send a message. This is the only send path; the WebSocket only pushes.
 
-- Status: **Predicted** — REST fallback complementing `WS /ws/chat`.
 - Actor/Auth: participant only (`CUSTOMER` or `SELLER` who belongs to conversation `{id}`).
   Requires `Authorization: Bearer <access-token>`.
 - `senderId` is resolved from the authentication principal and checked against conversation
   membership.
-- Idempotency: the client must send `Idempotency-Key: <client-generated-key>`; retries with the
-  same key return the original message rather than creating a duplicate (`FR-CHAT-04`).
+- Idempotency: the client must send `Idempotency-Key: <client-generated-key>` (1 to 100 characters,
+  for example a UUID); retries with the same key return the original message rather than creating a
+  duplicate, and push no new event (`FR-CHAT-04`). The key is unique per sender.
+- Effects: the message is stored unread, `conversation.lastMessageAt` becomes its `createdAt`, and
+  `MESSAGE_CREATED` is pushed after commit.
 
 ```http
 POST /api/v1/conversations/{id}/messages
@@ -228,15 +247,43 @@ Request body (raw JSON):
 }
 ```
 
-Success: `201 Created` with `ApiResponse<MessageResponse>` (same shape as message-history element).
+| Field | Rule |
+|---|---|
+| `content` | Text, at most 2000 characters; may be empty only when `imageUrl` is set |
+| `imageUrl` | Optional image URL (at most 2048 characters); upload is not part of this feature |
+
+Success: `201 Created` with `ApiResponse<MessageResponse>` (same shape as message-history element),
+also for an idempotent resend.
 
 Errors:
 
 | Code | HTTP | When |
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
-| `FORBIDDEN` | `403 Forbidden` | Caller is not a participant of the conversation |
-| `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist (or is not visible) |
-| `VALIDATION_ERROR` | `400 Bad Request` | Empty `content` with no `imageUrl`, or malformed body |
+| `FORBIDDEN` | `403 Forbidden` | Authenticated actor is neither `CUSTOMER` nor `SELLER` |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist or the caller is not a participant |
+| `VALIDATION_ERROR` | `400 Bad Request` | Missing `Idempotency-Key`, empty `content` with no `imageUrl`, or malformed body |
 
 Maps to: `FR-CHAT-02`, `FR-CHAT-03`, `FR-CHAT-04`.
+
+---
+
+### PATCH /api/v1/conversations/{id}/read
+
+Mark every unread message from the other participant in conversation `{id}` as read.
+
+- Actor/Auth: participant only. Requires `Authorization: Bearer <access-token>`. No body.
+- Idempotent: calling it again changes nothing.
+- When at least one message changed, `MESSAGES_READ` is pushed to the other participant after commit.
+
+Success: `200 OK` with `ApiResponse<null>`.
+
+Errors:
+
+| Code | HTTP | When |
+|---|---|---|
+| `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
+| `FORBIDDEN` | `403 Forbidden` | Authenticated actor is neither `CUSTOMER` nor `SELLER` |
+| `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist or the caller is not a participant |
+
+Maps to: `FR-CHAT-02`, `FR-CHAT-03`.

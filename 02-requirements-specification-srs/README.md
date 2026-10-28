@@ -299,9 +299,12 @@ GET  /api/v1/products/{productId}/reviews
 Planned interfaces:
 
 ```text
-WS  /ws/chat
-GET /api/v1/conversations
-GET /api/v1/conversations/{id}/messages
+WS    /ws/chat
+GET   /api/v1/conversations
+POST  /api/v1/conversations
+GET   /api/v1/conversations/{id}/messages
+POST  /api/v1/conversations/{id}/messages
+PATCH /api/v1/conversations/{id}/read
 ```
 
 ### 5.11 AI assistant

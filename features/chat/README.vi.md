@@ -13,13 +13,18 @@ Sở hữu hội thoại customer/seller, tin nhắn lưu trữ, cập nhật th
 - Áp dụng xử lý retry và idempotency cho tin nhắn.
 - Cho phép hội thoại tham chiếu sản phẩm hoặc đơn hàng.
 
-## API dự kiến
+## API
 
 ```text
-WS  /ws/chat
-GET /api/v1/conversations
-GET /api/v1/conversations/{id}/messages
+WS    /ws/chat
+GET   /api/v1/conversations
+POST  /api/v1/conversations
+GET   /api/v1/conversations/{id}/messages
+POST  /api/v1/conversations/{id}/messages
+PATCH /api/v1/conversations/{id}/read
 ```
+
+Chi tiết: [`API_CONTRACT.md`](API_CONTRACT.md).
 
 ## Phân quyền
 
@@ -73,9 +78,24 @@ classDiagram
 
 ## Quy tắc quan trọng
 
-- Quy tắc hội thoại MVP là `(customer, seller)` duy nhất.
+- Quy tắc hội thoại MVP là `(customer, seller)` duy nhất; mở hội thoại là get-or-create.
+- Customer mở hội thoại với seller đã `APPROVED`; seller mở hội thoại với customer. `orderId` tùy chọn phải
+  là đơn của customer đó.
+- Người ngoài hội thoại nhận `404 RESOURCE_NOT_FOUND`, để không lộ id hội thoại.
+- Tin nhắn được gửi qua REST kèm header `Idempotency-Key` bắt buộc; gửi lại cùng key trả về tin đã lưu thay
+  vì tạo bản trùng (`FR-CHAT-04`).
 - Human chat và AI chat là hai khái niệm riêng biệt.
-- Retry tin nhắn cần chiến lược idempotency.
+
+## Cập nhật thời gian thực
+
+- `WS /ws/chat` là kênh chỉ đẩy. Handshake mang `Authorization: Bearer <access-token>` và chỉ `CUSTOMER`,
+  `SELLER` được kết nối. Client không gửi gì; server đẩy sự kiện JSON sau khi transaction database commit:
+  - `MESSAGE_CREATED` kèm tin mới, tới các kết nối đang mở của cả hai participant;
+  - `MESSAGES_READ` kèm `conversationId` và `readerId`, tới participant còn lại.
+- REST và database vẫn là nguồn sự thật: client bị offline tải lại lịch sử bằng
+  `GET /conversations/{id}/messages`.
+- Shortcut: các kết nối đang mở được giữ trong RAM, đủ cho một instance backend. Chạy nhiều instance cần
+  một broker dùng chung (ví dụ Redis pub/sub).
 
 ## Mô hình dữ liệu
 
@@ -106,5 +126,7 @@ Human chat có một hàng hội thoại participant và các hàng tin nhắn c
 | `messages` | `createdAt` | Thời điểm tạo tin nhắn dùng để sắp xếp. |
 | `messages` | `conversationId` | Hội thoại cha. |
 | `messages` | `senderId` | Người dùng đã gửi tin nhắn. |
+| `messages` | `clientMessageId` | `Idempotency-Key` của người gửi; duy nhất theo từng người gửi. |
 
-Migration V9 lịch sử là placeholder. V13 tạo bảng conversation/message; hành vi idempotency vẫn cần được chốt khi triển khai lưu trữ WebSocket.
+Migration V9 lịch sử là placeholder. V13 tạo bảng conversation/message; V19 thêm cột
+`messages.client_message_id` với ràng buộc duy nhất `(sender_id, client_message_id)`.
