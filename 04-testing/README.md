@@ -18,7 +18,8 @@ This milestone explicitly does **not** contain:
 - backend integration tests;
 - system tests;
 - acceptance tests;
-- real server Cart tests (the backend Cart API does not exist yet).
+- real server Cart tests in this frontend milestone. The backend Cart API now exists; see
+  [backend verification](BACKEND_VERIFICATION.md) for the separate backend baseline.
 
 The frontend cart is intentionally a local runtime state owned by `CartContext`; it is not a server
 cart. Nothing in this document should be read as evidence of backend, integration, system, or
@@ -262,8 +263,8 @@ Notes:
 - The `formatVND` utility tests, the `queryKeys` tests, and the generic `Button` tests are **not**
   mapped to any requirement; no legitimate reference exists, so none is invented.
 - FR-CART-04 and FR-CART-05 (server-side stock validation and server-side price recalculation) are
-  **not** covered by frontend automated tests; those rules live in the backend and no backend Cart
-  API exists yet.
+  **not** covered by these frontend automated tests; those rules live in the backend. The backend
+  now has a Cart API and separate tests, which do not establish frontend integration coverage.
 
 ### Explicitly not covered
 
