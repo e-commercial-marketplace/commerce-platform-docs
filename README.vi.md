@@ -92,8 +92,9 @@ và database; provider call chỉ được vẽ khi contract có căn cứ.
 
 Đọc [`04-testing/README.vi.md`](04-testing/README.vi.md) về bộ automated test của frontend: chiến
 lược kiểm thử, đặc tả test case đầy đủ, kết quả đã kiểm chứng, coverage và truy vết requirement. Tài
-liệu này chỉ bao gồm các automated test frontend đã triển khai; integration, system và acceptance
-test của backend vẫn ở trạng thái kế hoạch.
+liệu này chỉ bao gồm snapshot test frontend. Xem [kiểm chứng backend](04-testing/BACKEND_VERIFICATION.vi.md)
+cho baseline test, truy vết và trạng thái backend; xem [triển khai và vận hành](05-deployment-operations/README.vi.md)
+cho checklist release và bảo mật.
 
 ## Ánh xạ feature frontend-backend
 
