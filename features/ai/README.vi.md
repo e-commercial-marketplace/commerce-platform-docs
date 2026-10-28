@@ -157,8 +157,11 @@ cho model 10 tin `USER`/`ASSISTANT` gần nhất (ít để đỡ tốn token c�
 `##` là một chunk độc lập, có dòng `Chủ đề:`. File chỉ chứa chính sách dành cho khách hàng: không có chi
 tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
 
-- Embedding lấy từ một API embedding tương thích OpenAI, cấu hình bằng `AI_EMBEDDING_BASE_URL`,
-  `AI_EMBEDDING_API_KEY` và `AI_EMBEDDING_MODEL` (mặc định `text-embedding-3-small`, 1536 chiều). Các biến
+- Embedding lấy từ Google Gemini qua endpoint tương thích OpenAI
+  (`https://generativelanguage.googleapis.com/v1beta/openai`, đường dẫn `/embeddings`), model
+  `gemini-embedding-001` (3072 chiều). `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_PATH` và `AI_EMBEDDING_MODEL`
+  mặc định là các giá trị này; `AI_EMBEDDING_API_KEY` là key của Google AI Studio. Provider khác dùng được
+  nếu model trả vector 3072 chiều. Các biến
   này tách riêng khỏi biến chat vì một số provider chat (DeepSeek, Groq) không có API embedding.
   `AI_EMBEDDING_API_KEY` rỗng thì tắt RAG; trợ lý vẫn chạy như trước.
 - Khi ứng dụng khởi động, backend đọc file, embedding từng chunk và thay toàn bộ dòng của bảng
@@ -174,7 +177,7 @@ tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
 | `policy_chunks` | `topic` | Giá trị của dòng `Chủ đề:`. |
 | `policy_chunks` | `title` | Tiêu đề `##`. |
 | `policy_chunks` | `content` | Toàn bộ nội dung chunk đưa cho model. |
-| `policy_chunks` | `embedding` | `vector(1536)` của nội dung. |
+| `policy_chunks` | `embedding` | `vector(3072)` của nội dung. |
 
 Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; extension pgvector và
 bảng `policy_chunks` được tạo trong V18.

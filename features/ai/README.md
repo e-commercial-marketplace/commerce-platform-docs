@@ -161,8 +161,11 @@ Customer-facing terms live in `backend/src/main/resources/rag/marketplace-terms.
 section is one self-contained chunk with a `Chủ đề:` (topic) line. The file holds customer policy only:
 no security internals, seller rules, prices, stock or voucher codes.
 
-- Embeddings come from an OpenAI-compatible embedding API configured by `AI_EMBEDDING_BASE_URL`,
-  `AI_EMBEDDING_API_KEY` and `AI_EMBEDDING_MODEL` (default `text-embedding-3-small`, 1536 dimensions).
+- Embeddings come from Google Gemini through its OpenAI-compatible endpoint
+  (`https://generativelanguage.googleapis.com/v1beta/openai`, path `/embeddings`), model
+  `gemini-embedding-001` (3072 dimensions). `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_PATH` and
+  `AI_EMBEDDING_MODEL` default to these values; `AI_EMBEDDING_API_KEY` is a Google AI Studio key.
+  Another provider works if its model returns 3072-dimensional vectors.
   They are separate from the chat variables because some chat providers (DeepSeek, Groq) have no
   embedding API. An empty `AI_EMBEDDING_API_KEY` turns RAG off; the assistant then works as before.
 - On application start the backend reads the file, embeds every chunk and replaces all rows of
@@ -178,7 +181,7 @@ no security internals, seller rules, prices, stock or voucher codes.
 | `policy_chunks` | `topic` | Value of the `Chủ đề:` line. |
 | `policy_chunks` | `title` | The `##` heading. |
 | `policy_chunks` | `content` | Full chunk text given to the model. |
-| `policy_chunks` | `embedding` | `vector(1536)` of the content. |
+| `policy_chunks` | `embedding` | `vector(3072)` of the content. |
 
 AI session/message fields are created by V13. V11 remains a historical placeholder; the pgvector
 extension and `policy_chunks` are created by V18.
