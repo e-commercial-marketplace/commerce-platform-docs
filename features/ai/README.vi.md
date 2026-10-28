@@ -11,7 +11,7 @@ ngữ tự nhiên của khách (guest hoặc khách hàng đã xác thực) thà
 hạn (qua Tool Calling tới catalog service) hoặc kiến thức chính sách/FAQ qua RAG. Yêu cầu của guest
 phi trạng thái (stateless).
 
-Đợt hiện tại: `ChatClient`, hai tool chỉ đọc `listCategories` và `searchProducts`, phiên lưu trữ của khách hàng kèm chat memory
+Đợt hiện tại: `ChatClient`, các tool chỉ đọc `listCategories`, `searchProducts` và `searchPolicies`, phiên lưu trữ của khách hàng kèm chat memory
 (10 tin gần nhất), RAG điều khoản khách hàng (pgvector) và bộ trả lời bằng luật. Hoãn lại: tool đơn
 hàng/vận chuyển/voucher và phân tích
 doanh thu cho seller.
@@ -166,10 +166,13 @@ tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
   `AI_EMBEDDING_API_KEY` rỗng thì tắt RAG; trợ lý vẫn chạy như trước.
 - Khi ứng dụng khởi động, backend đọc file, embedding từng chunk và thay toàn bộ dòng của bảng
   `policy_chunks` (V18, pgvector). Muốn đổi điều khoản thì sửa file rồi khởi động lại.
-- Với mỗi câu hỏi được LLM trả lời, backend embedding câu hỏi, lấy 3 chunk gần nhất (khoảng cách cosine)
-  và thêm vào system prompt dưới dạng trích đoạn chính sách. Model chỉ được trả lời câu hỏi chính sách dựa
-  trên các trích đoạn này. Câu trả lời bằng luật không dùng RAG.
-- Gọi embedding lỗi không làm `/ai/ask` lỗi: câu hỏi vẫn được trả lời, chỉ là không có trích đoạn.
+- RAG được đưa cho LLM dưới dạng tool chỉ đọc `searchPolicies(question)`. Model tự quyết khi nào gọi (câu
+  hỏi về quy định thanh toán, giao hàng, hủy đơn, hoàn tiền, voucher, đánh giá hay tài khoản), giống cách
+  gọi `searchProducts`. Tool embedding câu hỏi và trả về 3 chunk gần nhất (khoảng cách cosine). Vì vậy câu
+  hỏi về sản phẩm không tốn lần gọi embedding nào và không bị kèm điều khoản.
+- System prompt dặn model chỉ trả lời câu hỏi quy định dựa trên kết quả `searchPolicies` và không bịa điều
+  mà kết quả không nói (ví dụ bộ phận chăm sóc khách hàng). Câu trả lời bằng luật không dùng RAG.
+- Gọi embedding lỗi không làm `/ai/ask` lỗi: tool trả danh sách rỗng và model nói là chưa chắc chắn.
 
 | Bảng | Trường | Ý nghĩa |
 |---|---|---|

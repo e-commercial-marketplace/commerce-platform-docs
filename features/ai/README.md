@@ -11,7 +11,7 @@ The first AI slice answers marketplace questions without requiring login: it map
 authenticated customer's natural-language request to a constrained public product search (via Tool
 Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests are stateless.
 
-Current slice: `ChatClient`, the read-only `listCategories` and `searchProducts` tools, persisted customer sessions with chat
+Current slice: `ChatClient`, the read-only `listCategories`, `searchProducts` and `searchPolicies` tools, persisted customer sessions with chat
 memory (last 10 messages), policy RAG over the customer terms (pgvector), and the rule-based fallback.
 Deferred: order/shipment/voucher tools,
 and seller revenue analysis.
@@ -170,10 +170,14 @@ no security internals, seller rules, prices, stock or voucher codes.
   embedding API. An empty `AI_EMBEDDING_API_KEY` turns RAG off; the assistant then works as before.
 - On application start the backend reads the file, embeds every chunk and replaces all rows of
   `policy_chunks` (V18, pgvector). Editing the file and restarting is the only way to change the terms.
-- For each question answered by the LLM, the backend embeds the question, takes the 3 nearest chunks
-  (cosine distance) and adds them to the system prompt as policy excerpts. The model must answer policy
-  questions only from these excerpts. Rule-based answers do not use RAG.
-- A failing embedding call never fails `/ai/ask`: the question is answered without excerpts.
+- RAG is exposed to the LLM as the read-only tool `searchPolicies(question)`. The model decides when to
+  call it (questions about payment, delivery, cancellation, refund, voucher, review or account rules), the
+  same way it calls `searchProducts`. The tool embeds the question and returns the 3 nearest chunks
+  (cosine distance). Product questions therefore cost no embedding call and add no policy text.
+- The system prompt tells the model to answer rule questions only from `searchPolicies` results and not to
+  invent anything they do not say (for example a customer-support team). Rule-based answers do not use RAG.
+- A failing embedding call never fails `/ai/ask`: the tool returns an empty list and the model says it is
+  not sure.
 
 | Table | Field | Meaning |
 |---|---|---|
