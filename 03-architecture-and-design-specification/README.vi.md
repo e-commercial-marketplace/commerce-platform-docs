@@ -508,29 +508,52 @@ Giá trị tiền tệ dùng `BigDecimal`.
 
 ## 12. Ranh giới Thiết kế Frontend
 
-Cấu trúc React Native hướng theo feature:
+Client React Native được tổ chức theo trách nhiệm kỹ thuật dưới `frontend/src`. Tên file cho biết
+feature (ví dụ `useCart`, `cartService`, `CartScreen`), tương tự quy ước package-by-layer của backend.
 
 ```text
 src
-├── features
-│   ├── auth
-│   ├── catalog
-│   ├── cart
-│   ├── checkout
-│   ├── orders
-│   ├── shipment
-│   ├── review
-│   ├── chat
-│   └── ai
-├── components
-├── navigation
-├── lib/api
-├── hooks
-├── store
-└── types
+├── api            Axios client, query client, query key, chuẩn hóa lỗi
+├── services       mỗi endpoint một hàm; tokenStorage (SecureStore)
+├── hooks          hook TanStack Query (useCart, useOrders, useCheckout, ...)
+├── screens        mỗi màn hình một file
+├── components     UI dùng chung; components/seller cho xử lý đơn của seller
+├── navigation     AppNavigator (stack gốc), MainTabs, kiểu tham số route
+├── context        AuthContext (trạng thái phiên phía client)
+├── utils          hàm thuần và mapper DTO -> model giao diện
+├── types          DTO của API và model giao diện
+└── constants      theme và cấu hình dùng chung
 ```
 
-React Native sở hữu trình bày và trạng thái client. Spring Boot vẫn là nơi có thẩm quyền đối với phân quyền,
+### 12.1 Các lớp và luồng request
+
+```text
+Screen -> Hook (TanStack Query) -> Service -> apiClient (Axios) -> Spring Boot /api/v1
+```
+
+| Lớp backend | Lớp frontend | Trách nhiệm |
+|---|---|---|
+| Controller | Screen | Hiển thị UI và xử lý tương tác; không chứa quy tắc nghiệp vụ. |
+| Security filter | `apiClient` | Gắn Bearer token, xoay refresh token một lần khi gặp `401`, chuẩn hóa lỗi. |
+| Service | Service (`services/`) | Mỗi endpoint một hàm: đường dẫn, payload, bóc envelope. |
+| Repository | Hook (`hooks/`) | Cache server state, loading, refetch, invalidation. |
+| Mapper | `utils/*Mapper.ts` | Đổi DTO backend sang model giao diện (ví dụ chuỗi decimal sang số). |
+| Database | Spring Boot API | Backend là nguồn sự thật; client không có database riêng. |
+
+### 12.2 Quy tắc triển khai
+
+1. Screen không gọi Axios trực tiếp; chỉ dùng hook.
+2. Service chỉ chứa đường dẫn endpoint và ánh xạ payload, luôn dùng `apiClient` và `unwrapData` dùng chung.
+3. Hook sở hữu server state. Dữ liệu server không được sao chép vào React Context.
+4. Sau mutation, hook lưu response chuẩn từ server hoặc invalidate query liên quan. Không cập nhật lạc quan.
+5. Query key chỉ được tạo trong `api/queryKeys.ts`.
+6. Mutation không tự retry. Thao tác nhạy cảm như checkout còn chặn bấm đúp trong cùng một tick.
+7. `AuthContext` chỉ giữ phiên phía client. Cache giỏ hàng bị xóa mỗi khi danh tính thay đổi.
+8. UI có thể ẩn thao tác (ví dụ giỏ hàng chỉ bật cho `CUSTOMER`), nhưng Spring Boot thực thi phân quyền và ownership.
+9. Route mới được khai báo trong `navigation/types.ts` cùng lúc với mục trong `AppNavigator`.
+10. Test nằm cạnh code trong thư mục `__tests__`.
+
+React Native sở hữu phần trình bày và trạng thái client. Spring Boot vẫn là nơi có thẩm quyền đối với phân quyền,
 ngay cả khi UI mobile ẩn một thao tác.
 
 ## 13. Thiết kế Kiểm thử

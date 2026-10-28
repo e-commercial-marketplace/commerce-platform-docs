@@ -511,27 +511,51 @@ Money values use `BigDecimal`.
 
 ## 12. Frontend Design Boundary
 
-The React Native structure is feature-oriented:
+The React Native client is organized by technical responsibility under `frontend/src`. A file name
+identifies its feature (for example `useCart`, `cartService`, `CartScreen`), mirroring the backend's
+package-by-layer convention.
 
 ```text
 src
-├── features
-│   ├── auth
-│   ├── catalog
-│   ├── cart
-│   ├── checkout
-│   ├── orders
-│   ├── shipment
-│   ├── review
-│   ├── chat
-│   └── ai
-├── components
-├── navigation
-├── lib/api
-├── hooks
-├── store
-└── types
+├── api            Axios client, query client, query keys, error normalization
+├── services       one function per endpoint; tokenStorage (SecureStore)
+├── hooks          TanStack Query hooks (useCart, useOrders, useCheckout, ...)
+├── screens        one screen per file
+├── components     shared UI; components/seller for seller fulfillment
+├── navigation     AppNavigator (root stack), MainTabs, route param types
+├── context        AuthContext (client session state)
+├── utils          pure helpers and DTO -> UI model mappers
+├── types          API DTOs and UI models
+└── constants      theme and shared configuration
 ```
+
+### 12.1 Layers and request flow
+
+```text
+Screen -> Hook (TanStack Query) -> Service -> apiClient (Axios) -> Spring Boot /api/v1
+```
+
+| Backend layer | Frontend layer | Responsibility |
+|---|---|---|
+| Controller | Screen | Renders UI and handles user interaction; holds no business rules. |
+| Security filter | `apiClient` | Attaches the Bearer token, rotates the refresh token once on `401`, normalizes errors. |
+| Service | Service (`services/`) | One function per endpoint: path, payload, envelope unwrapping. |
+| Repository | Hook (`hooks/`) | Server-state cache, loading, refetch, invalidation. |
+| Mapper | `utils/*Mapper.ts` | Converts backend DTOs to UI models (for example decimal strings to numbers). |
+| Database | Spring Boot API | The backend is the source of truth; the client has no database of its own. |
+
+### 12.2 Implementation rules
+
+1. Screens never call Axios directly; they use hooks.
+2. Services contain endpoint paths and payload mapping only, and always use the shared `apiClient` and `unwrapData`.
+3. Hooks own server state. Server data is not copied into a React Context.
+4. After a mutation the hook stores the authoritative response or invalidates the related query. There are no optimistic updates.
+5. Query keys are built only in `api/queryKeys.ts`.
+6. Mutations are not retried automatically. Sensitive actions such as checkout also guard against a double tap in the same tick.
+7. `AuthContext` holds only the client session. The cart cache is purged whenever the identity changes.
+8. The UI may hide actions (for example the cart is enabled only for `CUSTOMER`), but Spring Boot enforces authorization and ownership.
+9. A new route is declared in `navigation/types.ts` together with its `AppNavigator` entry.
+10. Tests live next to the code in `__tests__` folders.
 
 React Native owns presentation and client state. Spring Boot remains the authority for authorization,
 even when the mobile UI hides an action.
