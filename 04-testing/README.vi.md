@@ -18,7 +18,8 @@ Cột mốc này **không** bao gồm:
 - backend integration test;
 - system test;
 - acceptance test;
-- real server Cart test (Cart API backend chưa tồn tại).
+- real server Cart test trong cột mốc frontend này. Backend hiện đã có Cart API; xem
+  [kiểm chứng backend](BACKEND_VERIFICATION.vi.md) cho baseline riêng của backend.
 
 Cart trên frontend được thiết kế là state runtime cục bộ do `CartContext` quản lý; đây không phải
 cart trên server. Không nội dung nào trong tài liệu này được hiểu là bằng chứng của việc kiểm chứng
@@ -262,7 +263,8 @@ Ghi chú:
 - Các test utility `formatVND`, các test `queryKeys` và các test `Button` chung **không** được map
   vào requirement nào; không có tham chiếu hợp lệ nên không tự tạo.
 - FR-CART-04 và FR-CART-05 (validate stock phía server và tính lại giá phía server) **không** được
-  phủ bởi automated test frontend; những rule này thuộc backend và Cart API backend chưa tồn tại.
+  phủ bởi automated test frontend này; những rule này thuộc backend. Backend hiện có Cart API và
+  test riêng, nhưng điều đó không chứng minh frontend đã được kiểm thử tích hợp.
 
 ### Không được phủ (nêu rõ)
 
