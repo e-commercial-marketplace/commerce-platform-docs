@@ -93,8 +93,10 @@ the current backend scaffold already implements them.
 
 Read [`04-testing/README.md`](04-testing/README.md) for the automated frontend test suite: test
 strategy, the full test case specification, the verified result, coverage, and requirement
-traceability. This document covers implemented frontend automated tests only; backend integration,
-system, and acceptance tests remain planned.
+traceability. This document covers the frontend snapshot only. See
+[`backend verification`](04-testing/BACKEND_VERIFICATION.md) for the separate backend test baseline,
+traceability and status; see [`deployment and operations`](05-deployment-operations/README.md) for
+release and security checklists.
 
 ## Frontend-to-backend feature mapping
 
