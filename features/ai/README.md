@@ -12,7 +12,8 @@ authenticated customer's natural-language request to a constrained public produc
 Calling on the catalog service) or to RAG-grounded policy/FAQ knowledge. Guest requests are stateless.
 
 Current slice: `ChatClient`, the read-only `listCategories` and `searchProducts` tools, persisted customer sessions with chat
-memory (last 10 messages), and the rule-based fallback. Deferred: RAG, order/shipment/voucher tools,
+memory (last 10 messages), policy RAG over the customer terms (pgvector), and the rule-based fallback.
+Deferred: order/shipment/voucher tools,
 and seller revenue analysis.
 
 The LLM is an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL` (Spring AI OpenAI client); OpenAI, DeepSeek, Groq or OpenRouter work by
@@ -154,5 +155,30 @@ and stateless, so they should not create a customer-owned session.
 conversation id. It only appends rows (full history stays for `GET /ai/sessions/{id}/messages`) and
 gives the model the last 10 `USER`/`ASSISTANT` messages (kept short to save provider tokens). Guests get no memory.
 
-AI session/message fields are created by V13. V11 remains a historical placeholder; pgvector and AI
-document/vector tables are deferred until the RAG schema is finalized.
+### Policy RAG
+
+Customer-facing terms live in `backend/src/main/resources/rag/marketplace-terms.vi.md`. Each `##`
+section is one self-contained chunk with a `Chủ đề:` (topic) line. The file holds customer policy only:
+no security internals, seller rules, prices, stock or voucher codes.
+
+- Embeddings come from an OpenAI-compatible embedding API configured by `AI_EMBEDDING_BASE_URL`,
+  `AI_EMBEDDING_API_KEY` and `AI_EMBEDDING_MODEL` (default `text-embedding-3-small`, 1536 dimensions).
+  They are separate from the chat variables because some chat providers (DeepSeek, Groq) have no
+  embedding API. An empty `AI_EMBEDDING_API_KEY` turns RAG off; the assistant then works as before.
+- On application start the backend reads the file, embeds every chunk and replaces all rows of
+  `policy_chunks` (V18, pgvector). Editing the file and restarting is the only way to change the terms.
+- For each question answered by the LLM, the backend embeds the question, takes the 3 nearest chunks
+  (cosine distance) and adds them to the system prompt as policy excerpts. The model must answer policy
+  questions only from these excerpts. Rule-based answers do not use RAG.
+- A failing embedding call never fails `/ai/ask`: the question is answered without excerpts.
+
+| Table | Field | Meaning |
+|---|---|---|
+| `policy_chunks` | `id` | Row identifier. |
+| `policy_chunks` | `topic` | Value of the `Chủ đề:` line. |
+| `policy_chunks` | `title` | The `##` heading. |
+| `policy_chunks` | `content` | Full chunk text given to the model. |
+| `policy_chunks` | `embedding` | `vector(1536)` of the content. |
+
+AI session/message fields are created by V13. V11 remains a historical placeholder; the pgvector
+extension and `policy_chunks` are created by V18.

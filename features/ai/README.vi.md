@@ -12,7 +12,8 @@ hạn (qua Tool Calling tới catalog service) hoặc kiến thức chính sách
 phi trạng thái (stateless).
 
 Đợt hiện tại: `ChatClient`, hai tool chỉ đọc `listCategories` và `searchProducts`, phiên lưu trữ của khách hàng kèm chat memory
-(10 tin gần nhất) và bộ trả lời bằng luật. Hoãn lại: RAG, tool đơn hàng/vận chuyển/voucher và phân tích
+(10 tin gần nhất), RAG điều khoản khách hàng (pgvector) và bộ trả lời bằng luật. Hoãn lại: tool đơn
+hàng/vận chuyển/voucher và phân tích
 doanh thu cho seller.
 
 LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_API_KEY` và `AI_MODEL` (client OpenAI của Spring AI); dùng OpenAI, DeepSeek, Groq hay OpenRouter chỉ cần
@@ -150,5 +151,30 @@ Mô hình AI lưu trữ chỉ lưu hội thoại của khách hàng. Yêu cầu 
 conversation id. Nó chỉ thêm dòng (toàn bộ lịch sử vẫn còn cho `GET /ai/sessions/{id}/messages`) và đưa
 cho model 10 tin `USER`/`ASSISTANT` gần nhất (ít để đỡ tốn token của provider). Guest không có memory.
 
-Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; pgvector và AI
-document/vector tables được hoãn đến khi hoàn tất thiết kế RAG schema.
+### RAG điều khoản
+
+Điều khoản dành cho khách hàng nằm trong `backend/src/main/resources/rag/marketplace-terms.vi.md`. Mỗi mục
+`##` là một chunk độc lập, có dòng `Chủ đề:`. File chỉ chứa chính sách dành cho khách hàng: không có chi
+tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
+
+- Embedding lấy từ một API embedding tương thích OpenAI, cấu hình bằng `AI_EMBEDDING_BASE_URL`,
+  `AI_EMBEDDING_API_KEY` và `AI_EMBEDDING_MODEL` (mặc định `text-embedding-3-small`, 1536 chiều). Các biến
+  này tách riêng khỏi biến chat vì một số provider chat (DeepSeek, Groq) không có API embedding.
+  `AI_EMBEDDING_API_KEY` rỗng thì tắt RAG; trợ lý vẫn chạy như trước.
+- Khi ứng dụng khởi động, backend đọc file, embedding từng chunk và thay toàn bộ dòng của bảng
+  `policy_chunks` (V18, pgvector). Muốn đổi điều khoản thì sửa file rồi khởi động lại.
+- Với mỗi câu hỏi được LLM trả lời, backend embedding câu hỏi, lấy 3 chunk gần nhất (khoảng cách cosine)
+  và thêm vào system prompt dưới dạng trích đoạn chính sách. Model chỉ được trả lời câu hỏi chính sách dựa
+  trên các trích đoạn này. Câu trả lời bằng luật không dùng RAG.
+- Gọi embedding lỗi không làm `/ai/ask` lỗi: câu hỏi vẫn được trả lời, chỉ là không có trích đoạn.
+
+| Bảng | Trường | Ý nghĩa |
+|---|---|---|
+| `policy_chunks` | `id` | Định danh dòng. |
+| `policy_chunks` | `topic` | Giá trị của dòng `Chủ đề:`. |
+| `policy_chunks` | `title` | Tiêu đề `##`. |
+| `policy_chunks` | `content` | Toàn bộ nội dung chunk đưa cho model. |
+| `policy_chunks` | `embedding` | `vector(1536)` của nội dung. |
+
+Các trường AI session/message được tạo trong V13. V11 vẫn là placeholder lịch sử; extension pgvector và
+bảng `policy_chunks` được tạo trong V18.
