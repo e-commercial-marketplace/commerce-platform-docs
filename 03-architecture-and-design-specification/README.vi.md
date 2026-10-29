@@ -187,19 +187,25 @@ từng customer để `GET /cart` bỏ qua câu query đó; mất Redis không b
 - Rủi ro chấp nhận: một lần đọc trượt cache đúng lúc request khác sửa giỏ có thể ghi lại dòng cũ vào
   Redis. Khi đó giỏ có thể hiển thị cũ tối đa 30 phút, tới lần sửa tiếp theo hoặc khi hết thời gian sống.
 
-#### Danh sách category và trang shop của seller
+#### Kết quả đọc của catalog
 
-Spring Cache lưu hai kết quả đọc công khai vào Redis dưới dạng JSON:
+Spring Cache lưu các kết quả đọc công khai sau vào Redis dưới dạng JSON:
 
 | Cache | Endpoint | Key | Thời gian sống | Bị xoá sau commit khi |
 |---|---|---|---|---|
 | `categories` | `GET /categories` | `all` | 1 giờ | admin tạo, đổi tên hoặc xoá category |
 | `sellerShops` | `GET /sellers/{id}` | id seller | 10 phút | seller đó tạo, sửa hoặc ẩn product; seller đổi tên; admin sửa, duyệt hoặc khoá seller đó |
+| `products` | `GET /products/{id}` | id product | 30 phút | mọi thay đổi của product đó: seller sửa, ẩn hoặc đổi kho; checkout trừ kho hoặc kho được cộng lại (huỷ dòng, shipment trả về, đơn VNPAY quá hạn); có review mới; đổi tên bất kỳ category nào (chi tiết có tên category) |
+| `productSearch` | `GET /products` | toàn bộ tham số tìm kiếm | 60 giây | không xoá; chỉ tự hết hạn |
 
 - Giá trị cache chỉ được ghi và xoá sau khi transaction commit, nên thay đổi bị rollback không bao giờ
   xoá hay ghi cache.
 - Kết quả "không tìm thấy" không được cache: seller được duyệt sau đó hiện ra ngay.
-- Danh sách và chi tiết product không được cache: tồn kho và giá đổi quá thường xuyên.
+- Mọi thay đổi kho và rating đi qua `ProductService` (`decreaseStock`, `increaseStock`, `addRating`), hàm
+  này xoá cache chi tiết của product đó, nên không nơi gọi nào quên được.
+- Rủi ro chấp nhận: một trang kết quả tìm kiếm có thể cũ tối đa 60 giây, nên product vừa ẩn hoặc vừa
+  đổi giá vẫn có thể còn trong danh sách (chi tiết thì đã đúng). Trợ lý AI và trang shop đọc product
+  qua cùng hàm tìm kiếm nên chịu cùng độ trễ. Giỏ hàng, checkout và đơn hàng không bao giờ đọc cache.
 
 #### Luật chung
 

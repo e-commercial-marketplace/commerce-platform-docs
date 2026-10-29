@@ -190,19 +190,26 @@ lines so `GET /cart` can skip that query; losing Redis never loses a cart.
   lines back into Redis. The cart can then look stale for at most 30 minutes, until the next change or
   the time to live ends.
 
-#### Category list and seller shop pages
+#### Catalog read results
 
-Spring Cache stores two public read results in Redis as JSON:
+Spring Cache stores these public read results in Redis as JSON:
 
 | Cache | Endpoint | Key | Time to live | Cleared after commit by |
 |---|---|---|---|---|
 | `categories` | `GET /categories` | `all` | 1 hour | admin create, rename or delete of a category |
 | `sellerShops` | `GET /sellers/{id}` | seller id | 10 minutes | that seller creating, updating or hiding a product; the seller changing their name; an admin updating, approving or suspending that seller |
+| `products` | `GET /products/{id}` | product id | 30 minutes | any change of that product: seller update, hide or stock change; stock taken by checkout or given back (line cancelled, shipment returned, unpaid VNPAY order expired); a new review; any category rename (the detail shows the category name) |
+| `productSearch` | `GET /products` | all search parameters | 60 seconds | never; it only expires |
 
 - Cached values are written and cleared only after the transaction commits, so a rolled-back change
   never clears or fills the cache.
 - "Not found" answers are not cached: a seller who is approved later appears at once.
-- The product list and product detail are not cached: stock and prices change too often.
+- Every stock or rating change goes through `ProductService` (`decreaseStock`, `increaseStock`,
+  `addRating`), which clears the product's detail entry, so no caller can forget it.
+- Accepted risk: a search result page can be up to 60 seconds old, so a product hidden or repriced a
+  moment ago can still be listed (its detail is already correct). The AI assistant and the shop page
+  read products through the same search, so they share this delay. Cart, checkout and orders never
+  read the cache.
 
 #### Common rules
 

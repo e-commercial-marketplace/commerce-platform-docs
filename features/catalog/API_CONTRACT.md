@@ -58,6 +58,9 @@ Status: Confirmed (root §4, SRS §5.2).
 |---|---|---|
 | `VALIDATION_ERROR` | 400 | Invalid `sort`, `minRating`, price range, or pagination |
 
+Caching: the backend may serve a result page from a Redis cache for up to 60 seconds (architecture
+§5.4), so a product hidden or repriced a moment ago can still appear; its detail is always current.
+
 ### GET /api/v1/products/{id}
 
 Status: Confirmed (root §4, SRS §5.2).
@@ -71,6 +74,9 @@ Status: Confirmed (root §4, SRS §5.2).
 | Code | HTTP | When |
 |---|---|---|
 | `RESOURCE_NOT_FOUND` | 404 | No active product with `id` |
+
+Caching: the backend may serve this detail from a Redis cache (architecture §5.4); any change of the
+product (price, stock, rating, visibility) clears it, so the next request is current.
 
 ### GET /api/v1/categories
 
