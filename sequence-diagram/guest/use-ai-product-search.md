@@ -22,7 +22,7 @@ sequenceDiagram
     Guest->>Client: Ask a question about products
     Client->>Security: POST /api/v1/ai/ask (no token, sessionId = null)
     Security->>Controller: Public request
-    Controller->>Service: ask(guest, message, null)
+    Controller->>Service: answerQuestion(guest, message, null)
     alt Guest sent a sessionId
         Service-->>Client: 401 AUTHENTICATION_REQUIRED
     end

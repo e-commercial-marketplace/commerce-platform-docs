@@ -24,7 +24,7 @@ sequenceDiagram
     Customer->>Client: Ask a question about products
     Client->>Security: POST /api/v1/ai/ask (Bearer token, optional sessionId)
     Security->>Controller: Authenticated CUSTOMER
-    Controller->>Service: ask(customer, message, sessionId)
+    Controller->>Service: answerQuestion(customer, message, sessionId)
     Service->>Limiter: Count this question for user:<id>
     alt More than 60 questions this minute
         Limiter-->>Service: BLOCKED

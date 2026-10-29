@@ -95,7 +95,7 @@ sequenceDiagram
     else credentials valid
         Auth->>Jwt: generateAccessToken(user)
         Jwt-->>Auth: signed JWT with sub, role and exp
-        Auth->>Refresh: issue(user)
+        Auth->>Refresh: createRefreshToken(user)
         Refresh->>DB: INSERT refresh_tokens with the SHA-256 hash only
         Refresh-->>Auth: raw refresh token
         Auth-->>Controller: AuthResponse
@@ -157,7 +157,7 @@ sequenceDiagram
     participant DB as Database
     Note over Client,DB: Refresh needs no access token
     Client->>Auth: POST /api/v1/auth/refresh with refreshToken
-    Auth->>Refresh: consume(rawToken)
+    Auth->>Refresh: useRefreshToken(rawToken)
     Refresh->>DB: find the row by SHA-256 hash
     alt unknown, expired, revoked or user disabled
         Refresh-->>Client: 401 AUTHENTICATION_REQUIRED
@@ -172,7 +172,7 @@ sequenceDiagram
     end
     Note over Client,DB: Logout needs the access token
     Client->>Auth: POST /api/v1/auth/logout with refreshToken
-    Auth->>Refresh: revoke(rawToken, currentUserId)
+    Auth->>Refresh: revokeRefreshToken(rawToken, currentUserId)
     Refresh->>DB: revoke only if the token belongs to the caller
     Refresh-->>Client: 200 and later reuse of that token returns 401
 ```
