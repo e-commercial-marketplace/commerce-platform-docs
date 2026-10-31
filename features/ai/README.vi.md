@@ -168,8 +168,9 @@ tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
   `policy_chunks` (V18, pgvector). Muốn đổi điều khoản thì sửa file rồi khởi động lại.
 - RAG được đưa cho LLM dưới dạng tool chỉ đọc `searchPolicies(question)`. Model tự quyết khi nào gọi (câu
   hỏi về quy định thanh toán, giao hàng, hủy đơn, hoàn tiền, voucher, đánh giá hay tài khoản), giống cách
-  gọi `searchProducts`. Tool embedding câu hỏi và trả về 3 chunk gần nhất (khoảng cách cosine). Vì vậy câu
-  hỏi về sản phẩm không tốn lần gọi embedding nào và không bị kèm điều khoản.
+  gọi `searchProducts`. Tool embedding câu hỏi và trả về 3 chunk gần nhất (khoảng cách cosine). Câu hỏi về
+  sản phẩm không bị kèm điều khoản. `searchProducts` gọi tìm kiếm của catalog nên cũng có fallback tìm theo
+  nghĩa (`features/catalog/README.vi.md`): chỉ tốn một lần gọi embedding khi tìm theo chữ không ra gì.
 - System prompt dặn model chỉ trả lời câu hỏi quy định dựa trên kết quả `searchPolicies` và không bịa điều
   mà kết quả không nói (ví dụ bộ phận chăm sóc khách hàng). Câu trả lời bằng luật không dùng RAG.
 - Gọi embedding lỗi không làm `/ai/ask` lỗi: tool trả danh sách rỗng và model nói là chưa chắc chắn.

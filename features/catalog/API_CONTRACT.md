@@ -16,7 +16,7 @@ Status: Confirmed (root §4, SRS §5.2).
 
 | Parameter | Meaning |
 |---|---|
-| `q` | Text search against product name and description |
+| `q` | Text search against product name and description; semantic fallback when nothing matches (below) |
 | `categoryId` | Category filter (UUID) |
 | `sellerId` | Seller (shop) filter (UUID): only that seller's listed products are returned |
 | `minPrice` / `maxPrice` | Inclusive price range |
@@ -26,6 +26,11 @@ Status: Confirmed (root §4, SRS §5.2).
 | `size` | Page size, default `20` |
 
 - Default sort is `relevance` when `q` is present, `rating_desc` otherwise; deterministic `id ASC` tie-breaker.
+- Semantic fallback (Implemented): when no listed product contains `q` (and the other filters), the list
+  holds the listed products closest in meaning to `q` instead (pgvector, at most 50, too-distant products
+  are left out), with the other filters still applied. `relevance` then means closest first. The response
+  shape is unchanged. Off when `AI_EMBEDDING_API_KEY` is empty or the embedding call fails (the list stays
+  empty as before). New or edited products can take up to 10 minutes to be found this way.
 - Success: `200 OK`, `ApiResponse<PageResponse<ProductSummaryResponse>>`. `data` payload:
 
 ```json

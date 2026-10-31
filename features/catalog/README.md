@@ -100,6 +100,11 @@ classDiagram
 - Catalog list defaults to relevance when a search term exists and `rating_desc` otherwise. Supported
   sorts are `relevance`, `price_asc`, `price_desc`, and `rating_desc`; `popular` is deferred until a
   popularity metric exists. Results use deterministic `id ASC` tie-breaking.
+- Semantic fallback: when the text search finds nothing, `GET /products` returns the products closest in
+  meaning (see `API_CONTRACT.md`). `ProductIndexer` keeps `product_embeddings` (V20, pgvector, one
+  `vector(3072)` of name + category + description per product, plus an md5 `content_hash`) in sync:
+  every 10 minutes it embeds only the listed products whose text changed. It reuses the Gemini embedding
+  settings of the AI feature (`AI_EMBEDDING_*`); an empty key turns it off.
 
 ## Data model
 

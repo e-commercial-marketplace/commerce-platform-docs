@@ -173,7 +173,9 @@ no security internals, seller rules, prices, stock or voucher codes.
 - RAG is exposed to the LLM as the read-only tool `searchPolicies(question)`. The model decides when to
   call it (questions about payment, delivery, cancellation, refund, voucher, review or account rules), the
   same way it calls `searchProducts`. The tool embeds the question and returns the 3 nearest chunks
-  (cosine distance). Product questions therefore cost no embedding call and add no policy text.
+  (cosine distance). Product questions add no policy text. `searchProducts` calls the catalog search, so
+  it also gets the catalog's semantic fallback (`features/catalog/README.md`): one embedding call only
+  when the text search finds nothing.
 - The system prompt tells the model to answer rule questions only from `searchPolicies` results and not to
   invent anything they do not say (for example a customer-support team). Rule-based answers do not use RAG.
 - A failing embedding call never fails `/ai/ask`: the tool returns an empty list and the model says it is
