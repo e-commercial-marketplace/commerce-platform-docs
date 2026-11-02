@@ -1,0 +1,60 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Auth - Register Account
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Guest|
+start
+note right
+Precondition:
+The user is not signed in.
+
+Postcondition:
+The account exists with a hashed password and the user
+is signed in (access and refresh tokens). A seller
+account stays PENDING until an admin approves it.
+end note
+:Open the registration form;
+|System|
+:Display the registration form;
+|Guest|
+repeat
+:Enter name, email, password and choose the account type;
+:Submit the registration;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |Guest|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Validate the data, reject the ADMIN role and check the email is free;
+backward :Return the registration error;
+repeat while (The data is invalid, the role\nis ADMIN or the email is taken?) is (Yes) not (No)
+:Create the account with a hashed password; a seller starts PENDING;
+:Issue the access and refresh tokens and return the result;
+|Guest|
+:View the registration result;
+stop
+
+@enduml

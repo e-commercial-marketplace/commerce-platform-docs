@@ -25,16 +25,16 @@ skinparam activity {
 start
 note right
 Precondition:
-Guest is not authenticated.
+The user is not signed in.
 
 Postcondition:
 None.
 end note
-:Open the AI assistant function;
+:Open the AI assistant;
 |System|
-:Display the question input;
+:Display the question box;
 |Guest|
-:Enter a question about public products;
+:Enter a question;
 :Submit the question;
 |System|
 if (The system fails while processing the request?) then (Yes)
@@ -45,18 +45,20 @@ if (The system fails while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-if (The assistant can answer the question?) then (No)
-  :Return the cannot-answer notice;
+:Check the per-minute question limit;
+if (There are more than 60 questions this minute?) then (Yes)
+  :Return the rate-limit error;
   |Guest|
-  :View the cannot-answer notice;
+  :View the message;
   stop
-else (Yes)
+else (No)
 endif
 |System|
-:Find the relevant information and generate the answer;
-:Display the answer;
+:Use the LLM and read-only tools (categories, product search, policies) to answer from real data;
+:If the LLM cannot be used (no key, error, cooling down after 429, or over 20 questions a minute), answer with rules;
+:Return the answer with the products found;
 |Guest|
-:View the answer;
+:View the answer and product cards;
 stop
 
 @enduml

@@ -64,7 +64,7 @@ multi-seller order ownership, 24-hour prepayment cancellation, independent selle
 | UNAUTHENTICATED USER | Browse public catalog data and use AI for public product search |
 | CUSTOMER | Browse products, manage cart, place orders, pay, track shipments, review products, chat, and use AI assistance |
 | SELLER | Manage owned products and stock, process owned order items, choose delivery method, manage owned shipments, and chat with customers |
-| ADMIN | Manage users, categories, vouchers, moderation, marketplace monitoring, platform delivery configuration, and administrative actions such as refund approval |
+| ADMIN | Manage users, seller approval, categories, vouchers, and carriers |
 
 ## 3. Product capabilities
 

@@ -4,8 +4,6 @@
 - **API route/status:** `GET /api/v1/products/{id}` — Confirmed
 - **Feature API contract:** [features/catalog/API_CONTRACT.md](../../features/catalog/API_CONTRACT.md)
 
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -13,26 +11,26 @@ sequenceDiagram
     participant Client as Client application
     participant Security as Spring Security
     participant Controller as ProductController
-    participant Service as CatalogService
+    participant Service as ProductService
+    participant Cache as Redis cache
     participant Repo as ProductRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Guest->>Client: Start the view product details use case
+    Guest->>Client: View Product Details
     Client->>Security: GET /api/v1/products/{id}
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute view product details
-    alt Main flow succeeds
-        Service->>Repo: Query ProductRepository for permitted view product details data
-        Repo->>DB: SELECT
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
+    Security->>Controller: Forward the request
+    Controller->>Service: getListedProduct(id)
+    alt Request succeeds
+        Service->>Cache: Read the product detail entry
+        Service->>Repo: On a miss, findByIdAndActiveTrue
+        Repo->>DB: SELECT products
         Service-->>Controller: Use-case result
-        Controller-->>Client: 200 OK response defined by the contract
+        Controller-->>Client: 200 OK ApiResponse<ProductResponse>
         Client-->>Guest: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
+    else Unknown or hidden product
+        Service-->>Controller: Propagate the error
         Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+        Handler-->>Client: 404 RESOURCE_NOT_FOUND
         Client-->>Guest: Display the error
     end
 ```

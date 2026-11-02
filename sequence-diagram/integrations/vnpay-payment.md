@@ -27,7 +27,7 @@ sequenceDiagram
         Backend-->>VNPAY: 200 {"RspCode":"00","Message":"Confirm Success"} (02 if already recorded)
     and Browser redirect
         VNPAY->>Backend: GET /api/v1/payments/vnpay/return?vnp_...
-        Backend->>DB: Same handler; records the result if the IPN has not yet
+        Backend->>DB: Same handler, records the result if the IPN has not yet
         Backend-->>Client: 302 to app-redirect-url?orderId=...&status=...
     end
     Client->>Backend: GET /api/v1/orders/{id}

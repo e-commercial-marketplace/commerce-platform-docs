@@ -56,7 +56,7 @@ callbacks, and AI tool access.
 | UNAUTHENTICATED USER | Browse public catalog data and use AI for public product search only |
 | CUSTOMER | Browse products, manage cart, place orders, pay, track shipments, review products, chat, use AI assistance |
 | SELLER | Manage owned products and stock, process owned order items, choose delivery, manage owned shipments, chat |
-| ADMIN | Manage users/categories/vouchers, moderate violations, monitor operations, configure platform delivery, approve administrative actions such as refunds |
+| ADMIN | Manage users, seller approval, categories, vouchers and carriers |
 | Payment provider | Return VNPAY payment callback data |
 | LLM provider | Provide model responses through the backend AI module |
 

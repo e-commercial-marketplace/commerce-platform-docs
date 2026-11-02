@@ -25,38 +25,26 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
-Category information changes only when
-the selected operation completes
-successfully.
+Categories change only when an operation succeeds.
 end note
-:Open the category management function;
+:Open category management;
 |System|
-:Display the managed information and the allowed operations;
-if (Managed data is available?) then (No)
-  :Return the no-data notice;
-  |Admin|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
+:Display the categories;
 |Admin|
-:Select the operation to perform;
+:Choose create, rename or delete;
 |System|
-:Open the corresponding function;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Admin|
   :View the system error;
   stop
 else (No)
 endif
-|Admin|
-:Perform the selected operation;
 |System|
-:Display the result;
+:Run the chosen operation;
 |Admin|
 :View the result;
 stop

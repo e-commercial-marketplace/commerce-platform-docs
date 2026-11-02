@@ -1,28 +1,28 @@
-# Cập nhật tồn kho sản phẩm
+# Cập nhật tồn kho
 
 <table>
-<tr><td colspan="2"><b>Tên use case:</b> Cập nhật tồn kho sản phẩm</td></tr>
-<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller cập nhật tồn kho sản phẩm.</td></tr>
+<tr><td colspan="2"><b>Tên use case:</b> Cập nhật tồn kho</td></tr>
+<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller đặt lại số tồn kho của sản phẩm của chính mình.</td></tr>
 <tr><td colspan="2"><b>Tác nhân chính:</b> Seller</td></tr>
 <tr><td colspan="2"><b>Tác nhân phụ:</b> Không có.</td></tr>
-<tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Seller đã đăng nhập; dữ liệu thuộc về Seller.</li></ul></td></tr>
-<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Số lượng tồn kho của sản phẩm được cập nhật.</li></ul></td></tr>
+<tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Seller đã đăng nhập và đã được duyệt.</li></ul></td></tr>
+<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Tồn kho được cập nhật và cache chi tiết bị xóa.</li></ul></td></tr>
 <tr><td colspan="2"><b>Luồng chính:</b></td></tr>
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
-<tr><td>1. Mở chức năng cập nhật tồn kho sản phẩm.</td><td></td></tr>
-<tr><td></td><td>2. Hiển thị tồn kho sản phẩm hiện tại và thao tác được phép.</td></tr>
-<tr><td>3. Chọn mục cần sửa và nhập thay đổi.</td><td></td></tr>
-<tr><td>4. Gửi hoặc xác nhận yêu cầu.</td><td></td></tr>
-<tr><td></td><td>5. Kiểm tra thông tin, điều kiện xử lý và quyền thực hiện.</td></tr>
-<tr><td></td><td>6. Lưu thay đổi của tồn kho sản phẩm.</td></tr>
-<tr><td></td><td>7. Hiển thị kết quả.</td></tr>
-<tr><td>8. Xem kết quả.</td><td></td></tr>
+<tr><td>1. Mở sản phẩm và nhập tồn kho mới.</td><td></td></tr>
+<tr><td>2. Gửi yêu cầu cập nhật.</td><td></td></tr>
+<tr><td></td><td>3. Kiểm tra tồn kho không âm và sản phẩm thuộc về Seller.</td></tr>
+<tr><td></td><td>4. Lưu tồn kho mới.</td></tr>
+<tr><td>5. Xem kết quả.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>
-<tr><td colspan="2"><b>Thay thế 1: Thông tin bị thiếu hoặc không hợp lệ tại bước 5.</b></td></tr>
-<tr><td></td><td>5.1.1. Thông báo thông tin chưa hợp lệ và không lưu thay đổi.</td></tr>
-<tr><td>5.1.2. Sửa thông tin và quay lại bước 3.</td><td></td></tr>
+<tr><td colspan="2"><b>Thay thế 1: Tồn kho âm tại bước 3.</b></td></tr>
+<tr><td></td><td>3.1.1. Thông báo tồn kho không hợp lệ.</td></tr>
+<tr><td>3.1.2. Xem thông báo, sửa thông tin và quay lại bước 1.</td><td></td></tr>
+<tr><td colspan="2"><b>Thay thế 2: Sản phẩm không tồn tại hoặc của Seller khác tại bước 3.</b></td></tr>
+<tr><td></td><td>3.2.1. Thông báo không cập nhật được.</td></tr>
+<tr><td>3.2.2. Xem thông báo.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng ngoại lệ:</b></td></tr>
-<tr><td colspan="2"><b>Ngoại lệ 1: Hệ thống gặp sự cố khi xử lý yêu cầu tại bước 4.</b></td></tr>
-<tr><td></td><td>4.1.1. Thông báo không thể hoàn tất yêu cầu do lỗi hệ thống và kết thúc lần xử lý này.</td></tr>
-<tr><td>4.1.2. Xem thông báo lỗi.</td><td></td></tr>
+<tr><td colspan="2"><b>Ngoại lệ 1: Hệ thống gặp sự cố khi xử lý yêu cầu tại bước 2.</b></td></tr>
+<tr><td></td><td>2.1.1. Thông báo không thể hoàn tất yêu cầu do lỗi hệ thống và kết thúc lần xử lý này.</td></tr>
+<tr><td>2.1.2. Xem thông báo lỗi.</td><td></td></tr>
 </table>

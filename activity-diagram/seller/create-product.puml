@@ -25,44 +25,35 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
-The new product is stored in the system.
+The product exists and belongs to the seller in the
+token. The product is found by meaning within 10 minutes
+(embedding sync job).
 end note
-:Open the product creation function;
+:Open the product form;
 |System|
-:Display the current new-product information and the allowed operations;
+:Display the form and categories;
 |Seller|
 repeat
-  :Enter the information to create;
-  :Send or confirm the request;
-  |System|
-  if (The system fails to process the request?) then (Yes)
-    :Return the system error;
-    |Seller|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the information, the processing conditions, and the permission to perform;
-  if (The product information is missing or invalid?) then (Yes)
-    :Return the invalid-information notice and do not save the changes;
-    |Seller|
-    :View the invalid-information notice;
-  else (No)
-    |System|
-    :Create and save the new product;
-    :Display the result;
-    |Seller|
-    :View the result;
-    stop
-  endif
+:Enter name, description, image URL, price, stock and category;
+:Submit the product;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Seller|
-  :Correct the information;
-repeat while (Create product\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check price above 0, stock not negative, the category exists and a listed product has an image;
+backward :Return the validation error;
+repeat while (The data is invalid?) is (Yes) not (No)
+:Save the product and return the result;
+|Seller|
+:View the result;
 stop
 
 @enduml

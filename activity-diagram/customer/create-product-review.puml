@@ -25,44 +25,39 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs
-to the Customer.
+The customer is signed in.
 
 Postcondition:
-The product review is stored in the system.
+The review is stored and the product's rating average
+and review count are updated.
 end note
-:Open the product review function;
+:Open the review form of a bought product;
 |System|
-:Display the products eligible for review;
+:Display the review form;
 |Customer|
-repeat
-  :Select a product from a completed order, and enter the rating and comment;
-  :Submit the review;
-  |System|
-  if (Processing the request fails?) then (Yes)
-    :Return the system error;
-    |Customer|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check a COMPLETED order contains the product, no review exists, and the rating is 1 to 5;
-  if (Review request is invalid?) then (Yes)
-    :Return the review-cannot-be-created notice;
-    |Customer|
-    :View the review-cannot-be-created notice;
-  else (No)
-    |System|
-    :Store the review;
-    :Display the result;
-    |Customer|
-    :View the result;
-    stop
-  endif
+:Choose a rating from 1 to 5 and enter a comment;
+:Submit the review;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Customer|
-  :Correct the review information or select an eligible product;
-repeat while (Submit review\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the product is listed, bought in a completed order and not reviewed yet;
+if (The product is hidden, no completed order contains it, it is already reviewed or the data is invalid?) then (Yes)
+  :Return the review error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Save the review and update the product rating;
+|Customer|
+:View the result;
 stop
 
 @enduml

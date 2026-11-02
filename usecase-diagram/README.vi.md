@@ -6,10 +6,10 @@ Thư mục này chứa các sơ đồ use-case draw.io có thể chỉnh sửa c
 
 | Tệp | Tác nhân | Phạm vi |
 |---|---|---|
-| `guest-usecases.drawio` | UNAUTHENTICATED USER | Catalog công khai, chi tiết sản phẩm, đăng ký, đăng nhập, đăng nhập bằng Google và AI tìm kiếm sản phẩm cho guest |
-| `customer-usecases.drawio` | CUSTOMER | Catalog/tìm kiếm/chi tiết công khai, giỏ hàng, checkout, thanh toán, đơn hàng, shipment, đánh giá, chat, đăng xuất và AI tìm kiếm của customer |
+| `guest-usecases.drawio` | UNAUTHENTICATED USER | Catalog công khai, chi tiết sản phẩm, trang shop, đánh giá sản phẩm, đăng ký, đăng nhập, đặt lại mật khẩu và AI tìm kiếm sản phẩm cho guest |
+| `customer-usecases.drawio` | CUSTOMER | Catalog/tìm kiếm/chi tiết công khai, trang shop, đánh giá, giỏ hàng, voucher, checkout, thanh toán, đơn hàng, shipment, chat, hồ sơ, đổi mật khẩu, đăng xuất, AI tìm kiếm và lịch sử trò chuyện AI |
 | `seller-usecases.drawio` | SELLER | Sản phẩm thuộc sở hữu, tồn kho, order item, shipment và chat với customer |
-| `admin-usecases.drawio` | ADMIN | Người dùng, danh mục, voucher, kiểm duyệt, giám sát, cấu hình giao hàng và hoàn tiền |
+| `admin-usecases.drawio` | ADMIN | Người dùng, duyệt seller, danh mục, voucher và đơn vị vận chuyển |
 
 ## Quy tắc ký hiệu
 
@@ -17,7 +17,8 @@ Thư mục này chứa các sơ đồ use-case draw.io có thể chỉnh sửa c
 - Mũi tên đứt nét nhãn `«include»`: use case nguồn yêu cầu khả năng của use case đích.
 - Trong dự án này, `«include» Login` là cách viết tắt cho điều kiện tiên quyết xác thực; không có nghĩa người dùng đã xác thực phải đăng nhập lại cho mỗi request.
 - `«include» Login` được vẽ từ mỗi use case quản lý / độc lập đã xác thực. Các lá CRUD được bao hàm bắc cầu qua `«extend»` tới manager.
-- `Logout` chỉ được vẽ trong sơ đồ Customer. Seller và Admin dùng chung use case và endpoint này nên không có sơ đồ riêng.
+- `Logout`, `Manage Profile` và `Change Password` chỉ được vẽ trong sơ đồ Customer. Seller và Admin dùng chung use case và endpoint này nên không có sơ đồ riêng.
+- Xoay refresh token (`POST /auth/refresh`) là hành vi tự động của client, không phải use case.
 - Mũi tên đứt nét nhãn `«extend»`: trỏ từ phần mở rộng (lá CRUD) tới use case cơ sở (manager), theo UML; cho thấy các thao tác CRUD thuộc về manager nào.
 - Các use case catalog công khai và AI tìm kiếm công khai chủ ý không include `Login`.
 
@@ -30,4 +31,5 @@ Thư mục này chứa các sơ đồ use-case draw.io có thể chỉnh sửa c
 - `«include»` / `«extend»`: mũi tên đứt `5 5` màu xám `#475569` với đầu mũi tên đặc, nhãn 12pt, đi qua các kênh bus dọc giữa các cột.
 - Mở trong draw.io qua File &gt; Open; kích thước trang được đặt cho từng sơ đồ, xuất ở 100%.
 
-Các sơ đồ mô tả hành vi hệ thống dự kiến. Các tính năng UI hoãn lại chỉ hiển thị khi thuộc trách nhiệm role của backend; ranh giới MVP được ghi trong `PRD.vi.md` và SRS.
+Các sơ đồ khớp với backend đã implement: use case chỉ xuất hiện khi endpoint của nó tồn tại. Đăng nhập bằng Google
+được ghi là Planned trong `features/auth` và SRS, và sẽ quay lại đây khi được implement.

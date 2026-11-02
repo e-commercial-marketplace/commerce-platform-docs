@@ -1,10 +1,8 @@
 # Catalog - View Own Products — Sequence Diagram
 
 - **Use-case spec:** [view-own-products.vi.md](../../usecase-specification/seller/view-own-products.vi.md)
-- **API route/status:** `No seller product-list endpoint is defined; route TBD` — TBD
+- **API route/status:** `GET /api/v1/seller/products, GET /api/v1/seller/products/{id}` — Confirmed
 - **Feature API contract:** [features/catalog/API_CONTRACT.md](../../features/catalog/API_CONTRACT.md)
-
-> **Target sequence:** route and/or persistence contract is not defined yet. Layer names are planned placeholders; the backend scaffold does not yet implement them. Do not treat this as a frozen API.
 
 ```mermaid
 sequenceDiagram
@@ -12,28 +10,46 @@ sequenceDiagram
     actor Seller
     participant Client as Client application
     participant Security as Spring Security
-    participant Controller as ProductController
-    participant Service as CatalogService
+    participant Controller as SellerProductController
+    participant Service as SellerProductService
+    participant Users as UserRepository
     participant Repo as ProductRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Seller->>Client: Start the view own products use case
-    Client->>Security: Planned operation: view own products (endpoint TBD)
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute view own products
-    alt Main flow succeeds
-        Service->>Repo: Query or persist data required to view own products
-        Repo->>DB: Read or write as the selected operation requires (transactional when required)
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Note over Controller,Repo: The Catalog API contract does not define a seller-owned product-list endpoint yet.
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Success response/status TBD
-        Client-->>Seller: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    Seller->>Client: View Own Products
+    Client->>Security: GET /api/v1/seller/products, GET /api/v1/seller/products/{id}
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: listMyProducts, then getMyProduct
+        alt Request succeeds
+            Service->>Users: getApprovedSeller(token id)
+            Users->>DB: SELECT users
+            Service->>Repo: Find with soldBy(seller), q and active
+            Repo->>DB: SELECT products
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>> or ApiResponse<ProductResponse>
+            Client-->>Seller: Display the result
+        else Seller not APPROVED (checked in the database)
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Another seller's product
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Unknown product
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Seller: Display the error
+        end
     end
 ```

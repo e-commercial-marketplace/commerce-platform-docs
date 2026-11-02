@@ -25,43 +25,41 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
-Voucher information is updated.
+The voucher is updated.
 end note
-:Open the voucher update function;
+:Choose a voucher to edit;
 |System|
-:Display the current information and the allowed operations;
+:Display the current data;
 |Admin|
 repeat
-  :Select the item to edit and enter the changes;
-  :Submit or confirm the request;
-  |System|
-  if (The system fails to process the request?) then (Yes)
-    :Return the system error;
-    |Admin|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the information, the processing conditions, and the permission;
-  if (The information is valid?) then (No)
-    :Return the invalid-information notice and do not save the changes;
-    |Admin|
-    :View the invalid-information notice;
-  else (Yes)
-    |System|
-    :Save the changes to the information;
-    :Display the result;
-    |Admin|
-    :View the result;
-    stop
-  endif
+:Change the fields;
+:Submit the update;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Admin|
-  :Correct the information;
-repeat while (Submit\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the voucher exists and the changes are allowed;
+if (The voucher is unknown?) then (Yes)
+  :Return the not-found error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+backward :Return the validation error;
+repeat while (The percent of a used voucher\nchanges, the dates are wrong,\nor the limit is below the uses?) is (Yes) not (No)
+:Save the changes and return the result;
+|Admin|
+:View the result;
 stop
 
 @enduml

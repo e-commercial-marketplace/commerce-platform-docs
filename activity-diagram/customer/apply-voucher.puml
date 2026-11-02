@@ -1,0 +1,53 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Voucher - Apply Voucher
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+The customer is signed in.
+
+Postcondition:
+Nothing changes. A use is consumed only at checkout.
+end note
+repeat
+:Enter a voucher code at checkout;
+:Submit the code;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |Customer|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the code exists (case-insensitive), is within its validity and has uses left;
+backward :Return the voucher error;
+repeat while (The code is unknown, out of\nvalidity or used up?) is (Yes) not (No)
+:Return the voucher discount percent;
+|Customer|
+:View the expected discount;
+stop
+
+@enduml

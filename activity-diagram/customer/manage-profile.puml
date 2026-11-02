@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title User - Disable or Delete User
+title User - Manage Profile
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -21,36 +21,38 @@ skinparam activity {
   EndColor #FFFFFF
 }
 
-|Admin|
+|Customer|
 start
 note right
 Precondition:
-Admin is authenticated.
+The user is signed in.
 
 Postcondition:
-The user is disabled or deleted
-according to the chosen action.
+The profile is updated. Email, role and status cannot
+change here.
 end note
-:Open the user disable or delete function;
+:Open my profile;
 |System|
-:Display the current selection and the allowed actions;
-|Admin|
-:Select the item to disable or delete;
-:Submit or confirm the request;
+:Display name, email, phone and address;
+|Customer|
+repeat
+:Edit the name, phone or address;
+:Submit the update;
 |System|
-:Check the information, processing conditions, and permission;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
-  |Admin|
-  :View the error message;
+  |Customer|
+  :View the system error;
   stop
 else (No)
 endif
 |System|
-:Disable or delete the user according to the Admin's choice;
-:Display the result;
-|Admin|
-:View the result;
+:Validate: name not blank, valid Vietnamese phone, address at most 500 characters;
+backward :Return the validation error;
+repeat while (The data is invalid?) is (Yes) not (No)
+:Save the sent fields; an empty string clears the phone or address;
+|Customer|
+:View the new profile;
 stop
 
 @enduml

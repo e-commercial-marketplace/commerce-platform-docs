@@ -25,45 +25,31 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs
-to the Customer.
+The customer is signed in.
 
 Postcondition:
-The product is added to the cart and the
-cart quantity is updated.
+The line is created or increased and the new cart is
+returned.
 end note
-:Open the cart or the product catalog;
-|System|
-:Display the related products;
-|Customer|
 repeat
-  :Select the product and the quantity to add;
-  :Confirm the cart change;
-  |System|
-  if (Processing the request fails?) then (Yes)
-    :Return the system error;
-    |Customer|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the product and the remaining quantity;
-  if (The product is unavailable or the quantity exceeds the remaining stock?) then (Yes)
-    :Return the cart-cannot-be-updated notice;
-    |Customer|
-    :View the cart-cannot-be-updated notice;
-  else (No)
-    |System|
-    :Update the cart and recalculate the amount;
-    :Display the updated cart;
-    |Customer|
-    :View the result;
-    stop
-  endif
+:Choose a product and a quantity;
+:Submit the add;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Customer|
-  :Correct the quantity or select another product;
-repeat while (Add another\nitem?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the product exists, is listed and has stock for the total quantity;
+backward :Return the add-to-cart error;
+repeat while (The product is unknown, hidden\nor short of stock?) is (Yes) not (No)
+:Create the line or increase the existing one;
+:Return the new cart;
+|Customer|
+:View the new cart;
 stop
 
 @enduml

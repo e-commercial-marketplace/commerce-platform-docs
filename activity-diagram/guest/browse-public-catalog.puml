@@ -25,28 +25,18 @@ skinparam activity {
 start
 note right
 Precondition:
-Guest is not authenticated.
+The user is not signed in.
 
 Postcondition:
 None.
 end note
-:Open the public catalog function;
+:Open the catalog;
 |System|
-:Load the information visible to the Guest;
-if (Catalog data is available?) then (No)
-  :Return the no-data notice;
-  |Guest|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the catalog information;
+:Display the categories and a page of listed products, top rated first;
 |Guest|
-:Select the information to view;
+:Choose a category or another page;
 |System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Guest|
   :View the system error;
@@ -54,9 +44,17 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Display the matching page;
+if (No product matches?) then (Yes)
+  :Return an empty list;
+  |Guest|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
 |Guest|
-:View the item details;
+:View the products;
 stop
 
 @enduml

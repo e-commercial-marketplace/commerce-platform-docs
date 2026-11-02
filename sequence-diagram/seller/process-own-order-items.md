@@ -1,10 +1,8 @@
 # Order - Process Own Order Items — Sequence Diagram
 
 - **Use-case spec:** [process-own-order-items.vi.md](../../usecase-specification/seller/process-own-order-items.vi.md)
-- **API route/status:** `GET /api/v1/seller/order-items; PATCH confirm/cancel` — Predicted
+- **API route/status:** `GET /api/v1/seller/order-items, PATCH /api/v1/seller/order-items/{id}/confirm, PATCH /api/v1/seller/order-items/{id}/cancel` — Confirmed
 - **Feature API contract:** [features/order/API_CONTRACT.md](../../features/order/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
@@ -12,28 +10,37 @@ sequenceDiagram
     actor Seller
     participant Client as Client application
     participant Security as Spring Security
-    participant Controller as OrderController
-    participant Service as OrderService
-    participant Repo as OrderItemRepository
+    participant Controller as SellerOrderController
+    participant Service as SellerOrderService
+    participant Users as UserRepository
+    participant Items as OrderItemRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Seller->>Client: Start the process own order items use case
-    Client->>Security: GET /api/v1/seller/order-items, PATCH confirm/cancel
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute process own order items
-    alt Main flow succeeds
-        Service->>Repo: Query or persist data required to process own order items
-        Repo->>DB: Read or write as the selected operation requires (transactional when required)
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Note over Controller,Repo: Seller order-item endpoints are Predicted in the Order API contract.
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Contract-defined success response for the selected endpoint
-        Client-->>Seller: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    Seller->>Client: Process Own Order Items
+    Client->>Security: GET /api/v1/seller/order-items, PATCH /api/v1/seller/order-items/{id}/confirm, PATCH /api/v1/seller/order-items/{id}/cancel
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: Run the chosen order-item operation
+        alt Request succeeds
+            Note over Client,Service: See view-own-order-items, confirm-order-item and cancel-order-item
+            Service->>Users: getApprovedSeller(token id)
+            Users->>DB: SELECT users
+            Service->>Items: Read or change the seller's own lines
+            Items->>DB: SELECT or UPDATE order_items
+            Service-->>Controller: Use-case result
+            Controller-->>Client: Response of the chosen operation
+            Client-->>Seller: Display the result
+        else Seller not APPROVED (checked in the database)
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        end
     end
 ```

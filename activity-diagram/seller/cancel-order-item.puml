@@ -25,23 +25,17 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
-The order item is cancelled, the unsent
-quantity is restored exactly once, and the
-pending payment total is recalculated
-when needed.
+The line is CANCELLED, the stock returns and the order
+total is recomputed. If every line is cancelled the
+order is CANCELLED; pending payments are updated.
 end note
-:Open the order-item cancellation function;
+:Choose to cancel a line and enter a reason if any;
+:Submit the cancellation;
 |System|
-:Display the current order item and the allowed operations;
-|Seller|
-:Choose the information or the operation to process;
-:Send or confirm the request;
-|System|
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Seller|
   :View the system error;
@@ -49,19 +43,25 @@ if (The system fails to process the request?) then (Yes)
 else (No)
 endif
 |System|
-:Check the information, the processing conditions, and the permission to perform;
-if (The order item is already in a shipment or is not eligible for cancellation?) then (Yes)
-  :Return the not-cancellable notice;
+:Check the line is the seller's, not in a shipment, not cancelled and the order is not paid;
+if (The line is in a shipment or the order is paid?) then (Yes)
+  :Return the cannot-cancel error;
   |Seller|
-  :View the not-cancellable notice;
+  :View the message;
   stop
 else (No)
 endif
 |System|
-:Cancel the order item;
-:Restore the unsent quantity exactly once;
-:Recalculate the order total and pending payment when needed;
-:Display the result;
+if (The line is unknown, another seller's or already cancelled?) then (Yes)
+  :Return the cancel error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Cancel the line and return the stock;
+:Recompute the order total and update pending payments;
 |Seller|
 :View the result;
 stop

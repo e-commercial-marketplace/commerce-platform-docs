@@ -56,7 +56,7 @@ thanh toán và quyền truy cập AI tool.
 | UNAUTHENTICATED USER | Duyệt dữ liệu catalog công khai và sử dụng AI chỉ cho tìm kiếm sản phẩm công khai |
 | CUSTOMER | Duyệt sản phẩm, quản lý cart, đặt hàng, thanh toán, theo dõi shipment, đánh giá sản phẩm, chat, sử dụng hỗ trợ AI |
 | SELLER | Quản lý product và stock thuộc sở hữu, xử lý order item thuộc sở hữu, lựa chọn giao hàng, quản lý shipment thuộc sở hữu, chat |
-| ADMIN | Quản lý user/category/voucher, kiểm duyệt vi phạm, giám sát vận hành, cấu hình platform delivery, phê duyệt các tác vụ quản trị như hoàn tiền |
+| ADMIN | Quản lý user, duyệt seller, category, voucher và đơn vị vận chuyển |
 | Payment provider | Trả về dữ liệu callback thanh toán VNPAY |
 | LLM provider | Cung cấp response của model thông qua module AI của backend |
 

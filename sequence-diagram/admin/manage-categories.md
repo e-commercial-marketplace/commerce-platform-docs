@@ -1,10 +1,8 @@
 # Category - Manage Categories — Sequence Diagram
 
 - **Use-case spec:** [manage-categories.vi.md](../../usecase-specification/admin/manage-categories.vi.md)
-- **API route/status:** `GET /api/v1/categories; POST/PATCH/DELETE /api/v1/admin/categories` — Mixed: confirmed public read + predicted admin writes
+- **API route/status:** `GET /api/v1/categories, POST/PATCH/DELETE /api/v1/admin/categories` — Confirmed
 - **Feature API contract:** [features/catalog/API_CONTRACT.md](../../features/catalog/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
@@ -12,28 +10,27 @@ sequenceDiagram
     actor Admin
     participant Client as Client application
     participant Security as Spring Security
-    participant Controller as CategoryController
-    participant Service as CatalogService
+    participant Controller as AdminCategoryController
+    participant Service as CategoryService
     participant Repo as CategoryRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Admin->>Client: Start the manage categories use case
+    Admin->>Client: Manage Categories
     Client->>Security: GET /api/v1/categories, POST/PATCH/DELETE /api/v1/admin/categories
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute manage categories
-    alt Main flow succeeds
-        Service->>Repo: Query or persist data required to manage categories
-        Repo->>DB: Read or write as the selected operation requires (transactional when required)
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Note over Controller,Repo: The list path is public, admin create/update/delete paths are Predicted.
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Contract-defined success response for the selected endpoint
-        Client-->>Admin: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Admin: Display the error
+    else Caller is not ADMIN
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Admin: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated ADMIN principal
+        Controller->>Service: Run the chosen category operation
+        Note over Client,Service: See view-categories, create-category, update-category and delete-category
+        Service->>Repo: Read or change categories
+        Repo->>DB: SELECT, INSERT, UPDATE or DELETE categories
+        Service-->>Controller: Use-case result
+        Controller-->>Client: Response of the chosen operation
+        Client-->>Admin: Display the result
     end
 ```

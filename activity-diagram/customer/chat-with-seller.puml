@@ -25,20 +25,31 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs
-to the Customer.
+The customer is signed in.
 
 Postcondition:
-The message is stored in the conversation.
+The message is stored once (idempotency key) and pushed
+to both participants. The other side's messages are
+marked read when the conversation is opened.
 end note
-:Open the conversation;
+:Choose to message the seller from a product, shop or order;
 |System|
-:Display the previous messages;
+:Find this pair's conversation or create it;
+if (The other participant is unknown or invalid?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Display the messages, newest first, and mark the other side's messages read;
 |Customer|
-:Enter the message;
+repeat
+:Enter the text or an image URL;
 :Send the message;
 |System|
-if (Processing the request fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
@@ -46,10 +57,13 @@ if (Processing the request fails?) then (Yes)
 else (No)
 endif
 |System|
-:Store the message and deliver it to the other participant;
-:Display the new message;
+:Check there is content and an idempotency key and that the sender is a participant;
+backward :Return the send error;
+repeat while (The message is empty, the key\nis missing or the sender is\nnot a participant?) is (Yes) not (No)
+:Save the message; a reused key returns the stored message;
+:Push the message to both sides over WebSocket after commit;
 |Customer|
-:View the message;
+:View the new message;
 stop
 
 @enduml

@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title Admin - Monitor Marketplace Operations
+title Catalog - Unlist Product
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -21,42 +21,39 @@ skinparam activity {
   EndColor #FFFFFF
 }
 
-|Admin|
+|Seller|
 start
 note right
 Precondition:
-Admin is authenticated.
+The seller is signed in and approved.
 
 Postcondition:
-None.
+The product has active = false, leaves the public
+catalog and its detail cache is cleared.
 end note
-:Open the marketplace operations monitoring function;
+:Choose to hide one of my products;
+:Confirm;
 |System|
-:Load the information visible to the Admin;
-if (Marketplace data is available?) then (No)
-  :Return the no-data notice;
-  |Admin|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the marketplace information;
-|Admin|
-:Select the information to view;
-|System|
-:Load the selected information details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
-  |Admin|
+  |Seller|
   :View the system error;
   stop
 else (No)
 endif
 |System|
-:Display the information details;
-|Admin|
-:View the information;
+:Check the product is the seller's;
+if (The product is unknown or another seller's?) then (Yes)
+  :Return the error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Set the product hidden;
+|Seller|
+:View the result;
 stop
 
 @enduml

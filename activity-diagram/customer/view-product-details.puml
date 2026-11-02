@@ -25,28 +25,14 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated.
+The customer is signed in.
 
 Postcondition:
 None.
 end note
-:Open the view-product-details function;
+:Choose a product;
 |System|
-:Load the information visible to the Customer;
-if (Data is available to display?) then (No)
-  :Return the no-data notice;
-  |Customer|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the product information;
-|Customer|
-:Select the information to view;
-|System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
@@ -54,9 +40,18 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Find the listed product by id;
+if (The product is unknown or hidden?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Return the product details;
 |Customer|
-:View the item details;
+:View the product details;
 stop
 
 @enduml

@@ -43,7 +43,7 @@ sequenceDiagram
         DB-->>Repo: Attempt and order
         Repo-->>Service: Attempt and locked order
         alt Signature, reference and amount valid, attempt still PENDING
-            Service->>Repo: Success code: attempt COMPLETED and order PAID; failure code: attempt FAILED
+            Service->>Repo: Success code: attempt COMPLETED and order PAID, failure code: attempt FAILED
             Repo->>DB: UPDATE payments (and orders)
             DB-->>Repo: Updated rows
             Service-->>Controller: RspCode 00

@@ -25,48 +25,53 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs
-to the Customer.
+The customer is signed in.
 
 Postcondition:
-The order is created, the stock is updated,
-and the purchased products are removed from
-the cart.
+A PENDING order exists with snapshot prices, stock and
+the voucher use are consumed, a payment is created and
+the bought lines leave the cart. With VNPAY the response
+has a payment URL and the order must be paid within 24
+hours.
 end note
+:Choose cart lines and go to checkout;
+|System|
+:Display the products and the form;
 |Customer|
-repeat
-  :Open the cart and select checkout;
-  |System|
-  :Display the products and the delivery-address form;
+:Enter the shipping address, choose COD or VNPAY and enter a voucher code if any;
+:Submit the order;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Customer|
-  :Enter the delivery address, the payment method and an optional voucher code;
-  :Submit the order request;
-  |System|
-  if (Processing the request fails?) then (Yes)
-    :Return the system error;
-    |Customer|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the products, the remaining quantities, the delivery address and the voucher;
-  if (Cart empty or stock insufficient?) then (Yes)
-    :Return the order-cannot-be-placed notice;
-    |Customer|
-    :View the order-cannot-be-placed notice;
-  else (No)
-    |System|
-    :Create the order and store the product information at order time;
-    :Update the stock and remove the purchased products from the cart;
-    :Display the created order;
-    |Customer|
-    :View the result;
-    stop
-  endif
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the lines are the customer's, the products are listed, and decrease each stock;
+if (A line is invalid, a product is hidden or short of stock?) then (Yes)
+  :Roll everything back and return the checkout error;
   |Customer|
-  :Update the cart;
-repeat while (Check out\nagain?) is (Yes) not (No)
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Check and consume one voucher use if any;
+if (The voucher is unknown, out of validity or used up?) then (Yes)
+  :Roll everything back and return the voucher error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Create the order with snapshot prices and compute the discounted total (shipping fee 0);
+:Create the COD payment, or the VNPAY payment with its URL;
+:Remove the bought lines from the cart and return the order;
+|Customer|
+:View the created order;
 stop
 
 @enduml

@@ -1,28 +1,29 @@
-# Xác nhận mặt hàng trong đơn hàng
+# Xác nhận dòng hàng
 
 <table>
-<tr><td colspan="2"><b>Tên use case:</b> Xác nhận mặt hàng trong đơn hàng</td></tr>
-<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller xác nhận mặt hàng trong đơn hàng.</td></tr>
+<tr><td colspan="2"><b>Tên use case:</b> Xác nhận dòng hàng</td></tr>
+<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller xác nhận một dòng hàng của mình. Đơn VNPAY phải được thanh toán trước khi xác nhận.</td></tr>
 <tr><td colspan="2"><b>Tác nhân chính:</b> Seller</td></tr>
 <tr><td colspan="2"><b>Tác nhân phụ:</b> Không có.</td></tr>
-<tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Seller đã đăng nhập; dữ liệu thuộc về Seller.</li></ul></td></tr>
-<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Mặt hàng trong đơn hàng được xác nhận.</li></ul></td></tr>
+<tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Seller đã đăng nhập và đã được duyệt.</li></ul></td></tr>
+<tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Dòng hàng chuyển sang CONFIRMED và có thể đưa vào đợt giao.</li></ul></td></tr>
 <tr><td colspan="2"><b>Luồng chính:</b></td></tr>
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
-<tr><td>1. Mở chức năng xác nhận mặt hàng trong đơn hàng.</td><td></td></tr>
-<tr><td></td><td>2. Hiển thị mặt hàng trong đơn hàng hiện tại và thao tác được phép.</td></tr>
-<tr><td>3. Chọn thông tin hoặc thao tác cần xử lý.</td><td></td></tr>
-<tr><td>4. Gửi hoặc xác nhận yêu cầu.</td><td></td></tr>
-<tr><td></td><td>5. Kiểm tra thông tin, điều kiện xử lý và quyền thực hiện.</td></tr>
-<tr><td></td><td>6. Cập nhật mặt hàng trong đơn hàng.</td></tr>
-<tr><td></td><td>7. Hiển thị kết quả.</td></tr>
-<tr><td>8. Xem kết quả.</td><td></td></tr>
+<tr><td>1. Chọn xác nhận một dòng hàng.</td><td></td></tr>
+<tr><td>2. Gửi yêu cầu xác nhận.</td><td></td></tr>
+<tr><td></td><td>3. Kiểm tra dòng hàng thuộc về Seller và đang chờ xử lý.</td></tr>
+<tr><td></td><td>4. Với đơn VNPAY, kiểm tra đơn đã thanh toán.</td></tr>
+<tr><td></td><td>5. Chuyển dòng hàng sang đã xác nhận.</td></tr>
+<tr><td>6. Xem kết quả.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>
-<tr><td colspan="2"><b>Thay thế 1: Đơn hàng thanh toán trước qua VNPAY chưa được thanh toán tại bước 5.</b></td></tr>
-<tr><td></td><td>5.1.1. Thông báo đơn hàng chưa thanh toán nên chưa thể xác nhận và không cập nhật mặt hàng.</td></tr>
-<tr><td>5.1.2. Xem thông báo và chờ khách thanh toán.</td><td></td></tr>
+<tr><td colspan="2"><b>Thay thế 1: Dòng hàng không tồn tại, của Seller khác hoặc không còn chờ xử lý tại bước 3.</b></td></tr>
+<tr><td></td><td>3.1.1. Thông báo không xác nhận được.</td></tr>
+<tr><td>3.1.2. Xem thông báo.</td><td></td></tr>
+<tr><td colspan="2"><b>Thay thế 2: Đơn VNPAY chưa thanh toán tại bước 4.</b></td></tr>
+<tr><td></td><td>4.1.1. Thông báo đơn hàng chưa thanh toán.</td></tr>
+<tr><td>4.1.2. Xem thông báo.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng ngoại lệ:</b></td></tr>
-<tr><td colspan="2"><b>Ngoại lệ 1: Hệ thống gặp sự cố khi xử lý yêu cầu tại bước 4.</b></td></tr>
-<tr><td></td><td>4.1.1. Thông báo không thể hoàn tất yêu cầu do lỗi hệ thống và kết thúc lần xử lý này.</td></tr>
-<tr><td>4.1.2. Xem thông báo lỗi.</td><td></td></tr>
+<tr><td colspan="2"><b>Ngoại lệ 1: Hệ thống gặp sự cố khi xử lý yêu cầu tại bước 2.</b></td></tr>
+<tr><td></td><td>2.1.1. Thông báo không thể hoàn tất yêu cầu do lỗi hệ thống và kết thúc lần xử lý này.</td></tr>
+<tr><td>2.1.2. Xem thông báo lỗi.</td><td></td></tr>
 </table>

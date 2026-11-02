@@ -25,29 +25,18 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs to
-the Customer.
+The customer is signed in.
 
 Postcondition:
 None.
 end note
-:Open the view-my-orders function;
+:Open my orders;
 |System|
-:Load the information visible to the Customer;
-if (Data is available to display?) then (No)
-  :Return the no-data notice;
-  |Customer|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the order information;
+:Display a page of the customer's orders, newest first;
 |Customer|
-:Select the information to view;
+:Choose an order;
 |System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
@@ -55,9 +44,17 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Check the order is the customer's and return the details;
+if (The order is unknown or foreign?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
 |Customer|
-:View the item details;
+:View the order details;
 stop
 
 @enduml

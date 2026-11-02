@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title Review - Moderate Reviews and Violations
+title AI - View AI Chat History
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -21,36 +21,40 @@ skinparam activity {
   EndColor #FFFFFF
 }
 
-|Admin|
+|Customer|
 start
 note right
 Precondition:
-Admin is authenticated.
+The customer is signed in.
 
 Postcondition:
-The moderation result is stored
-in the system.
+None.
 end note
-:Open the review and violation moderation function;
+:Open the AI chat history;
 |System|
-:Display the current moderation result and the allowed actions;
-|Admin|
-:Select the information or action to process;
-:Submit or confirm the request;
+:Display the customer's sessions, newest first;
+|Customer|
+:Choose a session;
 |System|
-:Check the information, processing conditions, and permission;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
-  |Admin|
-  :View the error message;
+  |Customer|
+  :View the system error;
   stop
 else (No)
 endif
 |System|
-:Update the moderation result;
-:Display the result;
-|Admin|
-:View the result;
+:Check the session is the customer's and return its messages, oldest first;
+if (The session is unknown or foreign?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+|Customer|
+:View the messages;
 stop
 
 @enduml

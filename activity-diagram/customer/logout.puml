@@ -25,15 +25,14 @@ skinparam activity {
 start
 note right
 Precondition:
-The user is authenticated and holds a valid
-refresh token.
+The user is signed in and holds an active refresh token.
 
 Postcondition:
-The refresh token is revoked. The current
-access token expires naturally.
+The refresh token is revoked. The current access token
+expires naturally (at most 15 minutes).
 end note
-:Choose to log out;
-:Submit the logout request with the refresh token;
+:Choose logout;
+:Submit the logout with the refresh token;
 |System|
 if (The system fails while processing the request?) then (Yes)
   :Return the system error;
@@ -43,29 +42,18 @@ if (The system fails while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-:Identify the caller from the access token;
-if (The access token is missing or expired?) then (Yes)
-  :Return the authentication-required error;
+:Check the refresh token is active and belongs to the caller;
+if (The refresh token is unknown, revoked or not the caller's?) then (Yes)
+  :Return the invalid-token error;
   |Customer|
-  :View the authentication-required error;
+  :View the message;
   stop
 else (No)
 endif
 |System|
-:Check the refresh token exists, is active
-and belongs to the caller;
-if (The refresh token is not valid for the caller?) then (Yes)
-  :Return the invalid-refresh-token error;
-  |Customer|
-  :View the invalid-refresh-token error;
-  stop
-else (No)
-  |System|
-  :Revoke the refresh token;
-  :Return the logout result;
-  |Customer|
-  :View the logout result;
-  stop
-endif
+:Revoke the refresh token;
+|Customer|
+:View the logout result;
+stop
 
 @enduml

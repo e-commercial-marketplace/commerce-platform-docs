@@ -1,0 +1,58 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Voucher - Expire Voucher
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Admin|
+start
+note right
+Precondition:
+The admin is signed in.
+
+Postcondition:
+The voucher ends now and the code can no longer be used.
+end note
+:Choose to expire a voucher;
+:Confirm;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |Admin|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the voucher exists;
+if (The voucher is unknown?) then (Yes)
+  :Return the not-found error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Set the end to now; a voucher that has not started also moves its start back;
+|Admin|
+:View the result;
+stop
+
+@enduml

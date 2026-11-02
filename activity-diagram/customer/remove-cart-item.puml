@@ -25,21 +25,15 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs to
-the Customer.
+The customer is signed in.
 
 Postcondition:
-The product is removed from the cart.
+The line is deleted and the new cart is returned.
 end note
-:Open the cart or the product catalog;
+:Choose to remove a line;
+:Confirm the removal;
 |System|
-:Display the related products;
-|Customer|
-:Select the product to remove;
-:Confirm the cart change;
-|System|
-:Check the product and the remaining quantity;
-if (A system error occurs while processing the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
@@ -47,10 +41,19 @@ if (A system error occurs while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-:Update the cart and recalculate the total;
-:Display the updated cart;
+:Check the line is the customer's;
+if (The line is unknown or foreign?) then (Yes)
+  :Return the remove error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Delete the line;
+:Return the new cart;
 |Customer|
-:View the result;
+:View the new cart;
 stop
 
 @enduml

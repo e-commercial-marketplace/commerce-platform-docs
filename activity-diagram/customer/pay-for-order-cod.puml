@@ -25,42 +25,41 @@ skinparam activity {
 start
 note right
 Precondition:
-The Customer has placed a COD order and the
-payment has not been collected yet.
+The customer placed a COD order.
 
 Postcondition:
-The COD payment is completed after every
-mandatory delivery has been delivered.
+Once every non-cancelled line is delivered: the order is
+DELIVERED and the COD payment is COMPLETED. The COD
+amount follows cancelled lines and the payment fails if
+the whole order is cancelled.
 end note
+:Choose COD at checkout;
+|System|
+:Create the COD payment as PENDING;
 |Customer|
-repeat
-  :Receive the package and pay the COD amount on delivery;
-  |System|
-  :Record the delivery result of the package;
-  if (Recording the delivery result fails?) then (Yes)
-    :Return the system error;
-    |Customer|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the mandatory deliveries of the order;
-  if (All mandatory deliveries have been delivered?) then (No)
-    :Keep the payment in the pending-collection state;
-  else (Yes)
-    |System|
-    :Complete the COD payment only when all mandatory deliveries have been delivered;
-    :Update the order status and the payment according to the delivery result;
-    :Display the payment status;
-    :Display the result;
-    |Customer|
-    :View the result;
-    stop
-  endif
+:Receive the parcel and pay the courier;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Customer|
-  :Continue receiving the remaining deliveries;
-repeat while (Another\ndelivery?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Record the shipment as DELIVERED when the seller updates it;
+:Check every non-cancelled line of the order is in a delivered shipment;
+if (Some lines are not delivered yet?) then (Yes)
+  :Keep the payment PENDING and the order unchanged;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Move the order to DELIVERED and complete the COD payment;
+|Customer|
+:View the order and payment status;
 stop
 
 @enduml

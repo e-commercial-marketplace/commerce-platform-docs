@@ -1,41 +1,59 @@
 # Chat - Chat with Customer — Sequence Diagram
 
 - **Use-case spec:** [chat-with-customer.vi.md](../../usecase-specification/seller/chat-with-customer.vi.md)
-- **API route/status:** `WebSocket /ws/chat (message frames are phased)` — Phased
+- **API route/status:** `GET/POST /api/v1/conversations, GET/POST /api/v1/conversations/{id}/messages, PATCH /api/v1/conversations/{id}/read, WebSocket /ws/chat` — Confirmed
 - **Feature API contract:** [features/chat/API_CONTRACT.md](../../features/chat/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Seller
     participant Client as Client application
-    participant Security as WebSocket JWT handshake
-    participant Endpoint as ChatWebSocketEndpoint
+    participant Security as Spring Security
+    participant Controller as ChatController
     participant Service as ChatService
-    participant ConversationRepo as ConversationRepository
-    participant MessageRepo as MessageRepository
+    participant Conversations as ConversationRepository
+    participant Messages as MessageRepository
+    participant Push as WebSocket /ws/chat
+    participant Other as Customer
     participant DB as PostgreSQL
-    Seller->>Client: Open conversation and send a message
-    Client->>Security: Connect to /ws/chat with JWT handshake
-    Security->>Endpoint: Forward authenticated CUSTOMER/SELLER principal
-    Endpoint->>Service: Send message for the participant-owned conversation
-    alt The sender is a participant of the conversation
-        Service->>ConversationRepo: Verify conversation participation
-        ConversationRepo->>DB: SELECT conversation by id and principal
-        DB-->>ConversationRepo: Owned conversation or none
-        Service->>MessageRepo: Persist message and update conversation timestamp
-        MessageRepo->>DB: INSERT message / UPDATE conversation
-        DB-->>MessageRepo: Persisted message
-        MessageRepo-->>Service: Message result
-        Service-->>Endpoint: WebSocket event
-        Endpoint-->>Client: Deliver message event to authorized participant
-        Client-->>Seller: Display the message
-    else Handshake is invalid, the conversation is unknown, or the sender is not a participant
-        Service-->>Endpoint: Error event without persisting a message
-        Endpoint-->>Client: Error frame (not authorized or conversation not found)
-        Client-->>Seller: Show the chat error
+    participant Handler as GlobalExceptionHandler
+    Seller->>Client: Chat with Customer
+    Client->>Security: GET/POST /api/v1/conversations, GET/POST /api/v1/conversations/{id}/messages, PATCH /api/v1/conversations/{id}/read, WebSocket /ws/chat
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: openConversation, listMessages, markRead, sendMessage
+        alt Request succeeds
+            Service->>Conversations: Find by customer and seller, or create (customerId from the body)
+            Conversations->>DB: SELECT or INSERT conversations
+            Service->>Messages: findByConversationId, newest first
+            Messages->>DB: SELECT messages
+            Service->>Messages: markReadByRecipient
+            Messages->>DB: UPDATE messages SET read
+            Note over Client,Service: Sending is POST /conversations/{id}/messages with an Idempotency-Key header
+            Service->>Messages: Save, or return the message stored under this key
+            Messages->>DB: INSERT messages, UPDATE last_message_at
+            Service-)Push: After commit, push the message to both sides
+            Push-)Other: message event
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 201 Created ApiResponse<MessageResponse>
+            Client-->>Seller: Display the result
+        else Empty message or missing Idempotency-Key
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Seller: Display the error
+        else Unknown participant, or caller not in this conversation
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Seller: Display the error
+        end
     end
-    Note over Client,Endpoint: WebSocket setup, subscription paths, and exact frames remain phased in the chat contract.
 ```

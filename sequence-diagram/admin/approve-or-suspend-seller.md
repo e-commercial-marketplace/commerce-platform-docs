@@ -1,46 +1,51 @@
-# User - Approve or Suspend Seller — Sequence Diagram
+# Admin - Approve or Suspend Seller — Sequence Diagram
 
 - **Use-case spec:** [approve-or-suspend-seller.vi.md](../../usecase-specification/admin/approve-or-suspend-seller.vi.md)
-- **API route/status:** `PATCH /api/v1/admin/sellers/{id}/approve or /suspend` — Confirmed
+- **API route/status:** `PATCH /api/v1/admin/sellers/{id}/approve, PATCH /api/v1/admin/sellers/{id}/suspend` — Confirmed
 - **Feature API contract:** [features/user/API_CONTRACT.md](../../features/user/API_CONTRACT.md)
-
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Admin
-    participant Client as Admin client
+    participant Client as Client application
     participant Security as Spring Security
-    participant Controller as UserController
-    participant Service as UserService
+    participant Controller as AdminUserController
+    participant Service as AdminUserService
     participant Repo as UserRepository
+    participant Cache as Redis cache
     participant DB as PostgreSQL
-    participant Email as Email provider (TBD)
     participant Handler as GlobalExceptionHandler
-    Admin->>Client: Approve or suspend a seller
-    Client->>Security: PATCH /api/v1/admin/sellers/{id}/approve or /suspend + admin JWT
-    Security->>Controller: Forward authenticated ADMIN principal
-    Controller->>Service: Change seller status
-    Service->>Repo: Load seller and validate current status
-    Repo->>DB: SELECT users by id and role
-    DB-->>Repo: Seller state
-    alt Status transition is allowed
-        Service->>Repo: Save APPROVED or SUSPENDED state
-        Repo->>DB: UPDATE users transactionally
-        DB-->>Repo: Updated seller
-        opt Notification provider is configured
-            Service->>Email: Send seller status notification (best effort)
-            Email-->>Service: Delivery result, failure does not roll back status
+    Admin->>Client: Approve or Suspend Seller
+    Client->>Security: PATCH /api/v1/admin/sellers/{id}/approve, PATCH /api/v1/admin/sellers/{id}/suspend
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Admin: Display the error
+    else Caller is not ADMIN
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Admin: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated ADMIN principal
+        Controller->>Service: approveSeller(id) or suspendSeller(id)
+        alt Request succeeds
+            Service->>Repo: Load the seller
+            Repo->>DB: SELECT users
+            Service->>Repo: saveAndFlush the new status
+            Repo->>DB: UPDATE users
+            Service->>Cache: Evict the seller shop entry after commit
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<UserResponse>
+            Client-->>Admin: Display the result
+        else Not a seller or status does not allow it
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Admin: Display the error
+        else Unknown user
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Admin: Display the error
         end
-        Service-->>Controller: Result
-        Controller-->>Client: 200 OK ApiResponse<UserResponse>
-        Client-->>Admin: Display the decision result
-    else Invalid seller or status transition
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize API error
-        Handler-->>Client: Error ApiResponse
-        Client-->>Admin: Show the error
     end
-    Note over Service,Email: Email provider selection is not specified, notification is best-effort per Auth API contract.
 ```

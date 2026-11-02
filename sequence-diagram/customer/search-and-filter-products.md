@@ -1,10 +1,8 @@
 # Catalog - Search and Filter Products — Sequence Diagram
 
 - **Use-case spec:** [search-and-filter-products.vi.md](../../usecase-specification/customer/search-and-filter-products.vi.md)
-- **API route/status:** `GET /api/v1/products (query/filter parameters per catalog contract)` — Confirmed
+- **API route/status:** `GET /api/v1/products?q=&categoryId=&sellerId=&minPrice=&maxPrice=&minRating=&sort=` — Confirmed
 - **Feature API contract:** [features/catalog/API_CONTRACT.md](../../features/catalog/API_CONTRACT.md)
-
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
 
 ```mermaid
 sequenceDiagram
@@ -13,26 +11,36 @@ sequenceDiagram
     participant Client as Client application
     participant Security as Spring Security
     participant Controller as ProductController
-    participant Service as CatalogService
+    participant Service as ProductService
+    participant Cache as Redis cache
     participant Repo as ProductRepository
+    participant Index as ProductIndexer
+    participant Gemini as Embedding provider
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Start the search and filter products use case
-    Client->>Security: GET /api/v1/products (query/filter parameters per catalog contract)
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute search and filter products
-    alt Main flow succeeds
-        Service->>Repo: Query ProductRepository for permitted search and filter products data
-        Repo->>DB: SELECT
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
+    Customer->>Client: Search and Filter Products
+    Client->>Security: GET /api/v1/products?q=&categoryId=&sellerId=&minPrice=&maxPrice=&minRating=&sort=
+    Security->>Controller: Forward the request
+    Controller->>Service: searchListedProducts(request)
+    alt Request succeeds
+        Service->>Cache: Read the 60-second search page
+        Service->>Repo: LIKE on name and description with the filters
+        Repo->>DB: SELECT products
+        opt No product contains the keyword
+            Service->>Index: findSimilar(q)
+            Index->>Gemini: Embed the keyword
+            Index->>DB: Nearest rows in product_embeddings
+            Service->>Repo: Same filters with id IN the nearest ids
+            Repo->>DB: SELECT products
+            Note over Service,Index: If embedding is off or fails the list stays empty
+        end
         Service-->>Controller: Use-case result
-        Controller-->>Client: 200 OK response defined by the contract
+        Controller-->>Client: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>>
         Client-->>Customer: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
+    else minPrice above maxPrice
+        Service-->>Controller: Propagate the error
         Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+        Handler-->>Client: 400 VALIDATION_ERROR
         Client-->>Customer: Display the error
     end
 ```

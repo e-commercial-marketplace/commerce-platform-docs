@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title Payment - Approve Refund
+title Review - View Product Reviews
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -21,35 +21,37 @@ skinparam activity {
   EndColor #FFFFFF
 }
 
-|Admin|
+|Customer|
 start
 note right
 Precondition:
-Admin is authenticated.
+The customer is signed in.
 
 Postcondition:
-The refund decision is stored in the system.
+None.
 end note
-:Open the refund approval function;
+:Open the reviews of a product;
 |System|
-:Display the current refund request and the allowed actions;
-|Admin|
-:Select the information or action to process;
-:Submit or confirm the request;
-|System|
-:Check the information, processing conditions, and permission;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
-  |Admin|
-  :View the error message;
+  |Customer|
+  :View the system error;
   stop
 else (No)
 endif
 |System|
-:Update the refund request;
-:Display the result;
-|Admin|
-:View the result;
+:Check the product is listed;
+if (The product is unknown or hidden?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Return a page of reviews, newest first;
+|Customer|
+:View the reviews;
 stop
 
 @enduml

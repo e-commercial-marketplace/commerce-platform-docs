@@ -25,42 +25,43 @@ skinparam activity {
 start
 note right
 Precondition:
-Guest is not authenticated.
+The user is not signed in.
 
 Postcondition:
 None.
 end note
-:Open the search and filter function;
+:Open the search;
 |System|
-:Display the products the Guest is allowed to view;
+:Display the search box and filters;
 |Guest|
 repeat
-  :Enter a keyword or select a filter condition;
-  :Submit the search request;
-  |System|
-  if (The system fails while processing the request?) then (Yes)
-    :Return the system error;
-    |Guest|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Find the matching products;
-  if (Matching products are found?) then (No)
-    :Return the no-results notice;
-    |Guest|
-    :View the no-results notice;
-  else (Yes)
-    |System|
-    :Display the results;
-    |Guest|
-    :View the results;
-    stop
-  endif
+:Enter a keyword or choose filters and a sort;
+:Submit the search;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Guest|
-  :Change the search conditions;
-repeat while (Search\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the minimum price is not above the maximum;
+backward :Return the validation error;
+repeat while (The minimum price is above the\nmaximum?) is (Yes) not (No)
+:Find listed products whose name or description contains the keyword and that pass the filters;
+:If nothing matches, find the closest products in meaning and still apply the filters;
+:Return the result page;
+if (There is still no result?) then (Yes)
+  :Return an empty list;
+  |Guest|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+|Guest|
+:View the results;
 stop
 
 @enduml

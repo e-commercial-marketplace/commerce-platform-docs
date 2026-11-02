@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title User - Approve or Suspend Seller
+title Admin - Approve or Suspend Seller
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -25,44 +25,47 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
-The seller status is updated according
-to the Admin's decision.
+The seller status is updated and applies from the next
+request, because it is read from the database.
 end note
-:Open the seller approval or suspension function;
+:Open the sellers;
 |System|
-:Display the current seller status and the allowed actions;
+:Display the sellers and their status;
 |Admin|
-repeat
-  :Select the information or action to process;
-  :Submit or confirm the request;
-  |System|
-  :Check the information, processing conditions, and permission;
-  if (The system fails to process the request?) then (Yes)
-    :Return the system error;
-    |Admin|
-    :View the error message;
-    stop
-  else (No)
-  endif
-  |System|
-  if (The seller status has already changed?) then (Yes)
-    :Return the status-cannot-be-changed notice;
-    |Admin|
-    :View the notice;
-  else (No)
-    |System|
-    :Update the seller status;
-    :Display the result;
-    |Admin|
-    :View the result;
-    stop
-  endif
+:Choose to approve or suspend a seller;
+:Confirm;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Admin|
-  :Reload the list and review again;
-repeat while (Submit another\nrequest?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the user is a seller and the status allows this action;
+if (The user is not a seller, is already approved, or is suspended without being approved?) then (Yes)
+  :Return the status error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+if (The user is unknown?) then (Yes)
+  :Return the not-found error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Save the new status and clear the shop cache;
+|Admin|
+:View the result;
 stop
 
 @enduml

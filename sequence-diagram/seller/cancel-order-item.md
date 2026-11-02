@@ -1,64 +1,77 @@
 # Order - Cancel Order Item — Sequence Diagram
 
 - **Use-case spec:** [cancel-order-item.vi.md](../../usecase-specification/seller/cancel-order-item.vi.md)
-- **API route/status:** `PATCH /api/v1/seller/order-items/{id}/cancel` — Predicted
+- **API route/status:** `PATCH /api/v1/seller/order-items/{id}/cancel` — Confirmed
 - **Feature API contract:** [features/order/API_CONTRACT.md](../../features/order/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Seller
-    participant Client as Seller client
+    participant Client as Client application
     participant Security as Spring Security
-    participant Controller as OrderController
-    participant Service as OrderService
-    participant ItemRepo as OrderItemRepository
-    participant OrderRepo as OrderRepository
-    participant CatalogService as CatalogService
-    participant ProductRepo as ProductRepository
-    participant PaymentService as PaymentService
-    participant PaymentRepo as PaymentRepository
+    participant Controller as SellerOrderController
+    participant Service as SellerOrderService
+    participant Users as UserRepository
+    participant Items as OrderItemRepository
+    participant Orders as OrderService
+    participant Products as ProductService
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Seller->>Client: Open the cancel function for an owned order item
-    Client->>Security: PATCH /api/v1/seller/order-items/{id}/cancel + seller JWT
-    Security->>Controller: Forward authenticated SELLER principal
-    Controller->>Service: cancelOrderItem(itemId, cancelReason, principal)
-    Service->>ItemRepo: Load the item with seller ownership and the shipment assignment state
-    ItemRepo->>DB: SELECT order_items and shipment linkage
-    DB-->>ItemRepo: Item state
-    ItemRepo-->>Service: Owned item and eligibility state
-    alt Item is cancellable before shipment assignment
-        Service->>ItemRepo: Mark the item CANCELLED with the optional reason
-        ItemRepo->>DB: UPDATE order_items.status
-        DB-->>ItemRepo: Cancelled snapshot
-        Service->>CatalogService: Restore the cancelled quantity exactly once
-        CatalogService->>ProductRepo: Restore product stock
-        ProductRepo->>DB: UPDATE products.stock
-        DB-->>ProductRepo: Updated stock
-        ProductRepo-->>CatalogService: Stock result
-        CatalogService-->>Service: Stock restored
-        opt Prepayment is still incomplete
-            Service->>OrderRepo: Recalculate Order.totalAmount from remaining non-cancelled snapshots
-            OrderRepo->>DB: UPDATE orders.total_amount
-            DB-->>OrderRepo: Updated order total
-            Service->>PaymentService: Recalculate every still-PENDING payment amount
-            PaymentService->>PaymentRepo: Recompute pending payment amounts
-            PaymentRepo->>DB: UPDATE payments in the same transaction
-            DB-->>PaymentRepo: Updated payment state
-            PaymentRepo-->>PaymentService: Payment result
-            PaymentService-->>Service: Recalculated amounts
+    Seller->>Client: Cancel Order Item
+    Client->>Security: PATCH /api/v1/seller/order-items/{id}/cancel
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: cancelOrderItem(sellerId, itemId, reason)
+        alt Request succeeds
+            Service->>Users: getApprovedSeller(token id)
+            Users->>DB: SELECT users
+            Service->>Items: Lock the order item and check the seller
+            Items->>DB: SELECT order_items FOR UPDATE
+            Service->>Orders: cancelOrderItem(item, reason)
+            Service->>Products: increaseStock (clears the product detail cache)
+            Products->>DB: UPDATE products
+            Service->>Orders: recalculateTotalsAfterCancel(order)
+            Orders->>DB: UPDATE orders and payments
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<OrderItemResponse>
+            Client-->>Seller: Display the result
+        else Already cancelled
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Seller: Display the error
+        else Seller not APPROVED (checked in the database)
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Another seller's line
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Unknown line
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Seller: Display the error
+        else Line already in a shipment
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 409 CANNOT_CANCEL_AFTER_SHIPMENT
+            Client-->>Seller: Display the error
+        else Order already paid
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 409 CANNOT_CANCEL_AFTER_PAYMENT
+            Client-->>Seller: Display the error
         end
-        Service-->>Controller: Cancelled item result
-        Controller-->>Client: 200 OK ApiResponse<OrderItemResponse>
-        Client-->>Seller: Display the cancelled item
-    else Item is not owned, already assigned to a shipment, or paid without a refund policy
-        Service-->>Controller: Propagate exception, nothing is committed
-        Controller->>Handler: Normalize API error
-        Handler-->>Client: Error ApiResponse per contract
-        Client-->>Seller: Show the rejection
     end
-    Note over Service,DB: Cancelled snapshots stay unchanged for history, and the cancelled quantity is restored exactly once.
 ```

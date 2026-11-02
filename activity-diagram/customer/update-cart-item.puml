@@ -25,44 +25,30 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs to
-the Customer.
+The customer is signed in.
 
 Postcondition:
-The product quantity in the cart is updated.
+The quantity is updated and the new cart is returned.
 end note
-:Open the cart or the product catalog;
-|System|
-:Display the related products;
-|Customer|
 repeat
-  :Select the product and enter the new quantity;
-  :Confirm the cart change;
-  |System|
-  :Check that the product is still sold and the requested quantity is in stock;
-  if (A system error occurs while processing the request?) then (Yes)
-    :Return the system error;
-    |Customer|
-    :View the system error;
-    stop
-  else (No)
-    |System|
-    if (Product unavailable or stock insufficient?) then (Yes)
-      :Notify that the cart cannot be updated;
-      |Customer|
-      :View the notice;
-    else (No)
-      |System|
-      :Update the cart and recalculate the total;
-      :Display the updated cart;
-      |Customer|
-      :View the result;
-      stop
-    endif
-  endif
+:Enter a new quantity for a line;
+:Submit the update;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Customer|
-  :Fix the quantity or select another product;
-repeat while (Update item\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the line is the customer's, the product is listed and has stock;
+backward :Return the update error;
+repeat while (The line is unknown or\nforeign, the product is hidden\nor short of stock?) is (Yes) not (No)
+:Save the new quantity;
+:Return the new cart;
+|Customer|
+:View the new cart;
 stop
 
 @enduml

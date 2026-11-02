@@ -25,20 +25,15 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
-The order item is confirmed.
+The line is CONFIRMED and can go into a shipment.
 end note
-:Open the order-item confirmation function;
+:Choose to confirm a line;
+:Submit the confirmation;
 |System|
-:Display the current order item and the allowed operations;
-|Seller|
-:Choose the information or the operation to process;
-:Send or confirm the request;
-|System|
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Seller|
   :View the system error;
@@ -46,17 +41,25 @@ if (The system fails to process the request?) then (Yes)
 else (No)
 endif
 |System|
-:Check the information, the processing conditions, and the permission to perform;
-if (The order is paid by VNPAY and not yet paid?) then (Yes)
-  :Return the order-not-paid error;
+:Check the line is the seller's and PENDING;
+if (The line is unknown, another seller's or not PENDING?) then (Yes)
+  :Return the confirm error;
   |Seller|
-  :View the order-not-paid error;
+  :View the message;
   stop
 else (No)
 endif
 |System|
-:Update the order item;
-:Display the result;
+:For a VNPAY order, check the order is paid;
+if (The VNPAY order is not paid?) then (Yes)
+  :Return the not-paid error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Move the line to CONFIRMED;
 |Seller|
 :View the result;
 stop

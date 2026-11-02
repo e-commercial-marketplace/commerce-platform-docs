@@ -1,62 +1,74 @@
 # Shipment - Update Shipment Status — Sequence Diagram
 
 - **Use-case spec:** [update-shipment-status.vi.md](../../usecase-specification/seller/update-shipment-status.vi.md)
-- **API route/status:** `PATCH /api/v1/seller/shipments/{id}/status` — Predicted
+- **API route/status:** `PATCH /api/v1/seller/shipments/{id}/status` — Confirmed
 - **Feature API contract:** [features/shipment/API_CONTRACT.md](../../features/shipment/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Seller
-    participant Client as Seller client
+    participant Client as Client application
     participant Security as Spring Security
-    participant Controller as ShipmentController
+    participant Controller as SellerShipmentController
     participant Service as ShipmentService
-    participant ShipmentRepo as ShipmentRepository
-    participant CatalogService as CatalogService
-    participant ProductRepo as ProductRepository
-    participant OrderService as OrderService
-    participant PaymentService as PaymentService
-    participant PaymentRepo as PaymentRepository
+    participant Users as UserRepository
+    participant Repo as ShipmentRepository
+    participant Orders as OrderService
+    participant Products as ProductService
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Seller->>Client: Choose a valid shipment status and required details
-    Client->>Security: PATCH /api/v1/seller/shipments/{id}/status + seller JWT
-    Security->>Controller: Forward authenticated SELLER principal
-    Controller->>Service: updateStatus(shipmentId, status, trackingCode)
-    Service->>ShipmentRepo: Load seller-owned shipment and validate transition
-    ShipmentRepo->>DB: SELECT shipment and mapped order items
-    DB-->>ShipmentRepo: Current shipment state
-    ShipmentRepo-->>Service: Owned shipment and items
-    alt Transition is valid
-        Service->>ShipmentRepo: Persist status and timestamps
-        ShipmentRepo->>DB: UPDATE shipment transactionally
-        opt Status is RETURNED after warehouse receipt
-            Service->>CatalogService: Restore only the shipped quantity once
-            CatalogService->>ProductRepo: Restore product stock
-            ProductRepo->>DB: UPDATE products.stock
-            DB-->>ProductRepo: Updated stock
-            CatalogService-->>Service: Stock restored
+    Seller->>Client: Update Shipment Status
+    Client->>Security: PATCH /api/v1/seller/shipments/{id}/status
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: updateShipmentStatus(sellerId, id, request)
+        alt Request succeeds
+            Service->>Users: getApprovedSeller(token id)
+            Users->>DB: SELECT users
+            Service->>Repo: Lock the shipment, its lines and the order
+            Repo->>DB: SELECT ... FOR UPDATE
+            Service->>Repo: Move to the new status
+            Repo->>DB: UPDATE shipments
+            alt DELIVERED
+                Service->>Orders: markDeliveredIfAllShipped(order)
+            else RETURNED
+                Service->>Products: increaseStock for each line
+            else CANCELLED
+                Service->>Orders: Cancel the lines, then recalculate totals
+                Service->>Products: increaseStock for each line
+            else PREPARING, SHIPPED or FAILED
+                Note over Service,Repo: Only the status changes
+            end
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<ShipmentResponse>
+            Client-->>Seller: Display the result
+        else Transition not allowed, missing tracking code, or cancelling a paid order's shipment
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Seller: Display the error
+        else Seller not APPROVED (checked in the database)
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Another seller's shipment
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        else Unknown shipment
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Seller: Display the error
         end
-        opt Final required shipment is DELIVERED
-            Service->>OrderService: Recalculate the aggregate order status from the current shipment states
-            OrderService-->>Service: Aggregate result
-            Service->>PaymentService: Complete COD only when all required deliveries qualify
-            PaymentService->>PaymentRepo: Reconcile COD state
-            PaymentRepo->>DB: UPDATE payment/order aggregate transactionally
-            DB-->>PaymentRepo: Updated payment state
-            PaymentService-->>Service: Reconciliation result
-        end
-        Service-->>Controller: Updated result
-        Controller-->>Client: 200 OK ApiResponse<ShipmentResponse>
-        Client-->>Seller: Display the new status
-    else Ownership or transition rule fails
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize API error
-        Handler-->>Client: Error ApiResponse, no invalid transition is committed
-        Client-->>Seller: Show the rejection
     end
-    Note over Controller,DB: Shipment endpoint is Predicted, FAILED restores no stock, RETURNED restores only after warehouse receipt.
 ```

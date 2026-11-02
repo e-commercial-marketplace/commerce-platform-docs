@@ -4,8 +4,6 @@
 - **API route/status:** `DELETE /api/v1/cart/items/{id}` — Confirmed
 - **Feature API contract:** [features/cart/API_CONTRACT.md](../../features/cart/API_CONTRACT.md)
 
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -14,25 +12,43 @@ sequenceDiagram
     participant Security as Spring Security
     participant Controller as CartController
     participant Service as CartService
+    participant Users as UserRepository
     participant Repo as CartItemRepository
+    participant Cache as Redis cache
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Start the remove cart item use case
+    Customer->>Client: Remove Cart Item
     Client->>Security: DELETE /api/v1/cart/items/{id}
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute remove cart item
-    alt Main flow succeeds
-        Service->>Repo: Apply the contract-defined delete/expiry behavior for remove cart item
-        Repo->>DB: SELECT and apply the contract-defined delete/expiry update
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Contract-defined delete/expiry response
-        Client-->>Customer: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Customer: Display the error
+    else Caller is not CUSTOMER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Customer: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated CUSTOMER principal
+        Controller->>Service: removeFromCart(callerId, itemId)
+        alt Request succeeds
+            Service->>Users: Lock the customer row
+            Users->>DB: SELECT users FOR UPDATE
+            Service->>Repo: Find the line and check the owner
+            Repo->>DB: SELECT cart_items
+            Service->>Repo: Delete the line
+            Repo->>DB: DELETE cart_items
+            Service->>Cache: Evict the cart after commit
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<CartResponse>
+            Client-->>Customer: Display the result
+        else Another customer's line
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Customer: Display the error
+        else Unknown line
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 CART_ITEM_NOT_FOUND
+            Client-->>Customer: Display the error
+        end
     end
 ```

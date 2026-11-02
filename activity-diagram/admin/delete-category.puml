@@ -25,29 +25,33 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
-The category is deleted as requested.
+The category is deleted and the categories cache is
+cleared.
 end note
-:Open the category deletion function;
+:Choose to delete a category;
+:Confirm;
 |System|
-:Display the current selection and the allowed actions;
-|Admin|
-:Select the item to delete;
-:Submit or confirm the request;
-|System|
-:Check the information, processing conditions, and permission;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Admin|
-  :View the error message;
+  :View the system error;
   stop
 else (No)
 endif
 |System|
-:Delete the selected category;
-:Display the result;
+:Check the category exists and has no products;
+if (The category is unknown or still has products?) then (Yes)
+  :Return the delete error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Delete the category;
 |Admin|
 :View the result;
 stop

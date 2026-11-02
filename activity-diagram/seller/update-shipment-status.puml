@@ -25,79 +25,47 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
-The shipment status is updated, and
-the stock, the order, and the COD are
-updated according to the shipment
-status.
+SHIPPED stores the tracking code. DELIVERED: if every
+non-cancelled line is delivered the order is DELIVERED
+and COD completes. RETURNED restores the stock, FAILED
+does not. CANCELLED cancels the lines, restores the
+stock and recomputes the total.
 end note
-:Open the shipment-status update function;
+:Choose a shipment and a new status, with a tracking code for SHIPPED;
+:Submit the update;
 |System|
-:Display the current shipment status and the allowed operations;
-|Seller|
-repeat
-  :Choose the information or the operation to process;
-  :Send or confirm the request;
-  |System|
-  if (The system fails to process the request?) then (Yes)
-    :Return the system error;
-    |Seller|
-    :View the system error;
-    stop
-  else (No)
-    |System|
-    :Validate the status transition, required delivery information, and cancellation/payment rules;
-    if (A status rule is violated?) then (Yes)
-      :Return the status-rejected notice;
-      |Seller|
-      :View the status-rejected notice;
-    else (No)
-      |System|
-      if (The package cannot be delivered?) then (Yes)
-        :Record the failed delivery and return no stock;
-        |Seller|
-        :View the result;
-        stop
-      else (No)
-      endif
-      |System|
-      if (The package has come back to the Seller's warehouse?) then (Yes)
-        :Record the returned package and return the shipped quantity;
-        |Seller|
-        :View the result;
-        stop
-      else (No)
-      endif
-      |System|
-      if (Unpaid PENDING/PREPARING cancellation?) then (Yes)
-        :Cancel the unshipped shipment items;
-        :Return stock exactly once;
-        :Recalculate the order total and pending COD;
-        if (No item remains in the order?) then (Yes)
-          :Cancel the order;
-        else (No)
-        endif
-        |Seller|
-        :View the result;
-        stop
-      else (No)
-      endif
-      |System|
-      :Update the shipment status;
-      :Recalculate the order status and COD when all mandatory shipments are delivered;
-      :Update the stock according to the result without returning goods;
-      :Display the update result;
-      |Seller|
-      :View the result;
-      stop
-    endif
-  endif
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Seller|
-  :Correct the information;
-repeat while (Update status\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the shipment is the seller's and the transition is allowed;
+if (The transition is not allowed, the tracking code is missing, or the order is paid and the status is CANCELLED?) then (Yes)
+  :Return the transition error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+if (The shipment is unknown or another seller's?) then (Yes)
+  :Return the error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Save the new status;
+:Apply the effects on the order, payment and stock for the new status;
+|Seller|
+:View the result;
 stop
 
 @enduml

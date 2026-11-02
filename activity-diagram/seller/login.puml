@@ -25,43 +25,34 @@ skinparam activity {
 start
 note right
 Precondition:
-Guest is not authenticated.
+The user is not signed in.
 
 Postcondition:
-The account is logged in when the
-credentials are correct.
+The user holds an access token (15 minutes) and a
+refresh token.
 end note
-:Open the login function;
+:Open the login form;
 |System|
 :Display the login form;
 |Guest|
 repeat
-  :Enter the email and password;
-  :Submit the login request;
-  |System|
-  if (The system fails to process the request?) then (Yes)
-    :Return the system error;
-    |Guest|
-    :View the system error;
-    stop
-  else (No)
-  endif
-  |System|
-  :Check the credentials;
-  if (The credentials are correct?) then (No)
-    :Return the invalid-credentials notice;
-    |Guest|
-    :View the invalid-credentials notice;
-  else (Yes)
-    |System|
-    :Log in the account and return the result;
-    |Guest|
-    :View the login result;
-    stop
-  endif
+:Enter email and password;
+:Submit the login;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
   |Guest|
-  :Re-enter the credentials;
-repeat while (Sign in\nagain?) is (Yes) not (No)
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the email, the password and that the account is enabled;
+backward :Return the same login error for every case;
+repeat while (The credentials are wrong or\nthe account is disabled?) is (Yes) not (No)
+:Issue the access and refresh tokens and return the result;
+|Guest|
+:View the login result;
 stop
 
 @enduml

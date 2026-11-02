@@ -1,0 +1,58 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Catalog - View Seller Shop
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Guest|
+start
+note right
+Precondition:
+The user is not signed in.
+
+Postcondition:
+None.
+end note
+:Choose the shop from a product page;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |Guest|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Find the seller by id and check it is approved;
+if (The seller is unknown or not approved?) then (Yes)
+  :Return the not-found error;
+  |Guest|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Return the shop name and the listed product count;
+:Return a page of the seller's listed products;
+|Guest|
+:View the shop;
+stop
+
+@enduml

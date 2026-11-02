@@ -64,7 +64,7 @@ xử lý `FAILED`/`RETURNED` và khôi phục stock chỉ sau `RETURNED`.
 | UNAUTHENTICATED USER | Browse public catalog data và dùng AI cho public product search |
 | CUSTOMER | Browse products, quản lý cart, đặt orders, pay, theo dõi shipments, review products, chat và dùng AI assistance |
 | SELLER | Quản lý owned products và stock, xử lý owned order items, chọn delivery method, quản lý owned shipments và chat với customers |
-| ADMIN | Quản lý users, categories, vouchers, moderation, marketplace monitoring, platform delivery configuration và các administrative actions như refund approval |
+| ADMIN | Quản lý users, duyệt seller, categories, vouchers và đơn vị vận chuyển |
 
 ## 3. Năng lực sản phẩm
 

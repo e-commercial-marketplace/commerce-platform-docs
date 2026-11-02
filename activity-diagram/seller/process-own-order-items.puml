@@ -25,39 +25,26 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
-The order item changes only when the
-selected operation completes
-successfully.
+A line changes only when an operation succeeds.
 end note
-:Open the processing function for own order items;
+:Open my order items;
 |System|
-:Display the managed information and the allowed operations;
-if (Data is available to display?) then (No)
-  :Return the no-data notice;
-  |Seller|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
+:Display the seller's lines;
 |Seller|
-:Choose the operation to perform;
+:Choose to confirm or cancel a line;
 |System|
-:Open the corresponding function;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Seller|
   :View the system error;
   stop
 else (No)
 endif
-|Seller|
-:End the list management and process each item through its own operation;
 |System|
-:Display the result;
+:Run the chosen operation;
 |Seller|
 :View the result;
 stop

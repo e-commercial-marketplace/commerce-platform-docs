@@ -1,11 +1,11 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Guest Use Cases" id="guest-usecases">
-    <mxGraphModel dx="1500" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="750" math="0" shadow="0">
+    <mxGraphModel dx="1500" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="880" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="boundary" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;spacingTop=10;fontSize=16;fontStyle=0;fontColor=#0f172a;fillColor=#f8fafc;strokeColor=#334155;strokeWidth=1;" value="Guest Use-Case" vertex="1">
-          <mxGeometry height="610" width="930" x="160" y="0" as="geometry" />
+          <mxGeometry height="700" width="930" x="160" y="0" as="geometry" />
         </mxCell>
         <mxCell id="browse" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Browse Public Catalog" vertex="1">
           <mxGeometry height="60" width="280" x="250" y="90" as="geometry" />
@@ -19,25 +19,31 @@
         <mxCell id="ai" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Use AI Product Search" vertex="1">
           <mxGeometry height="60" width="280" x="720" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="register" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Register Customer Account" vertex="1">
+        <mxCell id="register" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Register Account" vertex="1">
           <mxGeometry height="60" width="280" x="720" y="200" as="geometry" />
         </mxCell>
         <mxCell id="login" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#79CFF4;strokeColor=#1A1A1A;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Login" vertex="1">
           <mxGeometry height="60" width="280" x="720" y="310" as="geometry" />
         </mxCell>
-        <mxCell id="googleLogin" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Login with Google" vertex="1">
+        <mxCell id="resetPassword" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="Reset Password" vertex="1">
           <mxGeometry height="60" width="280" x="720" y="420" as="geometry" />
         </mxCell>
+        <mxCell id="shop" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="View Seller Shop" vertex="1">
+          <mxGeometry height="60" width="280" x="250" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="reviews" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontColor=#1A1A1A;fontSize=14;fontStyle=0;" value="View Product Reviews" vertex="1">
+          <mxGeometry height="60" width="280" x="250" y="530" as="geometry" />
+        </mxCell>
         <mxCell id="guest" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#334155;strokeWidth=1.5;fontColor=#0f172a;fontSize=14;fontStyle=0;" value="Guest" vertex="1">
-          <mxGeometry height="90" width="60" x="595" y="680" as="geometry" />
+          <mxGeometry height="90" width="60" x="595" y="770" as="geometry" />
         </mxCell>
         <mxCell id="a1" edge="1" parent="1" source="guest" style="endArrow=none;html=1;rounded=0;strokeColor=#334155;strokeWidth=1.5;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="browse" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="200" y="560" />
-               <mxPoint x="200" y="120" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="200" y="650" />
+              <mxPoint x="200" y="120" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -45,9 +51,9 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="200" y="560" />
-               <mxPoint x="200" y="230" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="200" y="650" />
+              <mxPoint x="200" y="230" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -55,9 +61,9 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="200" y="560" />
-               <mxPoint x="200" y="340" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="200" y="650" />
+              <mxPoint x="200" y="340" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -65,9 +71,9 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="1050" y="560" />
-               <mxPoint x="1050" y="120" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="1050" y="650" />
+              <mxPoint x="1050" y="120" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -75,9 +81,9 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="1050" y="560" />
-               <mxPoint x="1050" y="230" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="1050" y="650" />
+              <mxPoint x="1050" y="230" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -85,19 +91,39 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="1050" y="560" />
-               <mxPoint x="1050" y="340" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="1050" y="650" />
+              <mxPoint x="1050" y="340" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="a7" edge="1" parent="1" source="guest" style="endArrow=none;html=1;rounded=0;strokeColor=#334155;strokeWidth=1.5;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="googleLogin" value="">
+        <mxCell id="a7" edge="1" parent="1" source="guest" style="endArrow=none;html=1;rounded=0;strokeColor=#334155;strokeWidth=1.5;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="resetPassword" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint y="-11" as="offset" />
             <Array as="points">
-               <mxPoint x="625" y="560" />
-               <mxPoint x="1050" y="560" />
-               <mxPoint x="1050" y="450" />
+              <mxPoint x="625" y="650" />
+              <mxPoint x="1050" y="650" />
+              <mxPoint x="1050" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8" edge="1" parent="1" source="guest" style="endArrow=none;html=1;rounded=0;strokeColor=#334155;strokeWidth=1.5;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="shop" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-11" as="offset" />
+            <Array as="points">
+              <mxPoint x="625" y="650" />
+              <mxPoint x="200" y="650" />
+              <mxPoint x="200" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a9" edge="1" parent="1" source="guest" style="endArrow=none;html=1;rounded=0;strokeColor=#334155;strokeWidth=1.5;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="reviews" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-11" as="offset" />
+            <Array as="points">
+              <mxPoint x="625" y="650" />
+              <mxPoint x="200" y="650" />
+              <mxPoint x="200" y="560" />
             </Array>
           </mxGeometry>
         </mxCell>

@@ -1,10 +1,8 @@
 # Shipment - Manage Own Shipments — Sequence Diagram
 
 - **Use-case spec:** [manage-own-shipments.vi.md](../../usecase-specification/seller/manage-own-shipments.vi.md)
-- **API route/status:** `GET /api/v1/seller/shipments; PATCH /api/v1/seller/shipments/{id}/status` — Predicted
+- **API route/status:** `POST/GET /api/v1/seller/shipments, PATCH /api/v1/seller/shipments/{id}/status` — Confirmed
 - **Feature API contract:** [features/shipment/API_CONTRACT.md](../../features/shipment/API_CONTRACT.md)
-
-> **Target sequence:** endpoint status is not fully Confirmed (see API contract link). Layer names are planned placeholders; the backend scaffold does not yet implement them.
 
 ```mermaid
 sequenceDiagram
@@ -12,28 +10,37 @@ sequenceDiagram
     actor Seller
     participant Client as Client application
     participant Security as Spring Security
-    participant Controller as ShipmentController
+    participant Controller as SellerShipmentController
     participant Service as ShipmentService
+    participant Users as UserRepository
     participant Repo as ShipmentRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Seller->>Client: Start the manage own shipments use case
-    Client->>Security: GET /api/v1/seller/shipments, PATCH /api/v1/seller/shipments/{id}/status
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute manage own shipments
-    alt Main flow succeeds
-        Service->>Repo: Query or persist data required to manage own shipments
-        Repo->>DB: Read or write as the selected operation requires (transactional when required)
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Note over Controller,Repo: Seller shipment endpoints are Predicted in the Shipment API contract.
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Contract-defined success response for the selected endpoint
-        Client-->>Seller: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    Seller->>Client: Manage Own Shipments
+    Client->>Security: POST/GET /api/v1/seller/shipments, PATCH /api/v1/seller/shipments/{id}/status
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Seller: Display the error
+    else Caller is not SELLER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Seller: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated SELLER principal
+        Controller->>Service: Run the chosen shipment operation
+        alt Request succeeds
+            Note over Client,Service: See create-shipment, view-own-shipments and update-shipment-status
+            Service->>Users: getApprovedSeller(token id)
+            Users->>DB: SELECT users
+            Service->>Repo: Read or change the seller's own shipments
+            Repo->>DB: SELECT, INSERT or UPDATE shipments
+            Service-->>Controller: Use-case result
+            Controller-->>Client: Response of the chosen operation
+            Client-->>Seller: Display the result
+        else Seller not APPROVED (checked in the database)
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 FORBIDDEN
+            Client-->>Seller: Display the error
+        end
     end
 ```

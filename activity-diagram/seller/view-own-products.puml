@@ -25,35 +25,36 @@ skinparam activity {
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The seller is signed in and approved.
 
 Postcondition:
 None.
 end note
-:Open the own-product viewing function;
+:Open my products, optionally with a keyword or status filter;
 |System|
-:Display the information the Seller is allowed to view;
-if (Data is available to display?) then (No)
-  :Return the no-matching-data notice;
-  |Seller|
-  :View the notice or return to the list;
-  stop
-else (Yes)
-endif
+:Return a page of the seller's products, ordered by name;
 |Seller|
-:Choose the information to view;
+:Choose a product;
 |System|
-:Display the product details;
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Seller|
   :View the system error;
   stop
 else (No)
 endif
+|System|
+:Check the product is the seller's and return the details;
+if (The product is unknown or another seller's?) then (Yes)
+  :Return the error;
+  |Seller|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
 |Seller|
-:View the information;
+:View the product details;
 stop
 
 @enduml

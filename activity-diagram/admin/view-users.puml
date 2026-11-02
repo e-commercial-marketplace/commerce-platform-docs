@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title User - View Users
+title Admin - View Users
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -25,28 +25,18 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
 None.
 end note
-:Open the user viewing function;
+:Open the users, optionally with a role or keyword;
 |System|
-:Load the information visible to the Admin;
-if (User data is available?) then (No)
-  :Return the no-data notice;
-  |Admin|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the user information;
+:Return a page of users, newest first;
 |Admin|
-:Select the information to view;
+:Choose a user;
 |System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Admin|
   :View the system error;
@@ -54,9 +44,17 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Return the user details;
+if (The user is unknown?) then (Yes)
+  :Return the not-found error;
+  |Admin|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
 |Admin|
-:View the item details;
+:View the details;
 stop
 
 @enduml

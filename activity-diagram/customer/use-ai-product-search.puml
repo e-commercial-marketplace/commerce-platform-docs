@@ -25,20 +25,20 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated.
+The customer is signed in.
 
 Postcondition:
-None.
+The question and the answer are stored in the customer's
+session.
 end note
-:Open the AI assistant function;
+:Open the AI assistant;
 |System|
-:Display the question input area;
+:Display the question box;
 |Customer|
-:Enter a question about public products;
+:Enter a question;
 :Submit the question;
 |System|
-:Find relevant public information and assess whether the question can be answered;
-if (A system error occurs while processing the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
@@ -46,18 +46,20 @@ if (A system error occurs while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-if (Question is unanswerable?) then (Yes)
-  :Notify that the question cannot be answered yet;
+:Check the per-minute question limit;
+if (There are more than 60 questions this minute?) then (Yes)
+  :Return the rate-limit error;
   |Customer|
-  :View the notice;
+  :View the message;
   stop
 else (No)
 endif
 |System|
-:Generate an answer from the relevant public information;
-:Display the answer;
+:Use the LLM and read-only tools (categories, product search, policies) to answer from real data;
+:If the LLM cannot be used (no key, error, cooling down after 429, or over 20 questions a minute), answer with rules;
+:Return the answer with the products found;
 |Customer|
-:View the answer;
+:View the answer and product cards;
 stop
 
 @enduml

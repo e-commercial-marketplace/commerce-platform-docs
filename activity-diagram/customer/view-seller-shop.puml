@@ -1,7 +1,7 @@
 @startuml
 !include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
 
-title Catalog - Delete or Unlist Product
+title Catalog - View Seller Shop
 
 skinparam shadowing false
 skinparam backgroundColor white
@@ -21,36 +21,38 @@ skinparam activity {
   EndColor #FFFFFF
 }
 
-|Seller|
+|Customer|
 start
 note right
 Precondition:
-Seller is logged in and the data
-belongs to the Seller.
+The customer is signed in.
 
 Postcondition:
-The product is hidden from the sales list.
+None.
 end note
-:Open the product deletion or unlisting function;
+:Choose the shop from a product page;
 |System|
-:Display the selected item and the allowed operations;
-|Seller|
-:Choose the item to delete or end the operation;
-:Send or confirm the request;
-|System|
-if (The system fails to process the request?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
-  |Seller|
+  |Customer|
   :View the system error;
   stop
 else (No)
 endif
 |System|
-:Check the information, the processing conditions, and the permission to perform;
-:Unlist the selected product from the sales list;
-:Display the result;
-|Seller|
-:View the result;
+:Find the seller by id and check it is approved;
+if (The seller is unknown or not approved?) then (Yes)
+  :Return the not-found error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Return the shop name and the listed product count;
+:Return a page of the seller's listed products;
+|Customer|
+:View the shop;
 stop
 
 @enduml

@@ -4,8 +4,6 @@
 - **API route/status:** `POST /api/v1/auth/login` — Confirmed
 - **Feature API contract:** [features/auth/API_CONTRACT.md](../../features/auth/API_CONTRACT.md)
 
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -15,29 +13,31 @@ sequenceDiagram
     participant Controller as AuthController
     participant Service as AuthService
     participant Repo as UserRepository
+    participant Tokens as RefreshTokenService
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Guest->>Client: Start the login use case
+    Guest->>Client: Customer Login
     Client->>Security: POST /api/v1/auth/login
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute login
-    alt Main flow succeeds
-        Service->>Repo: Query UserRepository for the account by email and verify the password hash
-        Repo->>DB: SELECT account credentials and role by email
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Service->>Repo: Persist the refresh token hash for the new session
-        Repo->>DB: INSERT refresh_tokens
-        DB-->>Repo: Persisted token row
-        Repo-->>Service: Session issued
-        Note over Service,Repo: Auth owns the identity boundary around the users table, so the auth service reads and writes account credentials and role state.
+    Security->>Controller: Forward the request
+    Controller->>Service: login(request)
+    alt Request succeeds
+        Service->>Repo: Find the user by email
+        Repo->>DB: SELECT users
+        Service->>Service: Verify the BCrypt hash and enabled flag
+        Service->>Tokens: Create a refresh token
+        Tokens->>DB: INSERT refresh_tokens (hash only)
         Service-->>Controller: Use-case result
-        Controller-->>Client: 200 OK response defined by the contract
+        Controller-->>Client: 200 OK ApiResponse<AuthResponse>
         Client-->>Guest: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
+    else Unknown email, wrong password or disabled account
+        Service-->>Controller: Propagate the error
         Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+        Handler-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Guest: Display the error
+    else Invalid body
+        Service-->>Controller: Propagate the error
+        Controller->>Handler: Normalize safe API error
+        Handler-->>Client: 400 VALIDATION_ERROR
         Client-->>Guest: Display the error
     end
 ```

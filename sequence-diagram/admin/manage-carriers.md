@@ -1,6 +1,6 @@
 # Shipment - Manage Carriers — Sequence Diagram
 
-- **Use-case spec:** [configure-platform-delivery.vi.md](../../usecase-specification/admin/configure-platform-delivery.vi.md)
+- **Use-case spec:** [manage-carriers.vi.md](../../usecase-specification/admin/manage-carriers.vi.md)
 - **API route/status:** `GET`/`POST /api/v1/admin/carriers`, `PATCH /api/v1/admin/carriers/{id}` — Confirmed
 - **Feature API contract:** [features/shipment/API_CONTRACT.md](../../features/shipment/API_CONTRACT.md)
 

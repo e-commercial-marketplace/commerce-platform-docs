@@ -25,40 +25,28 @@ skinparam activity {
 start
 note right
 Precondition:
-Customer is authenticated; the data belongs
-to the Customer.
+The customer is signed in.
 
 Postcondition:
-The cart changes only when the selected action
-completes successfully.
+The cart changes only when an operation succeeds.
 end note
-:Open the cart management function;
+:Open the cart;
 |System|
-:Display the managed information and the allowed actions;
-if (There is no data to display?) then (Yes)
-  :Return the no-data notice;
-  |Customer|
-  :View the no-data notice;
-  stop
-else (No)
-endif
+:Display the lines and the total;
 |Customer|
-:Select the action to perform;
+:Choose add, change quantity or remove;
 |System|
-:Open the corresponding function;
-if (Processing the request fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Customer|
   :View the system error;
   stop
 else (No)
 endif
-|Customer|
-:Perform the selected action;
 |System|
-:Display the result;
+:Run the chosen operation and return the new cart;
 |Customer|
-:View the result;
+:View the new cart;
 stop
 
 @enduml

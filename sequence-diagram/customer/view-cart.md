@@ -4,8 +4,6 @@
 - **API route/status:** `GET /api/v1/cart` — Confirmed
 - **Feature API contract:** [features/cart/API_CONTRACT.md](../../features/cart/API_CONTRACT.md)
 
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -14,25 +12,33 @@ sequenceDiagram
     participant Security as Spring Security
     participant Controller as CartController
     participant Service as CartService
+    participant Cache as Redis cache
     participant Repo as CartItemRepository
+    participant Products as ProductRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Start the view cart use case
+    Customer->>Client: View Cart
     Client->>Security: GET /api/v1/cart
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute view cart
-    alt Main flow succeeds
-        Service->>Repo: Query CartItemRepository for permitted view cart data
-        Repo->>DB: SELECT
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Service-->>Controller: Use-case result
-        Controller-->>Client: 200 OK response defined by the contract
-        Client-->>Customer: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Customer: Display the error
+    else Caller is not CUSTOMER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Customer: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated CUSTOMER principal
+        Controller->>Service: getCart(callerId)
+        Service->>Cache: Read the cached lines
+        alt Cache hit
+            Service->>Products: Load the current products
+            Products->>DB: SELECT products
+        else Cache miss or Redis down
+            Service->>Repo: findByUserId, newest first
+            Repo->>DB: SELECT cart_items
+            Service->>Cache: Store the lines
+        end
+        Service-->>Controller: Use-case result
+        Controller-->>Client: 200 OK ApiResponse<CartResponse>
+        Client-->>Customer: Display the result
     end
 ```

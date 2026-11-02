@@ -1,42 +1,40 @@
 # Payment - Pay for Order (COD) — Sequence Diagram
 
 - **Use-case spec:** [pay-for-order-cod.vi.md](../../usecase-specification/customer/pay-for-order-cod.vi.md)
-- **API route/status:** `No customer COD endpoint is defined; delivery-result trigger is TBD` — TBD
-- **Feature API contract:** [features/shipment/API_CONTRACT.md](../../features/shipment/API_CONTRACT.md)
+- **API route/status:** `POST /api/v1/orders (paymentMethod = COD), PATCH /api/v1/seller/shipments/{id}/status` — Confirmed
+- **Feature API contract:** [features/payment/API_CONTRACT.md](../../features/payment/API_CONTRACT.md)
 
-> **Endpoint gap:** COD cash is offline and the API contract defines settlement from shipment delivery state; it does not define a Customer payment endpoint or delivery-event source.
+> COD has no payment endpoint of its own. It starts at checkout and completes from the seller's shipment update.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Customer
-    participant Handoff as Offline delivery handoff (source TBD)
-    participant Controller as ShipmentController (planned)
-    participant Service as ShipmentService
-    participant ShipmentRepo as ShipmentRepository
-    participant PaymentService as PaymentService
-    participant PaymentRepo as PaymentRepository
+    participant Client as Client application
+    participant Security as Spring Security
+    participant Seller
+    participant Shipments as ShipmentService
+    participant Orders as OrderService
+    participant Payments as PaymentService
     participant DB as PostgreSQL
-    Customer->>Handoff: Receive package and pay cash-on-delivery
-    Handoff-->>Controller: Report delivery outcome (API/event source TBD)
-    Controller->>Service: Record shipment delivery result
-    Service->>ShipmentRepo: Update the shipment result
-    ShipmentRepo->>DB: UPDATE shipment status
-    DB-->>ShipmentRepo: Updated shipment and order associations
-    alt All required non-cancelled shipments are delivered
-        Service->>PaymentService: Complete COD for the order
-        PaymentService->>PaymentRepo: Update COD payment state
-        PaymentRepo->>DB: UPDATE payment/order state transactionally
-        DB-->>PaymentRepo: Completed payment state
-        PaymentService-->>Service: COD completed
-    else More required deliveries remain
-        Service->>PaymentService: Keep COD pending
-        PaymentService->>PaymentRepo: Confirm pending state
-        PaymentRepo->>DB: Read/update payment state
-        DB-->>PaymentRepo: Pending payment state
-        PaymentService-->>Service: No final settlement yet
+    Customer->>Client: Choose COD at checkout
+    Client->>Security: POST /api/v1/orders with paymentMethod COD
+    Security->>Orders: Forward the CUSTOMER principal
+    Orders->>Payments: createCodPayment(order)
+    Payments->>DB: INSERT payments (COD, PENDING)
+    Orders-->>Client: 201 Created ApiResponse<OrderResponse>
+    Seller->>Security: PATCH /api/v1/seller/shipments/{id}/status with DELIVERED
+    Security->>Shipments: Forward the SELLER principal
+    Shipments->>DB: Lock the shipment, lines and order, set DELIVERED
+    Shipments->>Orders: markDeliveredIfAllShipped(order)
+    alt Every non-cancelled line is in a delivered shipment
+        Orders->>DB: UPDATE orders SET status = 'DELIVERED'
+        Orders->>Payments: markCodCollected(order)
+        Payments->>DB: UPDATE payments SET status = 'COMPLETED', paid_at
+    else Some lines are not delivered yet
+        Note over Orders,Payments: Order and payment stay unchanged
     end
-    Service-->>Controller: Result
-    Controller-->>Handoff: Record/reporting acknowledgement (response contract TBD)
-    Note over Customer,Controller: COD cash is offline. The current API contract defines completion from shipment delivery state, not a Customer payment endpoint.
+    Client->>Security: GET /api/v1/orders/{id}
+    Security-->>Client: 200 OK with the order and payment status
+    Client-->>Customer: Display the status
 ```

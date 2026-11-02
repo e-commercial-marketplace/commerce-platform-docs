@@ -4,44 +4,60 @@
 - **API route/status:** `POST /api/v1/products/{productId}/reviews` — Confirmed
 - **Feature API contract:** [features/review/API_CONTRACT.md](../../features/review/API_CONTRACT.md)
 
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
-
 ```mermaid
 sequenceDiagram
     autonumber
     actor Customer
-    participant Client as Customer client
+    participant Client as Client application
     participant Security as Spring Security
     participant Controller as ReviewController
     participant Service as ReviewService
+    participant Items as OrderItemRepository
     participant Repo as ReviewRepository
+    participant Products as ProductService
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Open the purchased product and write a review
-    Client->>Security: POST /api/v1/products/{productId}/reviews + customer JWT
-    Security->>Controller: Forward authenticated CUSTOMER principal
-    Controller->>Service: createReview(productId, rating, comment, principal)
-    Note over Service: The review author is resolved from the authentication principal, never from client input.
-    alt The caller purchased and received the product and has no review for it yet
-        Service->>Repo: Verify purchase and delivery history for (principal, product)
-        Repo->>DB: SELECT order and shipment history used for eligibility
-        DB-->>Repo: Delivered purchase rows
-        Repo-->>Service: Eligible purchase confirmed
-        Service->>Repo: Confirm no existing review for the unique (user, product) pair
-        Repo->>DB: SELECT review by (user, product)
-        DB-->>Repo: No existing review
-        Service->>Repo: Persist the review with rating and comment
-        Repo->>DB: INSERT review in one transaction
-        DB-->>Repo: Persisted review
-        Repo-->>Service: Review entity
-        Service-->>Controller: Created result
-        Controller-->>Client: 201 Created ApiResponse<ReviewResponse>
-        Client-->>Customer: Display the created review
-    else Not purchased/received, duplicate review, or invalid rating
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize API error
-        Handler-->>Client: Error ApiResponse per contract
-        Client-->>Customer: Show the rejection
+    Customer->>Client: Create Product Review
+    Client->>Security: POST /api/v1/products/{productId}/reviews
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
+        Client-->>Customer: Display the error
+    else Caller is not CUSTOMER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Customer: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated CUSTOMER principal
+        Controller->>Service: createReview(callerId, productId, request)
+        alt Request succeeds
+            Service->>Items: hasCompletedPurchase(customer, product)
+            Items->>DB: SELECT order_items of COMPLETED orders
+            Service->>Repo: saveAndFlush the review
+            Repo->>DB: INSERT reviews
+            Service->>Products: addRating (clears the product detail cache)
+            Products->>DB: UPDATE products in one statement
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 201 Created ApiResponse<ReviewResponse>
+            Client-->>Customer: Display the result
+        else Invalid rating or comment
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Customer: Display the error
+        else Unknown or hidden product
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 404 RESOURCE_NOT_FOUND
+            Client-->>Customer: Display the error
+        else No completed purchase
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 403 REVIEW_NOT_ELIGIBLE
+            Client-->>Customer: Display the error
+        else Already reviewed
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 409 REVIEW_ALREADY_EXISTS
+            Client-->>Customer: Display the error
+        end
     end
-    Note over Repo,DB: Order and shipment history is read for eligibility, and no direct order FK is modeled in the review table.
 ```

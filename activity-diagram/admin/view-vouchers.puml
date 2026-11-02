@@ -25,28 +25,14 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
 None.
 end note
-:Open the voucher viewing function;
+:Open voucher management;
 |System|
-:Load the information visible to the Admin;
-if (Voucher data is available?) then (No)
-  :Return the no-data notice;
-  |Admin|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the voucher information;
-|Admin|
-:Select the information to view;
-|System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Admin|
   :View the system error;
@@ -54,9 +40,9 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Return a page of vouchers;
 |Admin|
-:View the item details;
+:View the vouchers;
 stop
 
 @enduml

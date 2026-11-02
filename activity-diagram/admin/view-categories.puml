@@ -25,28 +25,14 @@ skinparam activity {
 start
 note right
 Precondition:
-Admin is authenticated.
+The admin is signed in.
 
 Postcondition:
 None.
 end note
-:Open the category viewing function;
+:Open category management;
 |System|
-:Load the information visible to the Admin;
-if (Category data is available?) then (No)
-  :Return the no-data notice;
-  |Admin|
-  :View the no-data notice;
-  stop
-else (Yes)
-endif
-|System|
-:Display the category information;
-|Admin|
-:Select the information to view;
-|System|
-:Load the selected item details;
-if (Loading the details fails?) then (Yes)
+if (The system fails while processing the request?) then (Yes)
   :Return the system error;
   |Admin|
   :View the system error;
@@ -54,9 +40,9 @@ if (Loading the details fails?) then (Yes)
 else (No)
 endif
 |System|
-:Display the item details;
+:Return the categories ordered by name;
 |Admin|
-:View the item details;
+:View the categories;
 stop
 
 @enduml

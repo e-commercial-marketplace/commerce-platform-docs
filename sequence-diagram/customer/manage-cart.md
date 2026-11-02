@@ -1,10 +1,8 @@
 # Cart - Manage Cart — Sequence Diagram
 
 - **Use-case spec:** [manage-cart.vi.md](../../usecase-specification/customer/manage-cart.vi.md)
-- **API route/status:** `GET /api/v1/cart; POST/PATCH/DELETE /api/v1/cart/items` — Confirmed
+- **API route/status:** `GET /api/v1/cart, POST/PATCH/DELETE /api/v1/cart/items` — Confirmed
 - **Feature API contract:** [features/cart/API_CONTRACT.md](../../features/cart/API_CONTRACT.md)
-
-> **Target sequence:** controller/service/repository names are planned placeholders; the current backend scaffold does not yet implement these layers.
 
 ```mermaid
 sequenceDiagram
@@ -17,22 +15,34 @@ sequenceDiagram
     participant Repo as CartItemRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Start the manage cart use case
+    Customer->>Client: Manage Cart
     Client->>Security: GET /api/v1/cart, POST/PATCH/DELETE /api/v1/cart/items
-    Security->>Controller: Forward public/authenticated request
-    Controller->>Service: Execute manage cart
-    alt Main flow succeeds
-        Service->>Repo: Query or persist data required to manage cart
-        Repo->>DB: Read or write as the selected operation requires (transactional when required)
-        DB-->>Repo: Domain row(s) or persistence result
-        Repo-->>Service: Entity/result
-        Service-->>Controller: Use-case result
-        Controller-->>Client: Contract-defined success response for the selected endpoint
-        Client-->>Customer: Display the result
-    else Validation, authorization, or business rule rejects the request
-        Service-->>Controller: Propagate exception
-        Controller->>Handler: Normalize safe API error
-        Handler-->>Client: Error ApiResponse per contract
+    alt Token missing, expired or invalid
+        Security-->>Client: 401 AUTHENTICATION_REQUIRED
         Client-->>Customer: Display the error
+    else Caller is not CUSTOMER
+        Security-->>Client: 403 FORBIDDEN
+        Client-->>Customer: Display the error
+    else Token and role accepted
+        Security->>Controller: Forward the authenticated CUSTOMER principal
+        Controller->>Service: Run the chosen cart operation
+        alt Request succeeds
+            Note over Client,Service: See view-cart, add-cart-item, update-cart-item and remove-cart-item for each operation
+            Service->>Repo: Read or change the caller's cart lines
+            Repo->>DB: SELECT, INSERT, UPDATE or DELETE cart_items
+            Service-->>Controller: Use-case result
+            Controller-->>Client: 200 OK ApiResponse<CartResponse>
+            Client-->>Customer: Display the result
+        else Invalid quantity
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 400 VALIDATION_ERROR
+            Client-->>Customer: Display the error
+        else Not enough stock
+            Service-->>Controller: Propagate the error
+            Controller->>Handler: Normalize safe API error
+            Handler-->>Client: 409 INSUFFICIENT_STOCK
+            Client-->>Customer: Display the error
+        end
     end
 ```
