@@ -1,0 +1,47 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Manage Carriers Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminCarrierController" as CT
+control "CarrierService" as SV
+entity "CarrierRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/admin/carriers or PATCH /api/v1/admin/carriers/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> CT: Forward authenticated ADMIN request
+deactivate SEC
+activate CT
+CT -> SV: Create or update the carrier
+activate SV
+alt Main flow succeeds
+SV -> REPO: Check the name is unused (ignoring case), then save the carrier
+REPO -> DB: SELECT by lower(name), then INSERT or UPDATE carriers
+DB --> REPO: Domain row(s) or persistence result
+REPO --> SV: Entity/result
+SV --> CT: Use-case result
+CT --> SEC: 201 or 200 ApiResponse<CarrierResponse>
+SEC --> A: 201 or 200 ApiResponse<CarrierResponse>
+else Validation, authorization, or business rule rejects the request
+SV --> CT: Propagate exception
+CT --> SEC: Error ApiResponse per contract
+SEC --> A: Error ApiResponse per contract
+end
+
+@enduml

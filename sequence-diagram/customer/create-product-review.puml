@@ -1,0 +1,69 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Create Product Review Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "ReviewController" as CT
+control "ReviewService" as SV
+entity "OrderItemRepository" as ITEMS
+entity "ReviewRepository" as REPO
+control "ProductService" as PRODUCTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/products/{productId}/reviews
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: createReview(callerId, productId, request)
+activate SV
+alt Request succeeds
+SV -> ITEMS: hasCompletedPurchase(customer, product)
+ITEMS -> DB: SELECT order_items of COMPLETED orders
+SV -> REPO: saveAndFlush the review
+REPO -> DB: INSERT reviews
+SV -> PRODUCTS: addRating (clears the product detail cache)
+PRODUCTS -> DB: UPDATE products in one statement
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<ReviewResponse>
+SEC --> A: 201 Created ApiResponse<ReviewResponse>
+else Invalid rating or comment
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Unknown or hidden product
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+else No completed purchase
+SV --> CT: BusinessException
+CT --> SEC: 403 REVIEW_NOT_ELIGIBLE
+SEC --> A: 403 REVIEW_NOT_ELIGIBLE
+else Already reviewed
+SV --> CT: BusinessException
+CT --> SEC: 409 REVIEW_ALREADY_EXISTS
+SEC --> A: 409 REVIEW_ALREADY_EXISTS
+end
+end
+
+@enduml

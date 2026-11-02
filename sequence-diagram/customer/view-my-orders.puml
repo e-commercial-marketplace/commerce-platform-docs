@@ -1,0 +1,53 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View My Orders Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "OrderController" as CT
+control "OrderService" as SV
+entity "OrderRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/orders, GET /api/v1/orders/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: listMyOrders, then getMyOrder
+activate SV
+alt Request succeeds
+SV -> REPO: findByCustomerId, newest first
+REPO -> DB: SELECT orders
+SV -> REPO: findByIdAndCustomerId for the chosen order
+REPO -> DB: SELECT orders with items, shipments and payments
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<PageResponse<OrderSummaryResponse>> or ApiResponse<OrderResponse>
+SEC --> A: 200 OK ApiResponse<PageResponse<OrderSummaryResponse>> or ApiResponse<OrderResponse>
+else Unknown or foreign order
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

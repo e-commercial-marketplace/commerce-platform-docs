@@ -1,0 +1,58 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Manage Cart Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "CartController" as CT
+control "CartService" as SV
+entity "CartItemRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/cart, POST/PATCH/DELETE /api/v1/cart/items
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: Run the chosen cart operation
+activate SV
+alt Request succeeds
+note over A,SV
+See view-cart, add-cart-item, update-cart-item and remove-cart-item for each operation
+end note
+SV -> REPO: Read or change the caller's cart lines
+REPO -> DB: SELECT, INSERT, UPDATE or DELETE cart_items
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<CartResponse>
+SEC --> A: 200 OK ApiResponse<CartResponse>
+else Invalid quantity
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Not enough stock
+SV --> CT: BusinessException
+CT --> SEC: 409 INSUFFICIENT_STOCK
+SEC --> A: 409 INSUFFICIENT_STOCK
+end
+end
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Create Voucher Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminVoucherController" as CT
+control "VoucherService" as SV
+entity "VoucherRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/admin/vouchers
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: createVoucher(request)
+activate SV
+alt Request succeeds
+SV -> REPO: existsById(normalized code)
+REPO -> DB: SELECT vouchers
+SV -> DB: persist and flush
+note over SV,DB
+A duplicate key from a parallel request also answers 400
+end note
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<VoucherResponse>
+SEC --> A: 201 Created ApiResponse<VoucherResponse>
+else Invalid data or duplicate code
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+end
+
+@enduml

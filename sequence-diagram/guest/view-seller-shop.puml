@@ -1,0 +1,50 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Seller Shop Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "SellerShopController" as CT
+control "SellerShopService" as SV
+database "Redis cache" as CACHE
+entity "UserRepository" as USERS
+entity "ProductRepository" as PRODUCTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/sellers/{id}, GET /api/v1/products?sellerId={id}
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: getShop(sellerId)
+activate SV
+alt Request succeeds
+SV -> CACHE: Read the shop entry
+SV -> USERS: On a miss, find the APPROVED seller
+USERS -> DB: SELECT users
+SV -> PRODUCTS: countBySellerIdAndActiveTrue
+PRODUCTS -> DB: SELECT count(*) FROM products
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<SellerShopResponse>
+SEC --> A: 200 OK ApiResponse<SellerShopResponse>
+else Unknown or unapproved seller
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+
+@enduml

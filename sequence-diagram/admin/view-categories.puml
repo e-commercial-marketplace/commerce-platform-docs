@@ -1,0 +1,41 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Categories Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "CategoryController" as CT
+control "CategoryService" as SV
+database "Redis cache" as CACHE
+entity "CategoryRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/categories
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: listCategories()
+activate SV
+SV -> CACHE: Read the categories entry
+SV -> REPO: On a miss, findAllByOrderByNameAsc
+REPO -> DB: SELECT categories
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<List<CategorySummaryResponse>>
+SEC --> A: 200 OK ApiResponse<List<CategorySummaryResponse>>
+
+@enduml

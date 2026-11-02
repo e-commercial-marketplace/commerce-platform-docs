@@ -1,0 +1,61 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Choose Delivery Method Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Seller" as A
+boundary "Spring Security" as SEC
+control "SellerShipmentController" as CT
+control "CarrierService" as SV
+entity "UserRepository" as USERS
+entity "CarrierRepository" as CARRIERS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/seller/carriers, POST /api/v1/seller/shipments (deliveryMethod, carrierId)
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not SELLER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated SELLER principal
+deactivate SEC
+activate CT
+CT -> SV: listActiveCarriers(sellerId)
+activate SV
+alt Request succeeds
+SV -> USERS: getApprovedSeller(token id)
+USERS -> DB: SELECT users
+SV -> CARRIERS: findByActiveTrueOrderByNameAsc
+CARRIERS -> DB: SELECT carriers
+note over A,SV
+The choice is checked by ShipmentService in POST /seller/shipments
+end note
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<List<CarrierResponse>>
+SEC --> A: 200 OK ApiResponse<List<CarrierResponse>>
+else Seller not APPROVED (checked in the database)
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+else Invalid method and carrier pair at shipment creation
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+end
+
+@enduml

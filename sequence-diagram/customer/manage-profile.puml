@@ -1,0 +1,53 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Manage Profile Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "UserController" as CT
+control "UserService" as SV
+entity "UserRepository" as REPO
+database "Redis cache" as CACHE
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/users/me, PATCH /api/v1/users/me
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Token and role accepted
+SEC -> CT: Forward the authenticated authenticated user principal
+deactivate SEC
+activate CT
+CT -> SV: getProfile, then updateProfile(callerId, request)
+activate SV
+alt Request succeeds
+SV -> REPO: Load the user from the token id
+REPO -> DB: SELECT users
+SV -> REPO: saveAndFlush the changed fields
+REPO -> DB: UPDATE users
+SV -> CACHE: Evict the seller shop entry after commit
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<UserProfileResponse>
+SEC --> A: 200 OK ApiResponse<UserProfileResponse>
+else Invalid name, phone or address
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+end
+
+@enduml

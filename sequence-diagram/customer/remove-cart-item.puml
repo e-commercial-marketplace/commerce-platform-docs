@@ -1,0 +1,62 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Remove Cart Item Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "CartController" as CT
+control "CartService" as SV
+entity "UserRepository" as USERS
+entity "CartItemRepository" as REPO
+database "Redis cache" as CACHE
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: DELETE /api/v1/cart/items/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: removeFromCart(callerId, itemId)
+activate SV
+alt Request succeeds
+SV -> USERS: Lock the customer row
+USERS -> DB: SELECT users FOR UPDATE
+SV -> REPO: Find the line and check the owner
+REPO -> DB: SELECT cart_items
+SV -> REPO: Delete the line
+REPO -> DB: DELETE cart_items
+SV -> CACHE: Evict the cart after commit
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<CartResponse>
+SEC --> A: 200 OK ApiResponse<CartResponse>
+else Another customer's line
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+else Unknown line
+SV --> CT: BusinessException
+CT --> SEC: 404 CART_ITEM_NOT_FOUND
+SEC --> A: 404 CART_ITEM_NOT_FOUND
+end
+end
+
+@enduml

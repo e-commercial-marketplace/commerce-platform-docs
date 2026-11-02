@@ -1,0 +1,63 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Create Product Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Seller" as A
+boundary "Spring Security" as SEC
+control "SellerProductController" as CT
+control "SellerProductService" as SV
+entity "UserRepository" as USERS
+entity "CategoryRepository" as CATEGORIES
+entity "ProductRepository" as REPO
+database "Redis cache" as CACHE
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/seller/products
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not SELLER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated SELLER principal
+deactivate SEC
+activate CT
+CT -> SV: createProduct(sellerId, request)
+activate SV
+alt Request succeeds
+SV -> USERS: getApprovedSeller(token id)
+USERS -> DB: SELECT users
+SV -> CATEGORIES: Find the category
+CATEGORIES -> DB: SELECT categories
+SV -> REPO: Save the product
+REPO -> DB: INSERT products
+SV -> CACHE: Evict the seller shop entry after commit
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<ProductResponse>
+SEC --> A: 201 Created ApiResponse<ProductResponse>
+else Invalid body, unknown category or listed product without image
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Seller not APPROVED (checked in the database)
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+end
+end
+
+@enduml

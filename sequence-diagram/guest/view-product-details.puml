@@ -1,0 +1,47 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Product Details Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "ProductController" as CT
+control "ProductService" as SV
+database "Redis cache" as CACHE
+entity "ProductRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/products/{id}
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: getListedProduct(id)
+activate SV
+alt Request succeeds
+SV -> CACHE: Read the product detail entry
+SV -> REPO: On a miss, findByIdAndActiveTrue
+REPO -> DB: SELECT products
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<ProductResponse>
+SEC --> A: 200 OK ApiResponse<ProductResponse>
+else Unknown or hidden product
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+
+@enduml

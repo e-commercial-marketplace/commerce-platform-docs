@@ -1,0 +1,48 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Manage Users Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminUserController" as CT
+control "AdminUserService" as SV
+entity "UserRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET/POST/PATCH/DELETE /api/v1/admin/users, PATCH /api/v1/admin/sellers/{id}/approve or /suspend
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: Run the chosen user operation
+activate SV
+note over A,SV
+See view-users, create-user, update-user, disable-user and approve-or-suspend-seller
+end note
+SV -> REPO: Read or change users
+REPO -> DB: SELECT, INSERT or UPDATE users
+SV --> CT: Use-case result
+CT --> SEC: Response of the chosen operation
+SEC --> A: Response of the chosen operation
+end
+
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Apply Voucher Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "VoucherController" as CT
+control "VoucherService" as SV
+entity "VoucherRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/vouchers/{code}/validate
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: checkVoucherUsable(code)
+activate SV
+alt Request succeeds
+SV -> REPO: findById(normalized code)
+REPO -> DB: SELECT vouchers
+SV -> SV: Check validFrom, validTo and timesUsed
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<VoucherResponse>
+SEC --> A: 200 OK ApiResponse<VoucherResponse>
+else Unknown code
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+else Not started or expired
+SV --> CT: BusinessException
+CT --> SEC: 409 VOUCHER_EXPIRED
+SEC --> A: 409 VOUCHER_EXPIRED
+else No use left
+SV --> CT: BusinessException
+CT --> SEC: 409 VOUCHER_EXHAUSTED
+SEC --> A: 409 VOUCHER_EXHAUSTED
+end
+end
+
+@enduml

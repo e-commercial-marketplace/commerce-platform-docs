@@ -1,0 +1,78 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Search Products with AI Assistant Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "AiController" as CT
+control "AiService" as SV
+control "AiRateLimiter" as LIMITER
+control "Spring AI ChatClient" as CHATCLIENT
+participant "OpenAI-compatible provider" as LLM
+control "ProductSearchTools" as TOOL
+control "RuleBasedAnswerer" as RULES
+control "ProductService" as CATALOG
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/ai/ask (no token, sessionId = null)
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Public request
+deactivate SEC
+activate CT
+CT -> SV: answerQuestion(guest, message, null)
+activate SV
+alt Guest sent a sessionId
+SV --> SEC: 401 AUTHENTICATION_REQUIRED
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+end
+SV -> LIMITER: Count this question for ip:<client IP>
+alt More than 60 questions this minute
+LIMITER --> SV: BLOCKED
+SV --> SEC: 429 RATE_LIMITED
+SEC --> A: 429 RATE_LIMITED
+end
+LIMITER --> SV: AI (1-20) or RULES (21-60)
+alt Level AI and provider configured
+SV -> CHATCLIENT: Prompt with system rules and the tool, no memory
+CHATCLIENT -> LLM: System prompt, question, tool definition
+opt Broad request
+LLM --> CHATCLIENT: Call listCategories()
+CHATCLIENT -> TOOL: listCategories()
+TOOL --> CHATCLIENT: Category names
+end
+LLM --> CHATCLIENT: Call searchProducts(text, category, prices, rating, sort)
+CHATCLIENT -> TOOL: searchProducts(...)
+TOOL -> CATALOG: search (top 5 listed products)
+CATALOG -> DB: SELECT products
+TOOL --> CHATCLIENT: Product results (also kept for the response)
+CHATCLIENT -> LLM: Tool results
+LLM --> CHATCLIENT: Answer grounded in the results
+CHATCLIENT --> SV: Answer, answeredBy = AI
+else Level RULES, provider missing, cooling down after 429, or provider call failed
+SV -> RULES: answer(message)
+RULES -> CATALOG: search with filters parsed from the message
+CATALOG -> DB: SELECT products
+RULES --> SV: Templated, canned or hint answer
+end
+note over SV
+Nothing is stored for guests
+end note
+SV --> CT: AiProductSearchResponse (sessionId = null)
+CT --> SEC: 200 OK
+SEC --> A: 200 OK
+
+@enduml

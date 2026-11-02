@@ -1,0 +1,60 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Delete Category Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminCategoryController" as CT
+control "CategoryService" as SV
+entity "CategoryRepository" as REPO
+entity "ProductRepository" as PRODUCTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: DELETE /api/v1/admin/categories/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: deleteCategory(id)
+activate SV
+alt Request succeeds
+SV -> REPO: Find the category
+REPO -> DB: SELECT categories
+SV -> PRODUCTS: existsByCategoryId
+PRODUCTS -> DB: SELECT products
+SV -> REPO: Delete
+REPO -> DB: DELETE categories
+SV --> CT: Use-case result
+CT --> SEC: 204 No Content
+SEC --> A: 204 No Content
+else Category still has products
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Unknown category
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

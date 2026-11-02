@@ -1,0 +1,79 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Pay for Order (VNPAY) Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "PaymentController" as CT
+control "PaymentService" as SV
+entity "OrderRepository / PaymentRepository" as REPO
+database "PostgreSQL" as DB
+participant "VNPAY sandbox" as VNPAY
+
+autonumber
+
+A -> SEC: POST /api/v1/payments/vnpay/create with orderId and customer JWT
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> CT: Forward authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: Create a VNPAY retry with orderId, caller id and client IP
+activate SV
+SV -> REPO: Load the caller-owned order and lock it
+REPO -> DB: SELECT order by id and customer, then SELECT ... FOR UPDATE
+DB --> REPO: Order with its payments
+REPO --> SV: Locked order
+alt Order PENDING, paid by VNPAY, within 24 hours
+SV -> REPO: Mark pending VNPAY attempts FAILED, insert a new PENDING attempt with a new vnp_TxnRef
+REPO -> DB: UPDATE payments, INSERT payments
+DB --> REPO: Persisted attempt
+SV -> SV: Build the vnp_* parameters and sign them with HMAC-SHA512 (secret stays on the server)
+SV --> CT: Payment link
+CT --> SEC: 200 OK ApiResponse<VnpayPaymentResponse>
+SEC --> A: 200 OK ApiResponse<VnpayPaymentResponse>
+A -> VNPAY: Open paymentUrl
+A -> VNPAY: Enter the test card and OTP
+VNPAY -> CT: GET /api/v1/payments/vnpay/ipn (or /return) with signed vnp_* fields
+CT -> SV: Handle the VNPAY result
+SV -> SV: Verify the signature
+SV -> REPO: Find the attempt by vnp_TxnRef and lock its order
+REPO -> DB: SELECT payment, SELECT order FOR UPDATE
+DB --> REPO: Attempt and order
+REPO --> SV: Attempt and locked order
+alt Signature, reference and amount valid, attempt still PENDING
+SV -> REPO: Success code: attempt COMPLETED and order PAID, failure code: attempt FAILED
+REPO -> DB: UPDATE payments (and orders)
+DB --> REPO: Updated rows
+SV --> CT: RspCode 00
+else Already processed
+SV --> CT: RspCode 02, nothing changed
+else Invalid signature, unknown reference, or wrong amount
+SV --> CT: RspCode 97, 01 or 04, nothing changed
+end
+CT --> VNPAY: IPN: 200 {"RspCode","Message"}
+CT --> SEC: Return: 302 to the app URL with orderId and status
+SEC --> A: Return: 302 to the app URL with orderId and status
+A -> SEC: GET /api/v1/orders/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+else Order not payable
+SV --> CT: Propagate ORDER_NOT_PAYABLE
+CT --> SEC: 409 ORDER_NOT_PAYABLE
+SEC --> A: 409 ORDER_NOT_PAYABLE
+end
+
+@enduml

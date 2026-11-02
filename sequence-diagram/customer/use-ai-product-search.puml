@@ -1,0 +1,87 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Search Products with AI Assistant Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "AiController" as CT
+control "AiService" as SV
+control "AiRateLimiter" as LIMITER
+entity "AiChatSessionRepository" as SESSIONREPO
+control "Spring AI ChatClient" as CHATCLIENT
+control "AiChatMemory" as MEMORY
+participant "OpenAI-compatible provider" as LLM
+control "ProductSearchTools" as TOOL
+control "RuleBasedAnswerer" as RULES
+control "ProductService" as CATALOG
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/ai/ask (Bearer token, optional sessionId)
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> CT: Authenticated CUSTOMER
+deactivate SEC
+activate CT
+CT -> SV: answerQuestion(customer, message, sessionId)
+activate SV
+SV -> LIMITER: Count this question for user:<id>
+alt More than 60 questions this minute
+LIMITER --> SV: BLOCKED
+SV --> SEC: 429 RATE_LIMITED
+SEC --> A: 429 RATE_LIMITED
+end
+LIMITER --> SV: AI (1-20) or RULES (21-60)
+alt sessionId is null
+SV -> SESSIONREPO: Create a session owned by the customer
+else sessionId given
+SV -> SESSIONREPO: findByIdAndUserId(sessionId, customer)
+SESSIONREPO --> SV: Not found or another customer's session
+SV --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+alt Level AI and provider configured
+SV -> CHATCLIENT: Prompt with system rules, tool and memory advisor (conversation = session id)
+CHATCLIENT -> MEMORY: Last 10 messages of the session
+MEMORY -> DB: SELECT ai_messages
+CHATCLIENT -> LLM: System prompt, history, question, tool definition
+opt Broad request
+LLM --> CHATCLIENT: Call listCategories()
+CHATCLIENT -> TOOL: listCategories()
+TOOL --> CHATCLIENT: Category names
+end
+LLM --> CHATCLIENT: Call searchProducts(text, category, prices, rating, sort)
+CHATCLIENT -> TOOL: searchProducts(...)
+TOOL -> CATALOG: search (top 5 listed products)
+CATALOG -> DB: SELECT products
+TOOL --> CHATCLIENT: Product results (also kept for the response)
+CHATCLIENT -> LLM: Tool results
+LLM --> CHATCLIENT: Answer grounded in the results
+CHATCLIENT -> MEMORY: Append user and assistant messages
+MEMORY -> DB: INSERT ai_messages
+CHATCLIENT --> SV: Answer, answeredBy = AI
+else Level RULES, provider missing, cooling down after 429, or provider call failed
+SV -> RULES: answer(message)
+RULES -> CATALOG: search with filters parsed from the message
+CATALOG -> DB: SELECT products
+RULES --> SV: Templated, canned or hint answer
+SV -> MEMORY: Append user and assistant messages
+MEMORY -> DB: INSERT ai_messages
+end
+SV --> CT: AiProductSearchResponse (answer, query, products, sessionId, answeredBy)
+CT --> SEC: 200 OK
+SEC --> A: 200 OK
+
+@enduml

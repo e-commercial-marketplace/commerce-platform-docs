@@ -1,0 +1,53 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Expire Voucher Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminVoucherController" as CT
+control "VoucherService" as SV
+entity "VoucherRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: DELETE /api/v1/admin/vouchers/{code}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: expireVoucher(code)
+activate SV
+alt Request succeeds
+SV -> REPO: findById(normalized code)
+REPO -> DB: SELECT vouchers
+SV -> REPO: Set validTo = now
+REPO -> DB: UPDATE vouchers
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<VoucherResponse>
+SEC --> A: 200 OK ApiResponse<VoucherResponse>
+else Unknown code
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

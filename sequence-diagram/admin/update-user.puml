@@ -1,0 +1,61 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Update User Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminUserController" as CT
+control "AdminUserService" as SV
+entity "UserRepository" as REPO
+control "RefreshTokenService" as TOKENS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: PATCH /api/v1/admin/users/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: updateUser(id, request, adminId)
+activate SV
+alt Request succeeds
+SV -> REPO: Load the user
+REPO -> DB: SELECT users
+SV -> REPO: saveAndFlush the changes
+REPO -> DB: UPDATE users
+opt enabled = false
+SV -> TOKENS: Revoke all refresh tokens
+end
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<UserResponse>
+SEC --> A: 200 OK ApiResponse<UserResponse>
+else Invalid data, self-lockout or seller status on a non-seller
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Unknown user
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

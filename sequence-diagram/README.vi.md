@@ -5,6 +5,13 @@ sequence diagram kỹ thuật bằng Mermaid (69 use case), kèm một sơ đồ
 Khác với activity diagram, các sơ đồ này không chỉ mô tả luồng nghiệp vụ mà thể hiện request đi
 qua các tầng backend thật.
 
+## Định dạng
+
+Mỗi sơ đồ có hai file cùng tên: Mermaid `.md` (kèm link spec, route và contract) và PlantUML `.puml`. File
+`.puml` là cùng luồng đó theo style PlantUML của dự án: gộp client vào actor và vẽ lỗi của
+`GlobalExceptionHandler` thành phản hồi, nên `BusinessException` đi theo `SV --> CT --> SEC --> A`. Sửa một
+file thì sửa cả file còn lại.
+
 ## Luồng request
 
 ```text

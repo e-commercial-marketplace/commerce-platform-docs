@@ -1,0 +1,52 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Register Account Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "AuthController" as CT
+control "AuthService" as SV
+control "UserService" as USERS
+entity "UserRepository" as REPO
+control "RefreshTokenService" as TOKENS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/auth/register
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: register(request)
+activate SV
+alt Request succeeds
+SV -> REPO: Check the email is not used
+REPO -> DB: SELECT users by email
+SV -> USERS: Build the user (SELLER starts PENDING)
+SV -> REPO: saveAndFlush with the BCrypt hash
+REPO -> DB: INSERT users
+SV -> TOKENS: Create a refresh token
+TOKENS -> DB: INSERT refresh_tokens (hash only)
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<AuthResponse>
+SEC --> A: 201 Created ApiResponse<AuthResponse>
+else Invalid body, role ADMIN or email already used
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+
+@enduml

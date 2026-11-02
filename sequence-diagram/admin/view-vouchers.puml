@@ -1,0 +1,45 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Vouchers Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Admin" as A
+boundary "Spring Security" as SEC
+control "AdminVoucherController" as CT
+control "VoucherService" as SV
+entity "VoucherRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/admin/vouchers
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not ADMIN
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated ADMIN principal
+deactivate SEC
+activate CT
+CT -> SV: listVouchers(page, size)
+activate SV
+SV -> REPO: findAll, validFrom descending then code
+REPO -> DB: SELECT vouchers
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<PageResponse<VoucherResponse>>
+SEC --> A: 200 OK ApiResponse<PageResponse<VoucherResponse>>
+end
+
+@enduml

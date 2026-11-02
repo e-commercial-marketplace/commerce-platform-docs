@@ -1,0 +1,101 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Checkout Order Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "OrderController" as CT
+control "OrderService" as SV
+entity "UserRepository" as USERS
+entity "CartItemRepository" as CART
+control "ProductService" as PRODUCTS
+control "VoucherService" as VOUCHERS
+entity "OrderRepository" as REPO
+control "PaymentService" as PAYMENTS
+control "VnpayGateway" as VNPAY
+database "Redis cache" as CACHE
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/orders
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: checkout(callerId, request, clientIp)
+activate SV
+alt Request succeeds
+SV -> USERS: Lock the customer row
+USERS -> DB: SELECT users FOR UPDATE
+SV -> CART: Load the chosen lines of this customer
+CART -> DB: SELECT cart_items
+loop Each line, ordered by product id
+SV -> PRODUCTS: requireListed and decreaseStock
+PRODUCTS -> DB: Conditional UPDATE products SET stock
+end
+opt voucherCode was sent
+SV -> VOUCHERS: useVoucher(code)
+VOUCHERS -> DB: Conditional UPDATE vouchers SET times_used
+end
+SV -> REPO: Save the order with snapshot lines and total
+REPO -> DB: INSERT orders and order_items
+alt paymentMethod is VNPAY
+SV -> PAYMENTS: createVnpayPayment
+PAYMENTS -> DB: INSERT payments
+PAYMENTS -> VNPAY: Build the signed payment URL
+else paymentMethod is COD
+SV -> PAYMENTS: createCodPayment
+PAYMENTS -> DB: INSERT payments
+end
+SV -> CART: Delete the bought lines
+CART -> DB: DELETE cart_items
+SV -> CACHE: Evict the cart after commit
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<OrderResponse> (paymentUrl for VNPAY)
+SEC --> A: 201 Created ApiResponse<OrderResponse> (paymentUrl for VNPAY)
+else Invalid body or duplicate ids
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else A line is unknown or foreign
+SV --> CT: BusinessException
+CT --> SEC: 404 CART_ITEM_NOT_FOUND
+SEC --> A: 404 CART_ITEM_NOT_FOUND
+else A product is hidden
+SV --> CT: BusinessException
+CT --> SEC: 400 PRODUCT_INACTIVE
+SEC --> A: 400 PRODUCT_INACTIVE
+else Not enough stock, whole transaction rolls back
+SV --> CT: BusinessException
+CT --> SEC: 409 INSUFFICIENT_STOCK
+SEC --> A: 409 INSUFFICIENT_STOCK
+else Unknown voucher
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+else Voucher out of validity or used up
+SV --> CT: BusinessException
+CT --> SEC: 409 VOUCHER_EXPIRED or VOUCHER_EXHAUSTED
+SEC --> A: 409 VOUCHER_EXPIRED or VOUCHER_EXHAUSTED
+end
+end
+
+@enduml

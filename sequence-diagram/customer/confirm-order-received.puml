@@ -1,0 +1,57 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Confirm Order Received Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "OrderController" as CT
+control "OrderService" as SV
+entity "OrderRepository" as REPO
+database "PostgreSQL" as DB
+control "OrderCompletionJob" as JOB
+
+autonumber
+
+A -> SEC: PATCH /api/v1/orders/{id}/received with customer JWT
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> CT: Forward authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: Confirm receipt for the caller's order
+activate SV
+SV -> REPO: Lock the order and check it belongs to the caller
+REPO -> DB: SELECT ... FOR UPDATE
+DB --> REPO: Order row
+REPO --> SV: Locked order
+alt Order is DELIVERED
+SV -> REPO: Mark the order COMPLETED
+REPO -> DB: UPDATE orders SET status = 'COMPLETED'
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<OrderResponse>
+SEC --> A: 200 OK ApiResponse<OrderResponse>
+else Unknown or another customer's order
+SV --> CT: Propagate RESOURCE_NOT_FOUND
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+else Order is not DELIVERED
+SV --> CT: Propagate VALIDATION_ERROR
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+loop Periodically
+JOB -> DB: UPDATE orders SET status = 'COMPLETED' WHERE status = 'DELIVERED' and no shipment was delivered in the last 3 days
+end
+
+@enduml

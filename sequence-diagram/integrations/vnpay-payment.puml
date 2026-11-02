@@ -1,0 +1,45 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title VNPAY Payment Integration Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+control "Backend (controllers + services)" as BACKEND
+database "PostgreSQL" as DB
+participant "VNPAY sandbox" as VNPAY
+control "PrepaymentExpiryJob" as JOB
+
+autonumber
+
+A -> BACKEND: POST /api/v1/orders {cartItemIds, shippingAddress, paymentMethod: VNPAY}
+BACKEND -> DB: Decrease stock, INSERT order and items, INSERT payment (VNPAY, PENDING, vnp_TxnRef)
+BACKEND -> BACKEND: Sign vnp_* parameters (HMAC-SHA512, link valid 15 minutes, never past the 24-hour deadline)
+BACKEND --> A: 201 OrderResponse with paymentUrl
+A -> VNPAY: Open paymentUrl in the browser
+A -> VNPAY: Pay with the test card
+par Server-to-server
+VNPAY -> BACKEND: GET /api/v1/payments/vnpay/ipn?vnp_...
+BACKEND -> DB: Verify, lock order, record result once
+BACKEND --> VNPAY: 200 {"RspCode":"00","Message":"Confirm Success"} (02 if already recorded)
+else Browser redirect
+VNPAY -> BACKEND: GET /api/v1/payments/vnpay/return?vnp_...
+BACKEND -> DB: Same handler, records the result if the IPN has not yet
+BACKEND --> A: 302 to app-redirect-url?orderId=...&status=...
+end
+A -> BACKEND: GET /api/v1/orders/{id}
+BACKEND --> A: status PAID, paymentStatus COMPLETED (or FAILED, payable again)
+loop Every 5 minutes
+JOB -> DB: Find PENDING VNPAY orders older than 24 hours without a COMPLETED payment
+JOB -> BACKEND: Cancel each order in its own transaction
+BACKEND -> DB: Lock order, cancel remaining lines, restore stock once, pending payments FAILED, order CANCELLED
+end
+
+@enduml

@@ -1,0 +1,69 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Chat with Seller Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "ChatController" as CT
+control "ChatService" as SV
+entity "ConversationRepository" as CONVERSATIONS
+entity "MessageRepository" as MESSAGES
+boundary "WebSocket /ws/chat" as PUSH
+actor "Seller" as OTHER
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET/POST /api/v1/conversations, GET/POST /api/v1/conversations/{id}/messages, PATCH /api/v1/conversations/{id}/read, WebSocket /ws/chat
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: openConversation, listMessages, markRead, sendMessage
+activate SV
+alt Request succeeds
+SV -> CONVERSATIONS: Find by customer and seller, or create (sellerId from the body)
+CONVERSATIONS -> DB: SELECT or INSERT conversations
+SV -> MESSAGES: findByConversationId, newest first
+MESSAGES -> DB: SELECT messages
+SV -> MESSAGES: markReadByRecipient
+MESSAGES -> DB: UPDATE messages SET read
+note over A,SV
+Sending is POST /conversations/{id}/messages with an Idempotency-Key header
+end note
+SV -> MESSAGES: Save, or return the message stored under this key
+MESSAGES -> DB: INSERT messages, UPDATE last_message_at
+SV ->> PUSH: After commit, push the message to both sides
+PUSH ->> OTHER: message event
+SV --> CT: Use-case result
+CT --> SEC: 201 Created ApiResponse<MessageResponse>
+SEC --> A: 201 Created ApiResponse<MessageResponse>
+else Empty message or missing Idempotency-Key
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Unknown participant, or caller not in this conversation
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

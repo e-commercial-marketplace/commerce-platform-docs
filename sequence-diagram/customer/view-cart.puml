@@ -1,0 +1,54 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Cart Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "CartController" as CT
+control "CartService" as SV
+database "Redis cache" as CACHE
+entity "CartItemRepository" as REPO
+entity "ProductRepository" as PRODUCTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/cart
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: getCart(callerId)
+activate SV
+SV -> CACHE: Read the cached lines
+alt Cache hit
+SV -> PRODUCTS: Load the current products
+PRODUCTS -> DB: SELECT products
+else Cache miss or Redis down
+SV -> REPO: findByUserId, newest first
+REPO -> DB: SELECT cart_items
+SV -> CACHE: Store the lines
+end
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<CartResponse>
+SEC --> A: 200 OK ApiResponse<CartResponse>
+end
+
+@enduml

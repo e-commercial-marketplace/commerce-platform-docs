@@ -1,0 +1,55 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View AI Chat History Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "AiController" as CT
+control "AiService" as SV
+entity "AiChatSessionRepository" as SESSIONS
+entity "AiMessageRepository" as MESSAGES
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/ai/sessions, GET /api/v1/ai/sessions/{id}/messages
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not CUSTOMER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: listSessions, then listSessionMessages
+activate SV
+alt Request succeeds
+SV -> SESSIONS: List the caller's sessions
+SESSIONS -> DB: SELECT ai_chat_sessions
+SV -> SESSIONS: Find the chosen session of this caller
+SV -> MESSAGES: findBySessionId, oldest first
+MESSAGES -> DB: SELECT ai_messages
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<List<AiChatSessionResponse>> or ApiResponse<List<AiMessageResponse>>
+SEC --> A: 200 OK ApiResponse<List<AiChatSessionResponse>> or ApiResponse<List<AiMessageResponse>>
+else Unknown or foreign session
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

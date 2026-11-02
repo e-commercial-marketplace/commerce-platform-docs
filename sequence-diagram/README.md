@@ -5,6 +5,13 @@ This folder contains one technical Mermaid sequence diagram per use case in
 integration diagram. Unlike the activity diagrams, these diagrams are not only business flows:
 they trace the request through the real backend layers.
 
+## Formats
+
+Each diagram has two files with the same name: a Mermaid `.md` (with the spec, route and contract links)
+and a PlantUML `.puml`. The `.puml` is the same flow in the project's PlantUML style: it merges the client
+into the actor and draws `GlobalExceptionHandler` errors as responses, so `BusinessException` travels
+`SV --> CT --> SEC --> A`. Change both files together.
+
 ## Request path
 
 ```text

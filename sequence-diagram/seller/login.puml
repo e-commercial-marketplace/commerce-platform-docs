@@ -1,0 +1,53 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Seller Login Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "AuthController" as CT
+control "AuthService" as SV
+entity "UserRepository" as REPO
+control "RefreshTokenService" as TOKENS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/auth/login
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: login(request)
+activate SV
+alt Request succeeds
+SV -> REPO: Find the user by email
+REPO -> DB: SELECT users
+SV -> SV: Verify the BCrypt hash and enabled flag
+SV -> TOKENS: Create a refresh token
+TOKENS -> DB: INSERT refresh_tokens (hash only)
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<AuthResponse>
+SEC --> A: 200 OK ApiResponse<AuthResponse>
+else Unknown email, wrong password or disabled account
+SV --> CT: BusinessException
+CT --> SEC: 401 AUTHENTICATION_REQUIRED
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Invalid body
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+
+@enduml

@@ -1,0 +1,62 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Pay for Order (COD) Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+actor "Seller" as SELLER
+control "ShipmentService" as SHIPMENTS
+control "OrderService" as ORDERS
+control "PaymentService" as PAYMENTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: POST /api/v1/orders with paymentMethod COD
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> ORDERS: Forward the CUSTOMER principal
+deactivate SEC
+activate ORDERS
+ORDERS -> PAYMENTS: createCodPayment(order)
+PAYMENTS -> DB: INSERT payments (COD, PENDING)
+ORDERS --> SEC: 201 Created ApiResponse<OrderResponse>
+SEC --> A: 201 Created ApiResponse<OrderResponse>
+SELLER -> SEC: PATCH /api/v1/seller/shipments/{id}/status with DELIVERED
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC -> SHIPMENTS: Forward the SELLER principal
+deactivate SEC
+activate SHIPMENTS
+SHIPMENTS -> DB: Lock the shipment, lines and order, set DELIVERED
+SHIPMENTS -> ORDERS: markDeliveredIfAllShipped(order)
+alt Every non-cancelled line is in a delivered shipment
+ORDERS -> DB: UPDATE orders SET status = 'DELIVERED'
+ORDERS -> PAYMENTS: markCodCollected(order)
+PAYMENTS -> DB: UPDATE payments SET status = 'COMPLETED', paid_at
+else Some lines are not delivered yet
+note over ORDERS,PAYMENTS
+Order and payment stay unchanged
+end note
+end
+A -> SEC: GET /api/v1/orders/{id}
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+SEC --> A: 200 OK with the order and payment status
+
+@enduml

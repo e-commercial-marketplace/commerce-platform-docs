@@ -1,0 +1,44 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Browse Public Catalog Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "ProductController" as CT
+control "ProductService" as SV
+entity "ProductRepository" as REPO
+database "Redis cache" as CACHE
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/products, GET /api/v1/categories
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: searchListedProducts(request)
+activate SV
+SV -> CACHE: Read the 60-second search page
+SV -> REPO: On a miss, query listed products (active = true)
+REPO -> DB: SELECT products with category and seller
+note over A,SV
+GET /categories goes through CategoryService and the categories cache
+end note
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>>
+SEC --> A: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>>
+
+@enduml

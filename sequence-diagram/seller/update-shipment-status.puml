@@ -1,0 +1,82 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Update Shipment Status Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Seller" as A
+boundary "Spring Security" as SEC
+control "SellerShipmentController" as CT
+control "ShipmentService" as SV
+entity "UserRepository" as USERS
+entity "ShipmentRepository" as REPO
+control "OrderService" as ORDERS
+control "ProductService" as PRODUCTS
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: PATCH /api/v1/seller/shipments/{id}/status
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Caller is not SELLER
+SEC --> A: 403 FORBIDDEN
+else Token and role accepted
+SEC -> CT: Forward the authenticated SELLER principal
+deactivate SEC
+activate CT
+CT -> SV: updateShipmentStatus(sellerId, id, request)
+activate SV
+alt Request succeeds
+SV -> USERS: getApprovedSeller(token id)
+USERS -> DB: SELECT users
+SV -> REPO: Lock the shipment, its lines and the order
+REPO -> DB: SELECT ... FOR UPDATE
+SV -> REPO: Move to the new status
+REPO -> DB: UPDATE shipments
+alt DELIVERED
+SV -> ORDERS: markDeliveredIfAllShipped(order)
+else RETURNED
+SV -> PRODUCTS: increaseStock for each line
+else CANCELLED
+SV -> ORDERS: Cancel the lines, then recalculate totals
+SV -> PRODUCTS: increaseStock for each line
+else PREPARING, SHIPPED or FAILED
+note over SV,REPO
+Only the status changes
+end note
+end
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<ShipmentResponse>
+SEC --> A: 200 OK ApiResponse<ShipmentResponse>
+else Transition not allowed, missing tracking code, or cancelling a paid order's shipment
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+else Seller not APPROVED (checked in the database)
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+else Another seller's shipment
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+else Unknown shipment
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+end
+
+@enduml

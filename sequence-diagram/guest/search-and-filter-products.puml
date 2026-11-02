@@ -1,0 +1,59 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Search and Filter Products Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Guest" as A
+boundary "Spring Security" as SEC
+control "ProductController" as CT
+control "ProductService" as SV
+database "Redis cache" as CACHE
+entity "ProductRepository" as REPO
+control "ProductIndexer" as INDEX
+participant "Embedding provider" as GEMINI
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/products?q=&categoryId=&sellerId=&minPrice=&maxPrice=&minRating=&sort=
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: searchListedProducts(request)
+activate SV
+alt Request succeeds
+SV -> CACHE: Read the 60-second search page
+SV -> REPO: LIKE on name and description with the filters
+REPO -> DB: SELECT products
+opt No product contains the keyword
+SV -> INDEX: findSimilar(q)
+INDEX -> GEMINI: Embed the keyword
+INDEX -> DB: Nearest rows in product_embeddings
+SV -> REPO: Same filters with id IN the nearest ids
+REPO -> DB: SELECT products
+note over SV,INDEX
+If embedding is off or fails the list stays empty
+end note
+end
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>>
+SEC --> A: 200 OK ApiResponse<PageResponse<ProductSummaryResponse>>
+else minPrice above maxPrice
+SV --> CT: BusinessException
+CT --> SEC: 400 VALIDATION_ERROR
+SEC --> A: 400 VALIDATION_ERROR
+end
+
+@enduml

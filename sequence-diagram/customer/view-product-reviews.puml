@@ -1,0 +1,48 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title View Product Reviews Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "ReviewController" as CT
+control "ReviewService" as SV
+entity "ProductRepository" as PRODUCTS
+entity "ReviewRepository" as REPO
+database "PostgreSQL" as DB
+
+autonumber
+
+A -> SEC: GET /api/v1/products/{productId}/reviews
+activate SEC
+note over SEC
+public route, no token required
+end note
+SEC -> CT: Forward the request
+deactivate SEC
+activate CT
+CT -> SV: listProductReviews(productId, page, size)
+activate SV
+alt Request succeeds
+SV -> PRODUCTS: findByIdAndActiveTrue
+PRODUCTS -> DB: SELECT products
+SV -> REPO: findByProductId, newest first
+REPO -> DB: SELECT reviews
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<PageResponse<ReviewResponse>>
+SEC --> A: 200 OK ApiResponse<PageResponse<ReviewResponse>>
+else Unknown or hidden product
+SV --> CT: BusinessException
+CT --> SEC: 404 RESOURCE_NOT_FOUND
+SEC --> A: 404 RESOURCE_NOT_FOUND
+end
+
+@enduml
