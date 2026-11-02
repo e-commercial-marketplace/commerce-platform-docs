@@ -33,7 +33,6 @@ use as the product image.
 end note
 repeat
 :Choose an image from the device;
-:Confirm the upload;
 |System|
 if (The system fails while processing the request?) then (Yes)
   :Return the system error;

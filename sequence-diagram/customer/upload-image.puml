@@ -41,8 +41,7 @@ SV --> CT: Use-case result
 CT --> SEC: 200 OK ApiResponse<UploadSignatureResponse>
 SEC --> A: 200 OK ApiResponse<UploadSignatureResponse>
 A -> CLOUD: POST the file with the signed parameters
-CLOUD --> SEC: secure_url
-SEC --> A: secure_url
+CLOUD --> A: secure_url
 else Caller must be CUSTOMER or SELLER
 SV --> CT: BusinessException
 CT --> SEC: 403 FORBIDDEN
