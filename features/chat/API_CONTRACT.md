@@ -250,7 +250,7 @@ Request body (raw JSON):
 | Field | Rule |
 |---|---|
 | `content` | Text, at most 2000 characters; may be empty only when `imageUrl` is set |
-| `imageUrl` | Optional image URL (at most 2048 characters); upload is not part of this feature |
+| `imageUrl` | Optional image URL (at most 2048 characters) from the Cloudinary upload flow, see `features/upload/API_CONTRACT.md` |
 
 Success: `201 Created` with `ApiResponse<MessageResponse>` (same shape as message-history element),
 also for an idempotent resend.
@@ -262,7 +262,7 @@ Errors:
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | Missing, expired, or invalid token |
 | `FORBIDDEN` | `403 Forbidden` | Authenticated actor is neither `CUSTOMER` nor `SELLER` |
 | `RESOURCE_NOT_FOUND` | `404 Not Found` | Conversation does not exist or the caller is not a participant |
-| `VALIDATION_ERROR` | `400 Bad Request` | Missing `Idempotency-Key`, empty `content` with no `imageUrl`, or malformed body |
+| `VALIDATION_ERROR` | `400 Bad Request` | Missing `Idempotency-Key`, empty `content` with no `imageUrl`, an `imageUrl` outside the project's Cloudinary, or malformed body |
 
 Maps to: `FR-CHAT-02`, `FR-CHAT-03`, `FR-CHAT-04`.
 

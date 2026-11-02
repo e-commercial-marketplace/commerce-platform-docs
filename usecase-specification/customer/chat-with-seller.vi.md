@@ -12,9 +12,9 @@
 <tr><td>1. Chọn nhắn tin từ sản phẩm, shop hoặc đơn hàng.</td><td></td></tr>
 <tr><td></td><td>2. Tìm cuộc trò chuyện của cặp này, chưa có thì tạo mới.</td></tr>
 <tr><td></td><td>3. Hiển thị tin nhắn, mới nhất trước, và đánh dấu tin nhắn của bên kia là đã đọc.</td></tr>
-<tr><td>4. Nhập nội dung hoặc đường dẫn ảnh.</td><td></td></tr>
+<tr><td>4. Nhập nội dung hoặc chọn ảnh.</td><td></td></tr>
 <tr><td>5. Gửi tin nhắn.</td><td></td></tr>
-<tr><td></td><td>6. Kiểm tra có nội dung và khóa chống gửi trùng, và người gửi thuộc cuộc trò chuyện.</td></tr>
+<tr><td></td><td>6. Kiểm tra có nội dung hoặc ảnh thuộc Cloudinary của hệ thống, có khóa chống gửi trùng, và người gửi thuộc cuộc trò chuyện.</td></tr>
 <tr><td></td><td>7. Lưu tin nhắn; khóa đã dùng thì trả lại tin nhắn cũ.</td></tr>
 <tr><td></td><td>8. Đẩy tin nhắn tới cả hai bên qua WebSocket sau khi lưu.</td></tr>
 <tr><td>9. Xem tin nhắn mới.</td><td></td></tr>
@@ -22,7 +22,7 @@
 <tr><td colspan="2"><b>Thay thế 1: Người nhận không tồn tại hoặc không hợp lệ tại bước 2.</b></td></tr>
 <tr><td></td><td>2.1.1. Thông báo không tìm thấy người nhận.</td></tr>
 <tr><td>2.1.2. Xem thông báo.</td><td></td></tr>
-<tr><td colspan="2"><b>Thay thế 2: Tin nhắn trống, thiếu khóa chống gửi trùng, hoặc người gửi không thuộc cuộc trò chuyện tại bước 6.</b></td></tr>
+<tr><td colspan="2"><b>Thay thế 2: Tin nhắn trống, ảnh không hợp lệ, thiếu khóa chống gửi trùng, hoặc người gửi không thuộc cuộc trò chuyện tại bước 6.</b></td></tr>
 <tr><td></td><td>6.1.1. Thông báo không gửi được tin nhắn.</td></tr>
 <tr><td>6.1.2. Xem thông báo, sửa thông tin và quay lại bước 4.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng ngoại lệ:</b></td></tr>

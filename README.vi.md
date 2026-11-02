@@ -57,6 +57,7 @@ Sau khi đọc các tài liệu gốc, mở feature mà bạn đang implement:
 | Payment | [`features/payment/README.vi.md`](features/payment/README.vi.md) |
 | Shipment | [`features/shipment/README.vi.md`](features/shipment/README.vi.md) |
 | Voucher | [`features/voucher/README.vi.md`](features/voucher/README.vi.md) |
+| Upload ảnh | [`features/upload/README.vi.md`](features/upload/README.vi.md) |
 | Review | [`features/review/README.vi.md`](features/review/README.vi.md) |
 | Human chat | [`features/chat/README.vi.md`](features/chat/README.vi.md) |
 | AI | [`features/ai/README.vi.md`](features/ai/README.vi.md) |

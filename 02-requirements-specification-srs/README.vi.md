@@ -331,6 +331,14 @@ GET  /api/v1/ai/sessions                    (CUSTOMER only)
 GET  /api/v1/ai/sessions/{id}/messages      (CUSTOMER and own session only)
 ```
 
+### 5.12 Upload ảnh
+
+| ID | Yêu cầu |
+|---|---|
+| FR-UPLOAD-01 | Hệ thống phải cấp chữ ký upload Cloudinary qua `POST /api/v1/uploads/signature` cho seller đã duyệt với ảnh sản phẩm, và cho customer, seller với ảnh chat. |
+| FR-UPLOAD-02 | File phải đi thẳng từ client lên Cloudinary, và API secret chỉ được nằm ở backend. |
+| FR-UPLOAD-03 | Khi đã cấu hình Cloudinary, hệ thống phải từ chối đường dẫn ảnh mới của sản phẩm hoặc chat không thuộc tài khoản Cloudinary của dự án. |
+
 ## 6. Quy tắc Nghiệp vụ và Bất biến Miền
 
 Các quy tắc sau áp dụng trên toàn bộ feature:

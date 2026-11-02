@@ -48,7 +48,7 @@ SV -> CACHE: Evict the shop and product detail entries after commit
 SV --> CT: Use-case result
 CT --> SEC: 200 OK ApiResponse<ProductResponse>
 SEC --> A: 200 OK ApiResponse<ProductResponse>
-else Invalid data, unknown category or listed product without image
+else Invalid data, unknown category, listed product without image, or changed image URL not allowed
 SV --> CT: BusinessException
 CT --> SEC: 400 VALIDATION_ERROR
 SEC --> A: 400 VALIDATION_ERROR

@@ -13,7 +13,7 @@
 <tr><td></td><td>2. Hiển thị thông tin hiện tại.</td></tr>
 <tr><td>3. Sửa thông tin cần đổi.</td><td></td></tr>
 <tr><td>4. Gửi yêu cầu cập nhật.</td><td></td></tr>
-<tr><td></td><td>5. Kiểm tra sản phẩm thuộc về Seller, danh mục tồn tại và sản phẩm đang bán vẫn có ảnh.</td></tr>
+<tr><td></td><td>5. Kiểm tra sản phẩm thuộc về Seller, danh mục tồn tại, sản phẩm đang bán vẫn có ảnh và ảnh mới (nếu đổi) thuộc Cloudinary của hệ thống.</td></tr>
 <tr><td></td><td>6. Lưu thay đổi và trả về kết quả.</td></tr>
 <tr><td>7. Xem kết quả.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>

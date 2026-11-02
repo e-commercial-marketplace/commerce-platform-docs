@@ -2,7 +2,7 @@
 
 <table>
 <tr><td colspan="2"><b>Tên use case:</b> Tạo sản phẩm</td></tr>
-<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller tạo sản phẩm. Sản phẩm mặc định đang bán và khi đó bắt buộc có đường dẫn ảnh. Hệ thống không nhận file ảnh.</td></tr>
+<tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép Seller tạo sản phẩm. Sản phẩm mặc định đang bán và khi đó bắt buộc có ảnh. Ảnh được đưa lên bằng use case Tải ảnh lên.</td></tr>
 <tr><td colspan="2"><b>Tác nhân chính:</b> Seller</td></tr>
 <tr><td colspan="2"><b>Tác nhân phụ:</b> Không có.</td></tr>
 <tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Seller đã đăng nhập và đã được duyệt.</li></ul></td></tr>
@@ -11,9 +11,9 @@
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
 <tr><td>1. Mở biểu mẫu tạo sản phẩm.</td><td></td></tr>
 <tr><td></td><td>2. Hiển thị biểu mẫu và danh mục.</td></tr>
-<tr><td>3. Nhập tên, mô tả, đường dẫn ảnh, giá, tồn kho và chọn danh mục.</td><td></td></tr>
+<tr><td>3. Nhập tên, mô tả, giá, tồn kho, chọn danh mục và chọn ảnh.</td><td></td></tr>
 <tr><td>4. Gửi yêu cầu tạo.</td><td></td></tr>
-<tr><td></td><td>5. Kiểm tra giá lớn hơn 0, tồn kho không âm, danh mục tồn tại và sản phẩm đang bán có ảnh.</td></tr>
+<tr><td></td><td>5. Kiểm tra giá lớn hơn 0, tồn kho không âm, danh mục tồn tại, sản phẩm đang bán có ảnh và ảnh thuộc Cloudinary của hệ thống.</td></tr>
 <tr><td></td><td>6. Lưu sản phẩm và trả về kết quả.</td></tr>
 <tr><td>7. Xem kết quả.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>

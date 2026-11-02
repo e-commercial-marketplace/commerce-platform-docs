@@ -55,7 +55,7 @@ PUSH ->> OTHER: message event
 SV --> CT: Use-case result
 CT --> SEC: 201 Created ApiResponse<MessageResponse>
 SEC --> A: 201 Created ApiResponse<MessageResponse>
-else Empty message or missing Idempotency-Key
+else Empty message, image URL not allowed, or missing Idempotency-Key
 SV --> CT: BusinessException
 CT --> SEC: 400 VALIDATION_ERROR
 SEC --> A: 400 VALIDATION_ERROR

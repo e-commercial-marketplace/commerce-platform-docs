@@ -45,6 +45,7 @@ triển khai.
 | [`customer/remove-cart-item.puml`](customer/remove-cart-item.puml) | Xóa sản phẩm khỏi giỏ | [`remove-cart-item.vi.md`](../usecase-specification/customer/remove-cart-item.vi.md) |
 | [`customer/search-and-filter-products.puml`](customer/search-and-filter-products.puml) | Tìm kiếm và lọc sản phẩm | [`search-and-filter-products.vi.md`](../usecase-specification/customer/search-and-filter-products.vi.md) |
 | [`customer/update-cart-item.puml`](customer/update-cart-item.puml) | Đổi số lượng trong giỏ | [`update-cart-item.vi.md`](../usecase-specification/customer/update-cart-item.vi.md) |
+| [`customer/upload-image.puml`](customer/upload-image.puml) | Tải ảnh lên | [`upload-image.vi.md`](../usecase-specification/customer/upload-image.vi.md) |
 | [`customer/use-ai-product-search.puml`](customer/use-ai-product-search.puml) | Tìm sản phẩm bằng trợ lý AI | [`use-ai-product-search.vi.md`](../usecase-specification/customer/use-ai-product-search.vi.md) |
 | [`customer/view-ai-chat-history.puml`](customer/view-ai-chat-history.puml) | Xem lịch sử trò chuyện AI | [`view-ai-chat-history.vi.md`](../usecase-specification/customer/view-ai-chat-history.vi.md) |
 | [`customer/view-cart.puml`](customer/view-cart.puml) | Xem giỏ hàng | [`view-cart.vi.md`](../usecase-specification/customer/view-cart.vi.md) |
@@ -72,6 +73,7 @@ triển khai.
 | [`seller/update-product.puml`](seller/update-product.puml) | Sửa sản phẩm | [`update-product.vi.md`](../usecase-specification/seller/update-product.vi.md) |
 | [`seller/update-product-stock.puml`](seller/update-product-stock.puml) | Cập nhật tồn kho | [`update-product-stock.vi.md`](../usecase-specification/seller/update-product-stock.vi.md) |
 | [`seller/update-shipment-status.puml`](seller/update-shipment-status.puml) | Cập nhật trạng thái đợt giao | [`update-shipment-status.vi.md`](../usecase-specification/seller/update-shipment-status.vi.md) |
+| [`seller/upload-image.puml`](seller/upload-image.puml) | Tải ảnh lên | [`upload-image.vi.md`](../usecase-specification/seller/upload-image.vi.md) |
 | [`seller/view-own-order-items.puml`](seller/view-own-order-items.puml) | Xem dòng hàng của tôi | [`view-own-order-items.vi.md`](../usecase-specification/seller/view-own-order-items.vi.md) |
 | [`seller/view-own-products.puml`](seller/view-own-products.puml) | Xem sản phẩm của tôi | [`view-own-products.vi.md`](../usecase-specification/seller/view-own-products.vi.md) |
 | [`seller/view-own-shipments.puml`](seller/view-own-shipments.puml) | Xem đợt giao của tôi | [`view-own-shipments.vi.md`](../usecase-specification/seller/view-own-shipments.vi.md) |

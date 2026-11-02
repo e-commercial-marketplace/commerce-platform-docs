@@ -46,7 +46,7 @@ if (The system fails while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-:Check the product is the seller's, the category exists and a listed product keeps an image;
+:Check the product is the seller's, the category exists, a listed product keeps an image and a changed image is on the project's Cloudinary;
 if (The product is unknown or another seller's?) then (Yes)
   :Return the error;
   |Seller|

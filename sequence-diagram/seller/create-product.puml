@@ -49,7 +49,7 @@ SV -> CACHE: Evict the seller shop entry after commit
 SV --> CT: Use-case result
 CT --> SEC: 201 Created ApiResponse<ProductResponse>
 SEC --> A: 201 Created ApiResponse<ProductResponse>
-else Invalid body, unknown category or listed product without image
+else Invalid body, unknown category, listed product without image, or image URL not allowed
 SV --> CT: BusinessException
 CT --> SEC: 400 VALIDATION_ERROR
 SEC --> A: 400 VALIDATION_ERROR

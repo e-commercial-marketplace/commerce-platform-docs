@@ -46,7 +46,7 @@ endif
 :Display the messages, newest first, and mark the other side's messages read;
 |Customer|
 repeat
-:Enter the text or an image URL;
+:Enter the text or choose an image;
 :Send the message;
 |System|
 if (The system fails while processing the request?) then (Yes)
@@ -57,9 +57,9 @@ if (The system fails while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-:Check there is content and an idempotency key and that the sender is a participant;
+:Check there is content or an image on the project's Cloudinary, an idempotency key, and that the sender is a participant;
 backward :Return the send error;
-repeat while (The message is empty, the key\nis missing or the sender is\nnot a participant?) is (Yes) not (No)
+repeat while (The message is empty, the\nimage is not allowed, the key\nis missing or the sender is\nnot a participant?) is (Yes) not (No)
 :Save the message; a reused key returns the stored message;
 :Push the message to both sides over WebSocket after commit;
 |Customer|

@@ -201,7 +201,7 @@ Status: Confirmed (SRS §5.2).
 |---|---|---|
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
 | `FORBIDDEN` | 403 | Not a seller, or seller not `APPROVED` |
-| `VALIDATION_ERROR` | 400 | `price <= 0`, `stock < 0`, missing name/category, unknown `categoryId`, or an active product (the default) without a non-blank `imageUrl` |
+| `VALIDATION_ERROR` | 400 | `price <= 0`, `stock < 0`, missing name/category, unknown `categoryId`, an active product (the default) without a non-blank `imageUrl`, or an `imageUrl` outside the project's Cloudinary (`features/upload/API_CONTRACT.md`) |
 
 ### PATCH /api/v1/seller/products/{id}
 
@@ -230,7 +230,7 @@ Status: Confirmed (SRS §5.2).
 | `AUTHENTICATION_REQUIRED` | 401 | Missing/expired/invalid token |
 | `FORBIDDEN` | 403 | Not an approved seller, or product owned by another seller |
 | `RESOURCE_NOT_FOUND` | 404 | No product with `id` |
-| `VALIDATION_ERROR` | 400 | Invalid field values, unknown `categoryId`, or a change that would leave an active product without a non-blank `imageUrl` (for example `active: true` on a product with no image, or a blank `imageUrl` on an active product) |
+| `VALIDATION_ERROR` | 400 | Invalid field values, unknown `categoryId`, or a change that would leave an active product without a non-blank `imageUrl` (for example `active: true` on a product with no image, or a blank `imageUrl` on an active product), or a changed `imageUrl` outside the project's Cloudinary |
 
 ### DELETE /api/v1/seller/products/{id}
 

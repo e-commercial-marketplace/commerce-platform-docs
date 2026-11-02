@@ -1,7 +1,7 @@
 # Sơ đồ tuần tự
 
 Thư mục này chứa mỗi use case trong [`usecase-specification/`](../usecase-specification/) một
-sequence diagram kỹ thuật bằng Mermaid (69 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
+sequence diagram kỹ thuật bằng Mermaid (71 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
 Khác với activity diagram, các sơ đồ này không chỉ mô tả luồng nghiệp vụ mà thể hiện request đi
 qua các tầng backend thật.
 
@@ -67,6 +67,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`customer/remove-cart-item.md`](customer/remove-cart-item.md) | Cart - Remove Cart Item | `DELETE /api/v1/cart/items/{id}` (Confirmed) |
 | [`customer/search-and-filter-products.md`](customer/search-and-filter-products.md) | Catalog - Search and Filter Products | `GET /api/v1/products?q=&categoryId=&sellerId=&minPrice=&maxPrice=&minRating=&sort=` (Confirmed) |
 | [`customer/update-cart-item.md`](customer/update-cart-item.md) | Cart - Update Cart Item | `PATCH /api/v1/cart/items/{id}` (Confirmed) |
+| [`customer/upload-image.md`](customer/upload-image.md) | Upload - Upload Image | `POST /api/v1/uploads/signature, then POST to Cloudinary` (Confirmed) |
 | [`customer/use-ai-product-search.md`](customer/use-ai-product-search.md) | AI - Search Products with AI Assistant | `POST /api/v1/ai/ask` (Confirmed) |
 | [`customer/view-ai-chat-history.md`](customer/view-ai-chat-history.md) | AI - View AI Chat History | `GET /api/v1/ai/sessions, GET /api/v1/ai/sessions/{id}/messages` (Confirmed) |
 | [`customer/view-cart.md`](customer/view-cart.md) | Cart - View Cart | `GET /api/v1/cart` (Confirmed) |
@@ -94,6 +95,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 | [`seller/update-product.md`](seller/update-product.md) | Catalog - Update Product | `PATCH /api/v1/seller/products/{id}` (Confirmed) |
 | [`seller/update-product-stock.md`](seller/update-product-stock.md) | Catalog - Update Product Stock | `PATCH /api/v1/seller/products/{id}/stock` (Confirmed) |
 | [`seller/update-shipment-status.md`](seller/update-shipment-status.md) | Shipment - Update Shipment Status | `PATCH /api/v1/seller/shipments/{id}/status` (Confirmed) |
+| [`seller/upload-image.md`](seller/upload-image.md) | Upload - Upload Image | `POST /api/v1/uploads/signature, then POST to Cloudinary` (Confirmed) |
 | [`seller/view-own-order-items.md`](seller/view-own-order-items.md) | Order - View Own Order Items | `GET /api/v1/seller/order-items?status=&orderId=` (Confirmed) |
 | [`seller/view-own-products.md`](seller/view-own-products.md) | Catalog - View Own Products | `GET /api/v1/seller/products, GET /api/v1/seller/products/{id}` (Confirmed) |
 | [`seller/view-own-shipments.md`](seller/view-own-shipments.md) | Shipment - View Own Shipments | `GET /api/v1/seller/shipments?status=&orderId=` (Confirmed) |

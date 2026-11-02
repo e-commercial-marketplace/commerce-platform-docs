@@ -1,0 +1,64 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Upload - Upload Image
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|Customer|
+start
+note right
+Precondition:
+The customer is signed in.
+
+Postcondition:
+The image is on Cloudinary and the app holds its URL to
+use as the chat image.
+end note
+repeat
+:Choose an image from the device;
+:Confirm the upload;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |Customer|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Check the caller may upload for this purpose and Cloudinary is configured;
+if (The caller is not allowed or Cloudinary is not configured?) then (Yes)
+  :Return the upload error;
+  |Customer|
+  :View the message;
+  stop
+else (No)
+endif
+|System|
+:Generate a random image id, sign the parameters with the secret and return a signature valid for one hour;
+:The app posts the file with the signature to Cloudinary;
+backward :Show the upload failure;
+repeat while (Cloudinary rejects the file\n(wrong format or expired\nsignature)?) is (Yes) not (No)
+:Receive the image URL from Cloudinary;
+|Customer|
+:View the chosen image;
+stop
+
+@enduml

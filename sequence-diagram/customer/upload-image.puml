@@ -1,0 +1,57 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+title Upload Image Sequence Diagram
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor white
+    ActivationBorderColor #333333
+    ActivationBackgroundColor #70C5E8
+}
+
+actor "Customer" as A
+boundary "Spring Security" as SEC
+control "UploadController" as CT
+control "UploadService" as SV
+control "CloudinaryGateway" as GATEWAY
+participant "Cloudinary" as CLOUD
+
+autonumber
+
+A -> SEC: POST /api/v1/uploads/signature with purpose CHAT
+activate SEC
+note over SEC
+validate the JWT and load AuthUser into the SecurityContext
+end note
+alt Token missing, expired or invalid
+SEC --> A: 401 AUTHENTICATION_REQUIRED
+else Token accepted
+SEC -> CT: Forward the authenticated CUSTOMER principal
+deactivate SEC
+activate CT
+CT -> SV: createSignature(caller, purpose)
+activate SV
+alt Allowed and configured
+SV -> SV: Check the caller is CUSTOMER or SELLER
+SV -> GATEWAY: sign(publicId, timestamp)
+GATEWAY --> SV: SHA-1 signature of the sorted parameters plus the secret
+SV --> CT: Use-case result
+CT --> SEC: 200 OK ApiResponse<UploadSignatureResponse>
+SEC --> A: 200 OK ApiResponse<UploadSignatureResponse>
+A -> CLOUD: POST the file with the signed parameters
+CLOUD --> SEC: secure_url
+SEC --> A: secure_url
+else Caller must be CUSTOMER or SELLER
+SV --> CT: BusinessException
+CT --> SEC: 403 FORBIDDEN
+SEC --> A: 403 FORBIDDEN
+else Cloudinary is not configured
+SV --> CT: BusinessException
+CT --> SEC: 503 UPLOAD_NOT_CONFIGURED
+SEC --> A: 503 UPLOAD_NOT_CONFIGURED
+end
+end
+
+@enduml

@@ -44,7 +44,7 @@ sequenceDiagram
             Service-->>Controller: Use-case result
             Controller-->>Client: 201 Created ApiResponse<MessageResponse>
             Client-->>Customer: Display the result
-        else Empty message or missing Idempotency-Key
+        else Empty message, image URL not allowed, or missing Idempotency-Key
             Service-->>Controller: Propagate the error
             Controller->>Handler: Normalize safe API error
             Handler-->>Client: 400 VALIDATION_ERROR

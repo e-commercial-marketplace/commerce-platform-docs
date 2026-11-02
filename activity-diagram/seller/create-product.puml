@@ -37,7 +37,7 @@ end note
 :Display the form and categories;
 |Seller|
 repeat
-:Enter name, description, image URL, price, stock and category;
+:Enter name, description, price, stock, category and choose an image;
 :Submit the product;
 |System|
 if (The system fails while processing the request?) then (Yes)
@@ -48,7 +48,7 @@ if (The system fails while processing the request?) then (Yes)
 else (No)
 endif
 |System|
-:Check price above 0, stock not negative, the category exists and a listed product has an image;
+:Check price above 0, stock not negative, the category exists, a listed product has an image and the image is on the project's Cloudinary;
 backward :Return the validation error;
 repeat while (The data is invalid?) is (Yes) not (No)
 :Save the product and return the result;

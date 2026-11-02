@@ -7,8 +7,8 @@ This folder contains editable draw.io use-case diagrams for the marketplace acto
 | File | Actor | Scope |
 |---|---|---|
 | `guest-usecases.drawio` | UNAUTHENTICATED USER | Public catalog, product details, seller shop, product reviews, registration, login, password reset, and guest AI product search |
-| `customer-usecases.drawio` | CUSTOMER | Public catalog/search/details, seller shop, reviews, cart, voucher, checkout, payment, orders, shipments, chat, profile, password change, logout, customer AI search and AI chat history |
-| `seller-usecases.drawio` | SELLER | Owned products, stock, order items, shipments, and customer chat |
+| `customer-usecases.drawio` | CUSTOMER | Public catalog/search/details, seller shop, reviews, cart, voucher, image upload in chat, checkout, payment, orders, shipments, chat, profile, password change, logout, customer AI search and AI chat history |
+| `seller-usecases.drawio` | SELLER | Owned products, stock, image upload, order items, shipments, and customer chat |
 | `admin-usecases.drawio` | ADMIN | Users, seller approval, categories, vouchers, and carriers |
 
 ## Notation rules

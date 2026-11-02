@@ -45,6 +45,7 @@ the implementation code.
 | [`customer/remove-cart-item.puml`](customer/remove-cart-item.puml) | Remove Cart Item | [`remove-cart-item.vi.md`](../usecase-specification/customer/remove-cart-item.vi.md) |
 | [`customer/search-and-filter-products.puml`](customer/search-and-filter-products.puml) | Search and Filter Products | [`search-and-filter-products.vi.md`](../usecase-specification/customer/search-and-filter-products.vi.md) |
 | [`customer/update-cart-item.puml`](customer/update-cart-item.puml) | Update Cart Item | [`update-cart-item.vi.md`](../usecase-specification/customer/update-cart-item.vi.md) |
+| [`customer/upload-image.puml`](customer/upload-image.puml) | Upload Image | [`upload-image.vi.md`](../usecase-specification/customer/upload-image.vi.md) |
 | [`customer/use-ai-product-search.puml`](customer/use-ai-product-search.puml) | Search Products with AI Assistant | [`use-ai-product-search.vi.md`](../usecase-specification/customer/use-ai-product-search.vi.md) |
 | [`customer/view-ai-chat-history.puml`](customer/view-ai-chat-history.puml) | View AI Chat History | [`view-ai-chat-history.vi.md`](../usecase-specification/customer/view-ai-chat-history.vi.md) |
 | [`customer/view-cart.puml`](customer/view-cart.puml) | View Cart | [`view-cart.vi.md`](../usecase-specification/customer/view-cart.vi.md) |
@@ -72,6 +73,7 @@ the implementation code.
 | [`seller/update-product.puml`](seller/update-product.puml) | Update Product | [`update-product.vi.md`](../usecase-specification/seller/update-product.vi.md) |
 | [`seller/update-product-stock.puml`](seller/update-product-stock.puml) | Update Product Stock | [`update-product-stock.vi.md`](../usecase-specification/seller/update-product-stock.vi.md) |
 | [`seller/update-shipment-status.puml`](seller/update-shipment-status.puml) | Update Shipment Status | [`update-shipment-status.vi.md`](../usecase-specification/seller/update-shipment-status.vi.md) |
+| [`seller/upload-image.puml`](seller/upload-image.puml) | Upload Image | [`upload-image.vi.md`](../usecase-specification/seller/upload-image.vi.md) |
 | [`seller/view-own-order-items.puml`](seller/view-own-order-items.puml) | View Own Order Items | [`view-own-order-items.vi.md`](../usecase-specification/seller/view-own-order-items.vi.md) |
 | [`seller/view-own-products.puml`](seller/view-own-products.puml) | View Own Products | [`view-own-products.vi.md`](../usecase-specification/seller/view-own-products.vi.md) |
 | [`seller/view-own-shipments.puml`](seller/view-own-shipments.puml) | View Own Shipments | [`view-own-shipments.vi.md`](../usecase-specification/seller/view-own-shipments.vi.md) |

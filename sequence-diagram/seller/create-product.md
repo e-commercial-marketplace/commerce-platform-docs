@@ -40,7 +40,7 @@ sequenceDiagram
             Service-->>Controller: Use-case result
             Controller-->>Client: 201 Created ApiResponse<ProductResponse>
             Client-->>Seller: Display the result
-        else Invalid body, unknown category or listed product without image
+        else Invalid body, unknown category, listed product without image, or image URL not allowed
             Service-->>Controller: Propagate the error
             Controller->>Handler: Normalize safe API error
             Handler-->>Client: 400 VALIDATION_ERROR

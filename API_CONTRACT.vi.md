@@ -635,6 +635,11 @@ Review listing trả về `ApiResponse<PageResponse<ReviewResponse>>`; `data` ch
 `totalPages`. Một ineligible customer nhận
 `REVIEW_NOT_ELIGIBLE`; một second review cho cùng customer/product nhận `REVIEW_ALREADY_EXISTS`.
 
+### 7.1 Upload ảnh
+
+`POST /api/v1/uploads/signature` cấp chữ ký Cloudinary; client upload file thẳng lên Cloudinary rồi gửi URL nhận
+được làm `imageUrl` của sản phẩm hoặc tin nhắn. Chi tiết: `features/upload/API_CONTRACT.md`.
+
 ## 8. AI product search và hỏi đáp marketplace
 
 Mobile client gửi natural language tới backend. Backend ánh xạ request thành constrained

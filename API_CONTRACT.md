@@ -646,6 +646,11 @@ Review listing returns `ApiResponse<PageResponse<ReviewResponse>>`; its `data` c
 `totalElements`, and `totalPages`. An ineligible customer receives
 `REVIEW_NOT_ELIGIBLE`; a second review for the same customer/product receives `REVIEW_ALREADY_EXISTS`.
 
+### 7.1 Image upload
+
+`POST /api/v1/uploads/signature` issues a Cloudinary signature; the client uploads the file directly to Cloudinary
+and sends the returned URL as a product or chat `imageUrl`. Details: `features/upload/API_CONTRACT.md`.
+
 ## 8. AI product search and marketplace Q&A
 
 The mobile client sends natural language to the backend. The backend maps the request to a constrained

@@ -57,6 +57,7 @@ After reading the root documents, open the feature that you are implementing:
 | Payment | [`features/payment/README.md`](features/payment/README.md) |
 | Shipment | [`features/shipment/README.md`](features/shipment/README.md) |
 | Voucher | [`features/voucher/README.md`](features/voucher/README.md) |
+| Image upload | [`features/upload/README.md`](features/upload/README.md) |
 | Review | [`features/review/README.md`](features/review/README.md) |
 | Human chat | [`features/chat/README.md`](features/chat/README.md) |
 | AI | [`features/ai/README.md`](features/ai/README.md) |

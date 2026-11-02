@@ -331,6 +331,14 @@ GET  /api/v1/ai/sessions                    (CUSTOMER only)
 GET  /api/v1/ai/sessions/{id}/messages      (CUSTOMER and own session only)
 ```
 
+### 5.12 Image upload
+
+| ID | Requirement |
+|---|---|
+| FR-UPLOAD-01 | The system shall issue a Cloudinary upload signature through `POST /api/v1/uploads/signature` to approved sellers for product images and to customers and sellers for chat images. |
+| FR-UPLOAD-02 | Files shall go directly from the client to Cloudinary, and the API secret shall stay on the backend. |
+| FR-UPLOAD-03 | When Cloudinary is configured, the system shall reject a new product or chat image URL outside the project's Cloudinary account. |
+
 ## 6. Business Rules and Domain Invariants
 
 The following rules apply across features:
