@@ -549,7 +549,7 @@ Screen -> Hook (TanStack Query) -> Service -> apiClient (Axios) -> Spring Boot /
 ### 12.2 Quy tắc triển khai
 
 1. Screen không gọi Axios trực tiếp; chỉ dùng hook.
-2. Service chỉ chứa đường dẫn endpoint và ánh xạ payload, luôn dùng `apiClient` và `unwrapData` dùng chung.
+2. Service chỉ chứa đường dẫn endpoint và ánh xạ payload, luôn dùng `apiClient` và `unwrapData` dùng chung. Ngoại lệ duy nhất là bước upload file lên Cloudinary trong `uploadService`, dùng `axios` gốc để Bearer token không bị gửi ra ngoài backend (`fetch` toàn cục của Expo không nhận file dạng `{ uri, name, type }` của React Native).
 3. Hook sở hữu server state. Dữ liệu server không được sao chép vào React Context.
 4. Sau mutation, hook lưu response chuẩn từ server hoặc invalidate query liên quan. Không cập nhật lạc quan.
 5. Query key chỉ được tạo trong `api/queryKeys.ts`.

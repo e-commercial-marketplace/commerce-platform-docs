@@ -1,6 +1,6 @@
 # Image Upload API Contract
 
-Status: Confirmed (backend implemented). The mobile client still has to adopt this flow.
+Status: Implemented (backend and mobile client: seller product form and chat).
 
 Conventions: base path `/api/v1`; responses use `ApiResponse<T>`. Files never pass through the backend: the
 client uploads directly to Cloudinary with a signature issued here, then sends the returned URL to the normal
