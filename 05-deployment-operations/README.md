@@ -23,7 +23,7 @@ restore or acceptance was performed. Detailed local commands and configuration a
 - [ ] Record artifact commit, environment, operator and rollback plan; check the matching tests/CI.
 - [ ] Confirm the database, backup and restore permissions; do not assume backup/restore succeeded.
 - [ ] Configure `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `APP_JWT_SECRET` via a secret manager; set
-  CORS to trusted origins and configure SMTP, VNPAY, AI and Redis as needed. Do not use local credentials in production.
+  CORS to trusted origins and configure Brevo email (`BREVO_API_KEY`, sent over HTTPS because Render free services block SMTP ports), VNPAY, AI and Redis as needed. Do not use local credentials in production.
 - [ ] Review new Flyway migrations and compatibility with the old application; do not edit applied
   migrations. Migrations run at backend startup: inspect logs/health before serving traffic.
 - [ ] After release, check health, public catalog GET, an authorized test-account login and a read-only

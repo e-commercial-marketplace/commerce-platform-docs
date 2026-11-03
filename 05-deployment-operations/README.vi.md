@@ -23,7 +23,7 @@ backup, restore hay nghiệm thu. Các lệnh local và cấu hình chi tiết n
 - [ ] Ghi commit artifact, môi trường, người thực hiện và kế hoạch quay lui; kiểm tra test/CI tương ứng.
 - [ ] Xác nhận database, backup và quyền khôi phục; không mặc định backup/restore đã thành công.
 - [ ] Cấu hình `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `APP_JWT_SECRET` qua secret manager; cấu hình
-  CORS theo origin tin cậy và SMTP, VNPAY, AI, Redis khi cần. Không dùng credential local ở production.
+  CORS theo origin tin cậy và email Brevo (`BREVO_API_KEY`, gửi qua HTTPS vì Render miễn phí chặn cổng SMTP), VNPAY, AI, Redis khi cần. Không dùng credential local ở production.
 - [ ] Kiểm tra Flyway migration mới và tương thích với phiên bản cũ; không sửa migration đã áp dụng.
   Migration chạy khi backend khởi động: kiểm tra log/health trước khi đưa traffic.
 - [ ] Sau release, kiểm tra health, GET catalog công khai, login tài khoản kiểm thử được phép và một
