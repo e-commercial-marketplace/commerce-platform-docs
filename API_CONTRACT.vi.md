@@ -30,7 +30,7 @@ trong `application.yml`, áp dụng bởi `WebConfig`) nên controller khai báo
 Authorization: Bearer <access-token>
 ```
 
-Các requests public catalog (kể cả trang shop của seller), guest AI product-search và review-list không yêu cầu token. Các thao tác cart,
+Các requests public catalog (kể cả trang shop của seller), danh sách voucher đang dùng được (`GET /api/v1/vouchers`), guest AI product-search và review-list không yêu cầu token. Các thao tác cart,
 checkout, order và tạo review yêu cầu `CUSTOMER` đã authenticated.
 
 ### 2.2 Định dạng dữ liệu

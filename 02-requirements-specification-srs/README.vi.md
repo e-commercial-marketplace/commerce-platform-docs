@@ -265,6 +265,7 @@ PATCH /api/v1/admin/carriers/{id}
 Các endpoint theo kế hoạch:
 
 ```text
+GET   /api/v1/vouchers
 GET   /api/v1/vouchers/{code}/validate
 GET   /api/v1/admin/vouchers
 POST  /api/v1/admin/vouchers
@@ -418,8 +419,8 @@ PostgreSQL lưu trữ dữ liệu marketplace. pgvector lưu trữ embedding cho
 
 ### 8.5 Nhà cung cấp email
 
-Backend phải gửi email giao dịch, ví dụ mã đặt lại mật khẩu, qua SMTP cấu hình bằng biến môi trường.
-Khi phát triển dùng Gmail SMTP với App Password; chưa chọn nhà cung cấp cho production. Khi tắt email lúc phát triển local, mã được ghi vào log của ứng dụng thay vì
+Backend phải gửi email giao dịch, ví dụ mã đặt lại mật khẩu, qua API HTTPS của Brevo cấu hình bằng biến môi trường,
+vì Render miễn phí chặn cổng SMTP. Khi tắt email lúc phát triển local, mã được ghi vào log của ứng dụng thay vì
 gửi đi; production phải bật email.
 
 ## 9. Kiểm chứng và Nghiệm thu

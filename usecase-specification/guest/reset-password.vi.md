@@ -4,7 +4,7 @@
 <tr><td colspan="2"><b>Tên use case:</b> Đặt lại mật khẩu</td></tr>
 <tr><td colspan="2"><b>Mô tả ngắn:</b> Hệ thống cho phép người dùng quên mật khẩu nhận mã 6 số qua email rồi đặt mật khẩu mới. Áp dụng cho mọi vai trò.</td></tr>
 <tr><td colspan="2"><b>Tác nhân chính:</b> Guest</td></tr>
-<tr><td colspan="2"><b>Tác nhân phụ:</b> Dịch vụ email (SMTP).</td></tr>
+<tr><td colspan="2"><b>Tác nhân phụ:</b> Dịch vụ email (Brevo).</td></tr>
 <tr><td colspan="2"><b>Tiền điều kiện:</b><ul><li>Người dùng chưa đăng nhập.</li></ul></td></tr>
 <tr><td colspan="2"><b>Hậu điều kiện:</b><ul><li>Mật khẩu được thay, mã đã dùng hết hiệu lực và mọi refresh token bị thu hồi; người dùng đăng nhập lại bằng mật khẩu mới.</li></ul></td></tr>
 <tr><td colspan="2"><b>Luồng chính:</b></td></tr>

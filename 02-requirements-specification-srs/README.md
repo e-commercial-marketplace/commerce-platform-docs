@@ -265,6 +265,7 @@ PATCH /api/v1/admin/carriers/{id}
 Planned endpoints:
 
 ```text
+GET   /api/v1/vouchers
 GET   /api/v1/vouchers/{code}/validate
 GET   /api/v1/admin/vouchers
 POST  /api/v1/admin/vouchers
@@ -418,9 +419,8 @@ data shall be read through application services/tools rather than treated as sta
 
 ### 8.5 Email provider
 
-The backend shall send transactional email, such as password reset codes, through SMTP configured
-by environment variables. Development uses Gmail SMTP with an App Password; the production provider
-is not selected yet. When email is turned off for local
+The backend shall send transactional email, such as password reset codes, through the Brevo HTTPS API
+configured by environment variables, because Render free services block SMTP ports. When email is turned off for local
 development, the code is written to the application log instead; production shall turn email on.
 
 ## 9. Verification and Acceptance

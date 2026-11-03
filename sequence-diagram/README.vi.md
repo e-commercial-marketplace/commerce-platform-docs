@@ -1,7 +1,7 @@
 # Sơ đồ tuần tự
 
 Thư mục này chứa mỗi use case trong [`usecase-specification/`](../usecase-specification/) một
-sequence diagram kỹ thuật bằng Mermaid (71 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
+sequence diagram kỹ thuật bằng Mermaid (72 use case), kèm một sơ đồ bổ sung cho tích hợp VNPAY.
 Khác với activity diagram, các sơ đồ này không chỉ mô tả luồng nghiệp vụ mà thể hiện request đi
 qua các tầng backend thật.
 

@@ -1,7 +1,7 @@
 # Sequence Diagrams
 
 This folder contains one technical Mermaid sequence diagram per use case in
-[`usecase-specification/`](../usecase-specification/) (71 use cases), plus one supplemental VNPAY
+[`usecase-specification/`](../usecase-specification/) (72 use cases), plus one supplemental VNPAY
 integration diagram. Unlike the activity diagrams, these diagrams are not only business flows:
 they trace the request through the real backend layers.
 

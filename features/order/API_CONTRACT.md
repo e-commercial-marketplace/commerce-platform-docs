@@ -41,7 +41,7 @@ Request body:
 | Field | Rule |
 |---|---|
 | `cartItemIds` | Required, non-empty, no duplicates. Ids of cart lines in the caller's own cart; only these lines are bought. |
-| `shippingAddress` | Required, non-blank string, at most 1000 characters (address snapshot). The app may prefill it from the profile `address`. |
+| `shippingAddress` | Required, non-blank string, at most 1000 characters (address snapshot). The app offers the profile `address` as an option the customer must choose; it does not fill it in automatically. |
 | `paymentMethod` | Required. `COD` or `VNPAY`. With `VNPAY`, checkout also creates the first `PENDING` VNPAY attempt and returns its `paymentUrl` (see `..\payment\API_CONTRACT.md`). |
 | `voucherCode` | Optional, at most 64 characters, case-insensitive. Applies one platform voucher (see `..\voucher\API_CONTRACT.md`): consumes one use atomically and sets `discountAmount` to `discountPercent` % of the subtotal. |
 

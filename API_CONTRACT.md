@@ -30,7 +30,7 @@ paths (actuator, OpenAPI, Swagger UI) stay unversioned. Protected requests send:
 Authorization: Bearer <access-token>
 ```
 
-Public catalog (including seller shop pages), guest AI product-search, and review-list requests do not require a token. Cart,
+Public catalog (including seller shop pages), the list of usable vouchers (`GET /api/v1/vouchers`), guest AI product-search, and review-list requests do not require a token. Cart,
 checkout, order, and review-creation operations require an authenticated `CUSTOMER`.
 
 ### 2.2 Data formats
