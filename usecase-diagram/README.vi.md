@@ -6,8 +6,8 @@ Thư mục này chứa các sơ đồ use-case draw.io có thể chỉnh sửa c
 
 | Tệp | Tác nhân | Phạm vi |
 |---|---|---|
-| `guest-usecases.drawio` | UNAUTHENTICATED USER | Catalog công khai, chi tiết sản phẩm, trang shop, đánh giá sản phẩm, đăng ký, đăng nhập, đặt lại mật khẩu và AI tìm kiếm sản phẩm cho guest |
-| `customer-usecases.drawio` | CUSTOMER | Catalog/tìm kiếm/chi tiết công khai, trang shop, đánh giá, giỏ hàng, voucher, tải ảnh trong chat, checkout, thanh toán, đơn hàng, shipment, chat, hồ sơ, đổi mật khẩu, đăng xuất, AI tìm kiếm và lịch sử trò chuyện AI |
+| `guest-usecases.drawio` | UNAUTHENTICATED USER | Xem voucher, Catalog công khai, chi tiết sản phẩm, trang shop, đánh giá sản phẩm, đăng ký, đăng nhập, đặt lại mật khẩu và AI tìm kiếm sản phẩm cho guest |
+| `customer-usecases.drawio` | CUSTOMER | Xem voucher, Catalog/tìm kiếm/chi tiết công khai, trang shop, đánh giá, giỏ hàng, voucher, tải ảnh trong chat, checkout, thanh toán, đơn hàng, shipment, chat, hồ sơ, đổi mật khẩu, đăng xuất, AI tìm kiếm và lịch sử trò chuyện AI |
 | `seller-usecases.drawio` | SELLER | Sản phẩm thuộc sở hữu, tồn kho, tải ảnh, order item, shipment và chat với customer |
 | `admin-usecases.drawio` | ADMIN | Người dùng, duyệt seller, danh mục, voucher và đơn vị vận chuyển |
 

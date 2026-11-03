@@ -20,6 +20,9 @@ database "PostgreSQL" as DB
 
 autonumber
 
+note over A
+choose a suggested voucher or enter a code
+end note
 A -> SEC: GET /api/v1/vouchers/{code}/validate
 activate SEC
 note over SEC

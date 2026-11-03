@@ -31,7 +31,7 @@ Postcondition:
 Nothing changes. A use is consumed only at checkout.
 end note
 repeat
-:Enter a voucher code at checkout;
+:Choose a suggested voucher or enter a code at checkout;
 :Submit the code;
 |System|
 if (The system fails while processing the request?) then (Yes)

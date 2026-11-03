@@ -52,6 +52,7 @@ Client -> Spring Security -> FeatureController -> FeatureService -> FeatureRepos
 |---|---|---|
 | [`customer/add-cart-item.md`](customer/add-cart-item.md) | Cart - Add Cart Item | `POST /api/v1/cart/items` (Confirmed) |
 | [`customer/apply-voucher.md`](customer/apply-voucher.md) | Voucher - Apply Voucher | `GET /api/v1/vouchers/{code}/validate` (Confirmed) |
+| [`customer/view-vouchers.md`](customer/view-vouchers.md) | Voucher - View Vouchers | `GET /api/v1/vouchers` (Confirmed) |
 | [`customer/browse-catalog.md`](customer/browse-catalog.md) | Catalog - Browse Catalog | `GET /api/v1/products, GET /api/v1/categories` (Confirmed) |
 | [`customer/change-password.md`](customer/change-password.md) | Auth - Change Password | `PATCH /api/v1/users/me/password` (Confirmed) |
 | [`customer/chat-with-seller.md`](customer/chat-with-seller.md) | Chat - Chat with Seller | `GET/POST /api/v1/conversations, GET/POST /api/v1/conversations/{id}/messages, PATCH /api/v1/conversations/{id}/read, WebSocket /ws/chat` (Confirmed) |

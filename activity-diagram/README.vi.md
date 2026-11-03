@@ -30,6 +30,7 @@ triển khai.
 |---|---|---|
 | [`customer/add-cart-item.puml`](customer/add-cart-item.puml) | Thêm sản phẩm vào giỏ | [`add-cart-item.vi.md`](../usecase-specification/customer/add-cart-item.vi.md) |
 | [`customer/apply-voucher.puml`](customer/apply-voucher.puml) | Áp dụng voucher | [`apply-voucher.vi.md`](../usecase-specification/customer/apply-voucher.vi.md) |
+| [`customer/view-vouchers.puml`](customer/view-vouchers.puml) | Xem voucher | [`view-vouchers.vi.md`](../usecase-specification/customer/view-vouchers.vi.md) |
 | [`customer/browse-catalog.puml`](customer/browse-catalog.puml) | Duyệt catalog | [`browse-catalog.vi.md`](../usecase-specification/customer/browse-catalog.vi.md) |
 | [`customer/change-password.puml`](customer/change-password.puml) | Đổi mật khẩu | [`change-password.vi.md`](../usecase-specification/customer/change-password.vi.md) |
 | [`customer/chat-with-seller.puml`](customer/chat-with-seller.puml) | Trò chuyện với Seller | [`chat-with-seller.vi.md`](../usecase-specification/customer/chat-with-seller.vi.md) |

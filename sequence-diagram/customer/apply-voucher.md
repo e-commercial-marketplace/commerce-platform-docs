@@ -15,7 +15,7 @@ sequenceDiagram
     participant Repo as VoucherRepository
     participant DB as PostgreSQL
     participant Handler as GlobalExceptionHandler
-    Customer->>Client: Apply Voucher
+    Customer->>Client: Choose a suggested voucher or enter a code
     Client->>Security: GET /api/v1/vouchers/{code}/validate
     alt Token missing, expired or invalid
         Security-->>Client: 401 AUTHENTICATION_REQUIRED

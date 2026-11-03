@@ -260,6 +260,7 @@ PATCH /api/v1/admin/carriers/{id}
 | FR-VCH-03 | Hệ thống phải từ chối voucher hết hạn hoặc đã dùng hết. |
 | FR-VCH-04 | Việc tiêu thụ voucher phải sử dụng update điều kiện nguyên tử (atomic conditional update) hoặc chiến lược optimistic-locking tương đương để các request đồng thời không vượt quá `usageLimit`. |
 | FR-VCH-05 | Voucher phải được áp lúc checkout. Giảm giá bằng phần trăm của voucher trên tổng các dòng chưa hủy của order và phải được tính lại khi một dòng bị hủy. Lượt dùng đã tiêu không được hoàn lại khi order bị hủy. |
+| FR-VCH-06 | Mọi người dùng, kể cả Guest, phải xem được các voucher đang dùng được và sao chép mã. Dùng voucher vẫn phải là Customer đã đăng nhập khi đặt hàng. |
 
 Các endpoint theo kế hoạch:
 

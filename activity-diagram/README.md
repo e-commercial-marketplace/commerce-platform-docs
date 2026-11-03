@@ -30,6 +30,7 @@ the implementation code.
 |---|---|---|
 | [`customer/add-cart-item.puml`](customer/add-cart-item.puml) | Add Cart Item | [`add-cart-item.vi.md`](../usecase-specification/customer/add-cart-item.vi.md) |
 | [`customer/apply-voucher.puml`](customer/apply-voucher.puml) | Apply Voucher | [`apply-voucher.vi.md`](../usecase-specification/customer/apply-voucher.vi.md) |
+| [`customer/view-vouchers.puml`](customer/view-vouchers.puml) | View Vouchers | [`view-vouchers.vi.md`](../usecase-specification/customer/view-vouchers.vi.md) |
 | [`customer/browse-catalog.puml`](customer/browse-catalog.puml) | Browse Catalog | [`browse-catalog.vi.md`](../usecase-specification/customer/browse-catalog.vi.md) |
 | [`customer/change-password.puml`](customer/change-password.puml) | Change Password | [`change-password.vi.md`](../usecase-specification/customer/change-password.vi.md) |
 | [`customer/chat-with-seller.puml`](customer/chat-with-seller.puml) | Chat with Seller | [`chat-with-seller.vi.md`](../usecase-specification/customer/chat-with-seller.vi.md) |

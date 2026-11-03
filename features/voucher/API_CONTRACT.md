@@ -2,7 +2,8 @@
 
 ## 1. Scope
 
-Covers platform voucher administration and the customer validity check. A
+Covers platform voucher administration, the public list of usable vouchers and
+the customer validity check. A
 voucher is applied at checkout through the optional `voucherCode` field of
 `POST /api/v1/orders` (see `..\order\API_CONTRACT.md`); there is no separate
 "apply voucher" endpoint.
@@ -47,7 +48,34 @@ Status: Confirmed — implemented in Phase 8.
 }
 ```
 
-## 3. Customer endpoint
+## 3. Public and customer endpoints
+
+### GET /api/v1/vouchers
+
+List the vouchers that can be used now, so anyone can discover them on entering
+the app. Reading is only a suggestion: it holds nothing and consumes no use.
+Actor: public, no token required. Using a voucher still requires a signed-in
+`CUSTOMER` at checkout.
+
+Query: `page` (default `0`), `size` (default `20`, maximum `100`).
+
+A voucher is listed when `validFrom <= now < validTo` and `timesUsed < usageLimit`.
+Order: highest `discountPercent` first, then the earliest `validTo`, then `code`.
+
+Success: `200 OK`, `ApiResponse<PageResponse<VoucherSummaryResponse>>`. An empty
+page is a success. `VoucherSummaryResponse` leaves out `validFrom`, `usageLimit`
+and `timesUsed`, because the use counts are internal:
+
+```json
+{
+  "code": "SALE10",
+  "description": "10% off platform campaign",
+  "discountPercent": 10,
+  "validTo": "2026-11-01T00:00:00Z"
+}
+```
+
+Maps to FR-VCH-06.
 
 ### GET /api/v1/vouchers/{code}/validate
 

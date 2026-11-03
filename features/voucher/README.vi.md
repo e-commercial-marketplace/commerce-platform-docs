@@ -19,6 +19,7 @@ Quản trị voucher và áp dụng voucher của customer được hoãn khỏi
 ## API dự kiến
 
 ```text
+GET   /api/v1/vouchers
 GET   /api/v1/vouchers/{code}/validate
 GET   /api/v1/admin/vouchers
 POST  /api/v1/admin/vouchers
@@ -30,6 +31,7 @@ DELETE /api/v1/admin/vouchers/{code}
 
 | Tác nhân | Thao tác cho phép | Ràng buộc |
 |---|---|---|
+| Guest, Customer, Seller, Admin | Xem voucher đang dùng được và sao chép mã | `GET /api/v1/vouchers` công khai; dùng voucher cần Customer đã đăng nhập khi đặt hàng |
 | ADMIN | Tạo và quản lý voucher | Yêu cầu ủy quyền admin. |
 | CUSTOMER | Kiểm tra/áp dụng voucher cho đơn hàng của mình | Quyền sở hữu đơn hàng và quy tắc voucher được kiểm tra. |
 | SELLER | Không quản trị voucher trực tiếp | Seller không kiểm soát hiệu lực voucher nền tảng. |

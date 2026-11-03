@@ -260,6 +260,7 @@ PATCH /api/v1/admin/carriers/{id}
 | FR-VCH-03 | The system shall reject expired or exhausted vouchers. |
 | FR-VCH-04 | Voucher consumption shall use an atomic conditional update or equivalent optimistic-locking strategy so concurrent requests cannot exceed `usageLimit`. |
 | FR-VCH-05 | A voucher shall be applied at checkout. Its discount shall be the voucher percentage of the subtotal of the order's non-cancelled lines and shall be recalculated when a line is cancelled. A consumed use shall not be given back when the order is cancelled. |
+| FR-VCH-06 | Every user, including a Guest, shall be able to view the vouchers usable now and copy a code. Using a voucher shall still require a signed-in Customer at checkout. |
 
 Planned endpoints:
 

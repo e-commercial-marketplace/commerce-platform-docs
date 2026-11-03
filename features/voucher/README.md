@@ -20,6 +20,7 @@ slice. Keep the validation and concurrency rules documented here for the later i
 ## Planned API
 
 ```text
+GET   /api/v1/vouchers
 GET   /api/v1/vouchers/{code}/validate
 GET   /api/v1/admin/vouchers
 POST  /api/v1/admin/vouchers
@@ -31,6 +32,7 @@ DELETE /api/v1/admin/vouchers/{code}
 
 | Actor | Allowed operation | Constraint |
 |---|---|---|
+| Guest, Customer, Seller, Admin | View usable vouchers and copy a code | `GET /api/v1/vouchers` is public; using a voucher requires a signed-in Customer at checkout |
 | ADMIN | Create and manage vouchers | Admin authorization is required. |
 | CUSTOMER | Validate/apply a voucher to their own order | Order ownership and voucher rules are checked. |
 | SELLER | No direct voucher administration | Seller does not control platform voucher validity. |

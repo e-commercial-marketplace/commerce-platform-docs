@@ -1,0 +1,69 @@
+@startuml
+!include https://static.visual-paradigm.com/web/resources/plantuml-stdlib/themes/vp.puml
+
+title Voucher - View Vouchers
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam activityFontName Arial
+skinparam activityFontSize 14
+skinparam activityBorderThickness 1.5
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #222222
+skinparam SwimlaneBorderColor #222222
+skinparam SwimlaneBorderThickness 2
+skinparam activity {
+  BackgroundColor #7DD3FC
+  BorderColor #2563EB
+  DiamondBackgroundColor #7DD3FC
+  DiamondBorderColor #2563EB
+  StartColor #111827
+  EndColor #FFFFFF
+}
+
+|User|
+start
+note right
+Precondition:
+No sign-in is required.
+
+Postcondition:
+Nothing changes. Viewing or copying a code consumes no use.
+end note
+:Open the home screen or choose to view all vouchers;
+|System|
+if (The system fails while processing the request?) then (Yes)
+  :Return the system error;
+  |User|
+  :View the system error;
+  stop
+else (No)
+endif
+|System|
+:Find the vouchers within their validity with uses left, highest percent first;
+if (No voucher is usable?) then (Yes)
+  :Return an empty list;
+  |User|
+  :View the no-voucher message;
+  stop
+else (No)
+endif
+|System|
+:Return the code, description, percent and expiry of each voucher;
+|User|
+:View the list;
+if (A Guest wants to use a voucher?) then (Yes)
+  |System|
+  :Remind the guest to sign in to use a voucher at checkout;
+  |User|
+  :Sign in or keep viewing;
+else (No)
+  :Choose to copy a code;
+  |System|
+  :The app copies the code to the clipboard and confirms;
+  |User|
+  :View the confirmation;
+endif
+stop
+
+@enduml
