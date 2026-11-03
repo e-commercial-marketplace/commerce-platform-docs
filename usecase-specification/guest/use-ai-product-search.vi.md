@@ -15,7 +15,7 @@
 <tr><td>4. Gửi câu hỏi.</td><td></td></tr>
 <tr><td></td><td>5. Kiểm tra hạn mức câu hỏi trong một phút.</td></tr>
 <tr><td></td><td>6. Dùng LLM và các công cụ chỉ đọc (danh mục, tìm sản phẩm, chính sách) để tạo câu trả lời từ dữ liệu thật.</td></tr>
-<tr><td></td><td>7. Nếu không gọi được LLM (thiếu key, lỗi, đang chờ sau 429, hoặc quá 20 câu một phút), trả lời bằng luật.</td></tr>
+<tr><td></td><td>7. Nếu không gọi được LLM (thiếu key, lỗi, đang chờ sau 429, hoặc quá 20 câu một phút), trả lời bằng luật; nếu đã tắt trả lời bằng luật thì báo lỗi.</td></tr>
 <tr><td></td><td>8. Trả về câu trả lời kèm các sản phẩm tìm được.</td></tr>
 <tr><td>9. Xem câu trả lời và thẻ sản phẩm.</td><td></td></tr>
 <tr><td colspan="2"><b>Luồng thay thế:</b></td></tr>

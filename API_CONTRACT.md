@@ -124,6 +124,7 @@ HTTP mapping for the first MVP:
 | `409 Conflict` | Business conflict such as insufficient stock, duplicate review, or an order that is no longer payable |
 | `429 Too Many Requests` | Too many AI questions in one minute (`RATE_LIMITED`) |
 | `500 Internal Server Error` | Unexpected server failure mapped to `INTERNAL_ERROR` |
+| `503 Service Unavailable` | The AI rules are off and the LLM cannot answer (`AI_UNAVAILABLE`) |
 
 ## 3. Authentication
 
@@ -718,7 +719,8 @@ rejected; the backend must not silently convert it without an explicit exchange-
 The AI feature must never crash the app. When the provider is not configured, the provider call
 fails, or the caller passed 20 questions in the current minute, the backend answers without the LLM
 (rule-based product search, canned answers, or a hint) and sets `answeredBy` to `RULES`. More than 60
-questions in one minute return `429 RATE_LIMITED`. Details: `features/ai/API_CONTRACT.md`.
+questions in one minute return `429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false` turns the rule-based answers off.
+Details: `features/ai/API_CONTRACT.md`.
 
 ## 9. State rules required by the backend
 

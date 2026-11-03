@@ -56,7 +56,7 @@ else (No)
 endif
 |System|
 :Use the LLM and read-only tools (categories, product search, policies) to answer from real data;
-:If the LLM cannot be used (no key, error, cooling down after 429, or over 20 questions a minute), answer with rules;
+:If the LLM cannot be used (no key, error, cooling down after 429, or over 20 questions a minute), answer with rules, or return an error when the rules are turned off;
 :Return the answer with the products found;
 |Customer|
 :View the answer and product cards;

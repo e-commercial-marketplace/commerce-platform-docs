@@ -64,7 +64,8 @@ flowchart LR
 - LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_API_KEY` và `AI_MODEL`, gọi qua Spring AI trên backend.
 - AI bắt đầu với read-only tools và không được bypass authorization thông thường.
 - React Native không bao giờ gọi trực tiếp LLM provider. Khi provider chưa cấu hình, lỗi hoặc vượt
-  hạn mức mỗi phút, AI trả lời bằng tìm kiếm theo luật và câu có sẵn (`answeredBy = RULES`).
+  hạn mức mỗi phút, AI trả lời bằng tìm kiếm theo luật và câu có sẵn (`answeredBy = RULES`), trừ khi
+  `APP_AI_RULES_ENABLED=false` thì trả lỗi.
 
 ## 3. Luồng client-backend
 

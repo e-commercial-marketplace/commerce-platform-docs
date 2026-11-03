@@ -124,6 +124,7 @@ INTERNAL_ERROR
 | `409 Conflict` | Business conflict như insufficient stock, duplicate review hoặc order không còn payable |
 | `429 Too Many Requests` | Hỏi AI quá nhiều câu trong một phút (`RATE_LIMITED`) |
 | `500 Internal Server Error` | Lỗi server không mong đợi được ánh xạ thành `INTERNAL_ERROR` |
+| `503 Service Unavailable` | Đã tắt trả lời bằng luật và LLM không trả lời được (`AI_UNAVAILABLE`) |
 
 ## 3. Authentication
 
@@ -707,7 +708,8 @@ rejected; backend không được silently convert nó khi chưa có explicit ex
 Tính năng AI không bao giờ được làm crash app. Khi provider chưa được cấu hình, gọi provider thất
 bại, hoặc người gọi đã hỏi quá 20 câu trong phút hiện tại, backend trả lời không cần LLM (tìm product
 theo luật, câu trả lời có sẵn, hoặc câu gợi ý) và đặt `answeredBy` là `RULES`. Hỏi quá 60 câu trong một
-phút thì trả `429 RATE_LIMITED`. Chi tiết: `features/ai/API_CONTRACT.md`.
+phút thì trả `429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false` tắt cách trả lời bằng luật.
+Chi tiết: `features/ai/API_CONTRACT.md`.
 
 ## 9. State rules backend bắt buộc
 

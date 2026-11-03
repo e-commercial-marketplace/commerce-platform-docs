@@ -63,6 +63,9 @@ CHATCLIENT -> LLM: Tool results
 LLM --> CHATCLIENT: Answer grounded in the results
 CHATCLIENT --> SV: Answer, answeredBy = AI
 else Level RULES, provider missing, cooling down after 429, or provider call failed
+note over SV
+APP_AI_RULES_ENABLED=false: 429 at level RULES, otherwise 503 AI_UNAVAILABLE instead of this branch
+end note
 SV -> RULES: answer(message)
 RULES -> CATALOG: search with filters parsed from the message
 CATALOG -> DB: SELECT products

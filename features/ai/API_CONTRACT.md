@@ -134,6 +134,20 @@ Answering without the LLM (`answeredBy = RULES`):
 - A foreign currency (`$`, `USD`) gets an answer that only VND is supported; nothing is converted.
 - For customers, rule-based turns are stored in the session like AI turns.
 
+Turning the rules off: `APP_AI_RULES_ENABLED` (default `true`, read at startup). With `false` the API never
+returns `answeredBy = RULES`:
+
+| Situation | Rules on | Rules off |
+|---|---|---|
+| Questions 1 to 20, the LLM answers | `AI` | `AI` |
+| Questions 21 to 60 in the minute | `RULES` | `429 RATE_LIMITED` |
+| `AI_API_KEY` is empty | `RULES` | `503 AI_UNAVAILABLE` |
+| The backend is waiting after a provider `429` | `RULES` | `503 AI_UNAVAILABLE` |
+| The provider call fails or returns an empty answer | `RULES` | `503 AI_UNAVAILABLE` |
+
+For a customer, a failure before the LLM call creates no session. A failure during the call keeps the question
+in the session, because it is stored before the call.
+
 Rate limit: counted per customer (user id) or per guest (client IP) in a one-minute window, kept in the
 backend's memory. Questions 1 to 20 may use the LLM, 21 to 60 are answered by rules, from 61 on the
 request is rejected.
@@ -146,7 +160,11 @@ Errors:
 | `AUTHENTICATION_REQUIRED` | `401 Unauthorized` | A guest sends a `sessionId` |
 | `FORBIDDEN` | `403 Forbidden` | The token belongs to a `SELLER` or `ADMIN` |
 | `RESOURCE_NOT_FOUND` | `404 Not Found` | `sessionId` does not exist or belongs to another customer |
-| `RATE_LIMITED` | `429 Too Many Requests` | More than 60 questions in the current minute |
+| `RATE_LIMITED` | `429 Too Many Requests` | More than 60 questions in the current minute, or more than 20 when the rules are off |
+| `AI_UNAVAILABLE` | `503 Service Unavailable` | The rules are off and the LLM cannot answer |
+
+`RATE_LIMITED` and `AI_UNAVAILABLE` carry the message `Vui lòng thử lại sau`. The mobile app shows this same message for
+every failed question, including network errors, and keeps the question so it can be sent again.
 
 Maps to: `FR-AI-01`, `FR-AI-02`, `FR-AI-03`, `FR-AI-04`, `FR-AI-06`, `FR-AI-10`, `NFR-AI-01`.
 

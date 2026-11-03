@@ -59,6 +59,7 @@ sequenceDiagram
         Memory->>DB: INSERT ai_messages
         ChatClient-->>Service: Answer, answeredBy = AI
     else Level RULES, provider missing, cooling down after 429, or provider call failed
+        Note over Service: APP_AI_RULES_ENABLED=false: 429 at level RULES, otherwise 503 AI_UNAVAILABLE instead of this branch
         Service->>Rules: answer(message)
         Rules->>Catalog: search with filters parsed from the message
         Catalog->>DB: SELECT products

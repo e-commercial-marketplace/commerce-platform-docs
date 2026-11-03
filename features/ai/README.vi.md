@@ -20,7 +20,8 @@ LLM là provider tương thích OpenAI, cấu hình bằng `AI_BASE_URL`, `AI_AP
 đổi các biến đó. Secret của provider không bao giờ rời backend. Tính năng AI không bao giờ được làm crash
 app: khi provider chưa cấu hình, gọi lỗi, hoặc người gọi đã hỏi quá 20 câu trong phút hiện tại, backend
 trả lời không cần LLM và đánh dấu `answeredBy = RULES`. Hỏi quá 60 câu trong một phút thì trả
-`429 RATE_LIMITED`.
+`429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false` tắt cách trả lời bằng luật: các trường hợp đó sẽ trả
+`429 RATE_LIMITED` hoặc `503 AI_UNAVAILABLE`.
 
 ## Trách nhiệm
 

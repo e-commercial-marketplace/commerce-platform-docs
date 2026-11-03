@@ -20,7 +20,8 @@ The LLM is an OpenAI-compatible provider configured by `AI_BASE_URL`, `AI_API_KE
 changing those variables only. Provider secrets never leave the backend. The AI feature must never
 crash the app: when the provider is not configured, the call fails, or the caller is over 20
 questions in the current minute, the backend answers without the LLM and marks the response
-`answeredBy = RULES`. More than 60 questions in a minute return `429 RATE_LIMITED`.
+`answeredBy = RULES`. More than 60 questions in a minute return `429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false`
+turns the rule-based answers off: those cases then return `429 RATE_LIMITED` or `503 AI_UNAVAILABLE`.
 
 ## Responsibilities
 
