@@ -11,7 +11,7 @@
 <tr><th>Tác nhân</th><th>Hệ thống</th></tr>
 <tr><td>1. Chọn các dòng hàng và chọn đặt hàng.</td><td></td></tr>
 <tr><td></td><td>2. Hiển thị sản phẩm và phần nhập thông tin.</td></tr>
-<tr><td>3. Nhập địa chỉ giao hàng, chọn COD hoặc VNPAY và nhập mã voucher (nếu có).</td><td></td></tr>
+<tr><td>3. Chọn địa chỉ trong hồ sơ (nếu có) hoặc nhập địa chỉ giao hàng khác, chọn COD hoặc VNPAY và nhập mã voucher (nếu có).</td><td></td></tr>
 <tr><td>4. Gửi yêu cầu đặt hàng.</td><td></td></tr>
 <tr><td></td><td>5. Kiểm tra dòng hàng thuộc về Customer, sản phẩm đang bán và trừ tồn kho từng sản phẩm.</td></tr>
 <tr><td></td><td>6. Kiểm tra và trừ một lượt voucher (nếu có).</td></tr>

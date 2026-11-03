@@ -38,7 +38,7 @@ end note
 |System|
 :Display the products and the form;
 |Customer|
-:Enter the shipping address, choose COD or VNPAY and enter a voucher code if any;
+:Choose the saved address or enter another, choose COD or VNPAY and enter a voucher code if any;
 :Submit the order;
 |System|
 if (The system fails while processing the request?) then (Yes)

@@ -556,7 +556,7 @@ Screen -> Hook (TanStack Query) -> Service -> apiClient (Axios) -> Spring Boot /
 1. Screens never call Axios directly; they use hooks.
 2. Services contain endpoint paths and payload mapping only, and always use the shared `apiClient` and `unwrapData`. The one exception is the Cloudinary file upload in `uploadService`, which uses plain `axios` so the Bearer token never leaves the backend's origin (Expo's global `fetch` does not accept React Native's `{ uri, name, type }` file parts).
 3. Hooks own server state. Server data is not copied into a React Context.
-4. After a mutation the hook stores the authoritative response or invalidates the related query. There are no optimistic updates.
+4. After a mutation the hook stores the authoritative response or invalidates the related query. Only changing a cart quantity, removing a cart line and sending a chat message update optimistically, and they must roll back on error. Money, stock, orders and actions with business rules never do.
 5. Query keys are built only in `api/queryKeys.ts`.
 6. Mutations are not retried automatically. Sensitive actions such as checkout also guard against a double tap in the same tick.
 7. `AuthContext` holds only the client session. The cart cache is purged whenever the identity changes.
