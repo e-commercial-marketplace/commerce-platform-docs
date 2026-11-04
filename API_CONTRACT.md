@@ -267,7 +267,7 @@ All query parameters are optional:
 
 | Parameter | Meaning |
 |---|---|
-| `q` | Text search against product name and description |
+| `q` | Text search against product name, category name and description, ignoring case and Vietnamese accents |
 | `categoryId` | Category filter |
 | `sellerId` | Seller (shop) filter: only that seller's listed products |
 | `minPrice` / `maxPrice` | Inclusive price range |

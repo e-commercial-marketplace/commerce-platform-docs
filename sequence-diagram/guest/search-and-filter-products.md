@@ -24,7 +24,7 @@ sequenceDiagram
     Controller->>Service: searchListedProducts(request)
     alt Request succeeds
         Service->>Cache: Read the 60-second search page
-        Service->>Repo: LIKE on name and description with the filters
+        Service->>Repo: LIKE ignoring accents on name, category name and description with the filters
         Repo->>DB: SELECT products
         opt No product contains the keyword
             Service->>Index: findSimilar(q)

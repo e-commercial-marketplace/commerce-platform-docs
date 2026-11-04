@@ -35,7 +35,7 @@ CT -> SV: searchListedProducts(request)
 activate SV
 alt Request succeeds
 SV -> CACHE: Read the 60-second search page
-SV -> REPO: LIKE on name and description with the filters
+SV -> REPO: LIKE ignoring accents on name, category name and description with the filters
 REPO -> DB: SELECT products
 opt No product contains the keyword
 SV -> INDEX: findSimilar(q)

@@ -14,7 +14,7 @@
 <tr><td>3. Nhập từ khóa hoặc chọn bộ lọc và cách sắp xếp.</td><td></td></tr>
 <tr><td>4. Gửi yêu cầu tìm kiếm.</td><td></td></tr>
 <tr><td></td><td>5. Kiểm tra giá tối thiểu không lớn hơn giá tối đa.</td></tr>
-<tr><td></td><td>6. Tìm sản phẩm đang bán có tên hoặc mô tả chứa từ khóa và thỏa các bộ lọc.</td></tr>
+<tr><td></td><td>6. Tìm sản phẩm đang bán có tên, tên danh mục hoặc mô tả chứa từ khóa (không phân biệt dấu) và thỏa các bộ lọc.</td></tr>
 <tr><td></td><td>7. Nếu không có kết quả, tìm các sản phẩm gần nghĩa nhất và vẫn áp các bộ lọc.</td></tr>
 <tr><td></td><td>8. Trả về trang kết quả.</td></tr>
 <tr><td>9. Xem kết quả.</td><td></td></tr>

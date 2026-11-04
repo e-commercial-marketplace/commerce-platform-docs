@@ -98,6 +98,8 @@ classDiagram
 - Seller không được sửa sản phẩm của seller khác.
 - Giá trị tiền tệ dùng `BigDecimal` trong implementation.
 - Danh sách catalog mặc định sắp xếp theo mức liên quan khi có từ khóa tìm kiếm và `rating_desc` trong các trường hợp còn lại. Các sắp xếp được hỗ trợ là `relevance`, `price_asc`, `price_desc` và `rating_desc`; `popular` được hoãn lại cho đến khi có chỉ số popularity. Kết quả dùng `id ASC` để phá hòa một cách xác định.
+- Tìm theo chữ không phân biệt hoa thường và dấu tiếng Việt, tìm trong tên sản phẩm, tên danh mục và mô tả;
+  `relevance` xếp theo đúng thứ tự đó.
 - Tìm theo nghĩa (fallback): khi tìm theo chữ không ra gì, `GET /products` trả các sản phẩm gần nghĩa nhất
   (xem `API_CONTRACT.md`). `ProductIndexer` giữ bảng `product_embeddings` (V20, pgvector, mỗi sản phẩm một
   `vector(3072)` của tên + danh mục + mô tả, kèm `content_hash` md5) luôn khớp: cứ 10 phút nó embedding lại

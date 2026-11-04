@@ -49,7 +49,7 @@ endif
 :Check the minimum price is not above the maximum;
 backward :Return the validation error;
 repeat while (The minimum price is above the\nmaximum?) is (Yes) not (No)
-:Find listed products whose name or description contains the keyword and that pass the filters;
+:Find listed products whose name, category name or description contains the keyword (ignoring accents) and that pass the filters;
 :If nothing matches, find the closest products in meaning and still apply the filters;
 :Return the result page;
 if (There is still no result?) then (Yes)

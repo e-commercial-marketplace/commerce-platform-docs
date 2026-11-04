@@ -264,7 +264,7 @@ Mọi query parameters đều optional:
 
 | Parameter | Meaning |
 |---|---|
-| `q` | Text search trên product name và description |
+| `q` | Tìm trong tên sản phẩm, tên danh mục và mô tả, không phân biệt hoa thường và dấu tiếng Việt |
 | `categoryId` | Category filter |
 | `sellerId` | Seller (shop) filter: chỉ các product đang bán của seller đó |
 | `minPrice` / `maxPrice` | Khoảng price bao gồm cận |
