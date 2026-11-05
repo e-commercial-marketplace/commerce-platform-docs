@@ -23,6 +23,14 @@ questions in the current minute, the backend answers without the LLM and marks t
 `answeredBy = RULES`. More than 60 questions in a minute return `429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false`
 turns the rule-based answers off: those cases then return `429 RATE_LIMITED` or `503 AI_UNAVAILABLE`.
 
+An optional second provider answers when the first one is not configured, fails, is in its 429 cooldown or
+returns an empty answer: `AI_FALLBACK_API_KEY` turns it on (empty keeps it off). `AI_FALLBACK_BASE_URL`,
+`AI_FALLBACK_COMPLETIONS_PATH` and `AI_FALLBACK_MODEL` default to Google Gemini. Each provider has its own
+cooldown. The question restarts from the beginning on the fallback provider, and the response is still
+`answeredBy = AI`. Rule-based answers or the errors above apply only after both providers cannot answer.
+Provider calls are tried 2 times (`spring.ai.retry.max-attempts`) and the fallback provider once, so an
+overloaded provider cannot hold a request for minutes.
+
 ## Responsibilities
 
 - Provide `POST /api/v1/ai/ask` as a public endpoint (no login required for public data).
@@ -177,6 +185,11 @@ no security internals, seller rules, prices, stock or voucher codes.
   (cosine distance). Product questions add no policy text. `searchProducts` calls the catalog search, so
   it also gets the catalog's semantic fallback (`features/catalog/README.md`): one embedding call only
   when the text search finds nothing.
+- To spend fewer provider tokens per question: `searchProducts` gives the model only each product's name,
+  price, stock, rating and review count (the response's `products` still carry all their fields); the
+  system prompt carries the current category names, so `listCategories` is only for questions about what the
+  shop sells; and it tells the model to call `searchProducts` at most 2 times per question. That limit is an
+  instruction to the model, not enforced in code.
 - The system prompt tells the model to answer rule questions only from `searchPolicies` results and not to
   invent anything they do not say (for example a customer-support team). Rule-based answers do not use RAG.
 - A failing embedding call never fails `/ai/ask`: the tool returns an empty list and the model says it is

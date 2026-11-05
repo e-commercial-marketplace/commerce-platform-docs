@@ -23,6 +23,14 @@ trả lời không cần LLM và đánh dấu `answeredBy = RULES`. Hỏi quá 6
 `429 RATE_LIMITED`. `APP_AI_RULES_ENABLED=false` tắt cách trả lời bằng luật: các trường hợp đó sẽ trả
 `429 RATE_LIMITED` hoặc `503 AI_UNAVAILABLE`.
 
+Có thể thêm một provider thứ hai để trả lời khi provider đầu chưa cấu hình, gọi lỗi, đang nghỉ sau 429 hoặc
+trả câu rỗng: `AI_FALLBACK_API_KEY` bật tính năng này (rỗng thì tắt). `AI_FALLBACK_BASE_URL`,
+`AI_FALLBACK_COMPLETIONS_PATH` và `AI_FALLBACK_MODEL` mặc định là Google Gemini. Mỗi provider có thời gian
+nghỉ riêng. Câu hỏi chạy lại từ đầu trên provider dự phòng, và response vẫn là `answeredBy = AI`. Chỉ khi cả
+hai provider đều không trả lời được thì mới trả lời bằng luật hoặc trả các lỗi ở trên.
+Mỗi lần gọi provider được thử 2 lần (`spring.ai.retry.max-attempts`), provider dự phòng chỉ thử 1 lần, để
+provider quá tải không giữ request hàng phút.
+
 ## Trách nhiệm
 
 - Cung cấp `POST /api/v1/ai/ask` dưới dạng endpoint public (không yêu cầu đăng nhập cho dữ liệu công khai).
@@ -172,6 +180,10 @@ tiết bảo mật, quy định seller, giá, tồn kho hay mã voucher.
   gọi `searchProducts`. Tool embedding câu hỏi và trả về 3 chunk gần nhất (khoảng cách cosine). Câu hỏi về
   sản phẩm không bị kèm điều khoản. `searchProducts` gọi tìm kiếm của catalog nên cũng có fallback tìm theo
   nghĩa (`features/catalog/README.vi.md`): chỉ tốn một lần gọi embedding khi tìm theo chữ không ra gì.
+- Để mỗi câu hỏi tốn ít token của provider hơn: `searchProducts` chỉ đưa cho model tên, giá, tồn kho, đánh giá
+  và số đánh giá của từng sản phẩm (`products` trong response vẫn đủ mọi trường); system prompt có sẵn tên
+  các danh mục hiện tại, nên `listCategories` chỉ dùng cho câu hỏi shop bán gì; và prompt dặn model gọi
+  `searchProducts` tối đa 2 lần cho mỗi câu hỏi. Giới hạn này là lời dặn cho model, code không chặn cứng.
 - System prompt dặn model chỉ trả lời câu hỏi quy định dựa trên kết quả `searchPolicies` và không bịa điều
   mà kết quả không nói (ví dụ bộ phận chăm sóc khách hàng). Câu trả lời bằng luật không dùng RAG.
 - Gọi embedding lỗi không làm `/ai/ask` lỗi: tool trả danh sách rỗng và model nói là chưa chắc chắn.
